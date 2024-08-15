@@ -1,24 +1,38 @@
 services:
+  frontend:
+    container_name: reallystick_frontend
+    image: reallystick_frontend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    networks:
+      - app-network
+    environment:
+      - FLUTTER_WEB_PORT=3000
 
-    frontend:
-        container_name: reallystick_frontend
-        image: reallystick_frontend
-        logging:
-            driver: "json-file"
-            options:
-                max-size: "10m"
-                max-file: "10"
-        build:
-            context: ./frontend
-        ports:
-            - "8080:8080"
-        volumes:
-            - ./frontend:/app
-        networks:
-            - app-network
-        environment:
-            - FLUTTER_WEB_PORT=8080
+  backend:
+    container_name: reallystick_backend
+    image: reallystick_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    networks:
+      - app-network
+    environment:
+      - RUST_LOG=info
 
 networks:
-    app-network:
-        driver: bridge
+  app-network:
+    driver: bridge
