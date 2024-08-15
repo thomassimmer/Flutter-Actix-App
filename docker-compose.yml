@@ -1,0 +1,24 @@
+services:
+
+    frontend:
+        container_name: reallystick_frontend
+        image: reallystick_frontend
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "10m"
+                max-file: "10"
+        build:
+            context: ./frontend
+        ports:
+            - "8080:8080"
+        volumes:
+            - ./frontend:/app
+        networks:
+            - app-network
+        environment:
+            - FLUTTER_WEB_PORT=8080
+
+networks:
+    app-network:
+        driver: bridge
