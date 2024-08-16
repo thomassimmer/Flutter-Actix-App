@@ -17,6 +17,9 @@ WORKDIR /home/flutteruser/app
 # Copy the Flutter project files into the container
 COPY --chown=flutteruser:docker . .
 
+# Enable web support
+RUN flutter config --enable-web
+
 # Ensure dependencies are installed
 RUN flutter pub get
 

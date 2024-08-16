@@ -3,12 +3,19 @@ use crate::{
         AppState, DisableOTPSchema, GenerateOTPSchema, User, UserLoginSchema, UserRegisterSchema,
         VerifyOTPSchema,
     },
-    response::{GenericResponse, UserData, UserResponse},
+    response::{
+        GenericResponse, UserData, UserLoginWhenOtpDisabledResponse,
+        UserLoginWhenOtpEnabledResponse, UserSignupResponse,
+    },
 };
 use actix_web::{get, post, web, HttpResponse, Responder};
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    Argon2,
+};
 use base32;
 use chrono::prelude::*;
-use rand::Rng;
+use rand::{distributions::Alphanumeric, Rng};
 use serde_json::json;
 use totp_rs::{Algorithm, Secret, TOTP};
 use uuid::Uuid;
@@ -37,25 +44,62 @@ async fn register_user_handler(
         }
     }
 
+    let salt = SaltString::generate(&mut OsRng);
+    let argon2 = Argon2::default();
+
+    let password_hash = if let Ok(result) = argon2.hash_password(body.password.as_bytes(), &salt) {
+        result.to_string()
+    } else {
+        return HttpResponse::BadRequest()
+            .json(json!({"status": "fail", "message": "Failed to hash password"}));
+    };
+
+    let mut recovery_codes = Vec::new();
+    let mut hashed_recovery_codes = Vec::new();
+    for _ in 0..5 {
+        let code: String = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(16)
+            .map(char::from)
+            .collect();
+
+        recovery_codes.push(code.clone());
+
+        let hashed_code = if let Ok(result) = argon2.hash_password(code.as_bytes(), &salt) {
+            result.to_string()
+        } else {
+            return HttpResponse::BadRequest()
+                .json(json!({"status": "fail", "message": "Failed to hash recovery code"}));
+        };
+
+        hashed_recovery_codes.push(hashed_code);
+    }
+
     let uuid_id = Uuid::new_v4();
     let datetime = Utc::now();
 
     let user = User {
-        id: Some(uuid_id.to_string()),
+        id: uuid_id.to_string(),
         username: body.username.to_owned(),
-        password: body.password.to_owned(),
-        otp_enabled: Some(false),
-        otp_verified: Some(false),
+        password: password_hash,
+        otp_enabled: false,
+        otp_verified: false,
         otp_base32: None,
         otp_auth_url: None,
         createdAt: Some(datetime),
         updatedAt: Some(datetime),
+        recovery_codes: hashed_recovery_codes,
     };
 
-    vec.push(user);
+    vec.push(user.clone());
 
-    HttpResponse::Ok()
-        .json(json!({"status": "success", "message": "Registered successfully, please login"}))
+    let json_response = UserSignupResponse {
+        status: "success".to_string(),
+        user: user_to_response(&user),
+        recovery_codes: recovery_codes,
+    };
+
+    HttpResponse::Ok().json(json_response)
 }
 
 #[post("/auth/login")]
@@ -74,14 +118,37 @@ async fn login_user_handler(
             .json(json!({"status": "fail", "message": "Invalid email or password"}));
     }
 
-    let user = user.unwrap().clone();
+    let user: User = user.unwrap().clone();
 
-    let json_response = UserResponse {
-        status: "success".to_string(),
-        user: user_to_response(&user),
+    let parsed_hash = if let Ok(password) = PasswordHash::new(&user.password) {
+        password
+    } else {
+        return HttpResponse::BadRequest()
+            .json(json!({"status": "fail", "message": "Failed to retrieve hashed password"}));
     };
 
-    HttpResponse::Ok().json(json_response)
+    let argon2 = Argon2::default();
+
+    let is_valid = argon2
+        .verify_password(body.password.as_bytes(), &parsed_hash)
+        .is_ok();
+
+    if !is_valid {
+        return HttpResponse::BadRequest()
+            .json(json!({"status": "fail", "message": "Invalid username or password"}));
+    }
+
+    if !user.otp_enabled {
+        return HttpResponse::Ok().json(UserLoginWhenOtpEnabledResponse {
+            status: "success".to_string(),
+            user_id: user.id,
+        });
+    }
+
+    return HttpResponse::Ok().json(UserLoginWhenOtpDisabledResponse {
+        status: "success".to_string(),
+        user: user_to_response(&user),
+    });
 }
 
 #[post("/auth/otp/generate")]
@@ -93,7 +160,7 @@ async fn generate_otp_handler(
 
     let user = vec
         .iter_mut()
-        .find(|user| user.id == Some(body.user_id.to_owned()));
+        .find(|user| user.id == body.user_id.to_owned());
 
     if user.is_none() {
         let json_error = GenericResponse {
@@ -130,7 +197,7 @@ async fn generate_otp_handler(
     user.otp_auth_url = Some(otp_auth_url.to_owned());
 
     HttpResponse::Ok()
-        .json(json!({"base32":otp_base32.to_owned(), "otpauth_url": otp_auth_url.to_owned()} ))
+        .json(json!({"otp_base32":otp_base32.to_owned(), "otp_auth_url": otp_auth_url.to_owned()} ))
 }
 
 #[post("/auth/otp/verify")]
@@ -142,7 +209,7 @@ async fn verify_otp_handler(
 
     let user = vec
         .iter_mut()
-        .find(|user| user.id == Some(body.user_id.to_owned()));
+        .find(|user| user.id == body.user_id.to_owned());
 
     if user.is_none() {
         let json_error = GenericResponse {
@@ -177,8 +244,8 @@ async fn verify_otp_handler(
         return HttpResponse::Forbidden().json(json_error);
     }
 
-    user.otp_enabled = Some(true);
-    user.otp_verified = Some(true);
+    user.otp_enabled = true;
+    user.otp_verified = true;
 
     HttpResponse::Ok().json(json!({"otp_verified": true, "user": user_to_response(user)}))
 }
@@ -190,9 +257,7 @@ async fn validate_otp_handler(
 ) -> impl Responder {
     let vec = data.db.lock().unwrap();
 
-    let user = vec
-        .iter()
-        .find(|user| user.id == Some(body.user_id.to_owned()));
+    let user = vec.iter().find(|user| user.id == body.user_id.to_owned());
 
     if user.is_none() {
         let json_error = GenericResponse {
@@ -205,7 +270,7 @@ async fn validate_otp_handler(
 
     let user = user.unwrap();
 
-    if !user.otp_enabled.unwrap() {
+    if !user.otp_enabled {
         let json_error = GenericResponse {
             status: "fail".to_string(),
             message: "2FA not enabled".to_string(),
@@ -244,7 +309,7 @@ async fn disable_otp_handler(
 
     let user = vec
         .iter_mut()
-        .find(|user| user.id == Some(body.user_id.to_owned()));
+        .find(|user| user.id == body.user_id.to_owned());
 
     if user.is_none() {
         let json_error = GenericResponse {
@@ -257,8 +322,8 @@ async fn disable_otp_handler(
 
     let user = user.unwrap();
 
-    user.otp_enabled = Some(false);
-    user.otp_verified = Some(false);
+    user.otp_enabled = false;
+    user.otp_verified = false;
     user.otp_auth_url = None;
     user.otp_base32 = None;
 
@@ -267,12 +332,12 @@ async fn disable_otp_handler(
 
 fn user_to_response(user: &User) -> UserData {
     UserData {
-        id: user.id.to_owned().unwrap(),
+        id: user.id.to_owned(),
         username: user.username.to_owned(),
         otp_auth_url: user.otp_auth_url.to_owned(),
         otp_base32: user.otp_base32.to_owned(),
-        otp_enabled: user.otp_enabled.unwrap(),
-        otp_verified: user.otp_verified.unwrap(),
+        otp_enabled: user.otp_enabled,
+        otp_verified: user.otp_verified,
         createdAt: user.createdAt.unwrap(),
         updatedAt: user.updatedAt.unwrap(),
     }
