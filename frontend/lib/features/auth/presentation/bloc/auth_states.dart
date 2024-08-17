@@ -1,11 +1,12 @@
 import 'package:equatable/equatable.dart';
+import 'package:reallystick/features/auth/domain/entities/otp_entity.dart';
 import 'package:reallystick/features/auth/domain/entities/user_entity.dart';
 
 abstract class AuthState extends Equatable {
   const AuthState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class AuthInitial extends AuthState {}
@@ -25,11 +26,12 @@ class AuthUnauthenticated extends AuthState {}
 
 class AuthOTPRequired extends AuthState {
   final String userId;
+  final OtpEntity? otp;
 
-  const AuthOTPRequired({required this.userId});
+  const AuthOTPRequired({required this.userId, this.otp});
 
   @override
-  List<Object> get props => [userId];
+  List<Object?> get props => [userId, otp];
 }
 
 class AuthFailure extends AuthState {

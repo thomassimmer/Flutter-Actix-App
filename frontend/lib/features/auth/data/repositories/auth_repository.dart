@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dartz/dartz.dart';
 import 'package:http/http.dart' as http;
 import 'package:reallystick/features/auth/data/models/otp_model.dart';
 
@@ -44,7 +45,7 @@ class AuthRepository {
     }
   }
 
-  Future<UserModel> login({
+  Future<Either<String, UserModel>> login({
     required String username,
     required String password,
   }) async {
@@ -60,7 +61,14 @@ class AuthRepository {
 
     if (response.statusCode == 200) {
       final jsonBody = json.decode(response.body);
-      return UserModel.fromJson(jsonBody['user']);
+
+      if (jsonBody.containsKey('user')) {
+        return Right(UserModel.fromJson(jsonBody['user']));
+      } else if (jsonBody.containsKey('user_id')) {
+        return Left(jsonBody['user_id']);
+      } else {
+        throw Exception('An unpredicted response occured');
+      }
     } else {
       throw Exception('Invalid username or password');
     }

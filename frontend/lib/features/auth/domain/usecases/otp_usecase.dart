@@ -5,16 +5,17 @@ import 'package:reallystick/features/auth/domain/errors/failures.dart';
 
 import '../../data/repositories/auth_repository.dart';
 
-class VerifyOTPUseCase {
+class OtpUseCase {
   final AuthRepository authRepository;
 
-  VerifyOTPUseCase(this.authRepository);
+  OtpUseCase(this.authRepository);
 
   /// Verifies the OTP provided by the user.
   Future<Either<Failure, UserEntity>> verifyOTP(
       String userId, String otp) async {
     try {
-      final userModel = await authRepository.verifyOtp(userId: userId, token: otp);
+      final userModel =
+          await authRepository.verifyOtp(userId: userId, token: otp);
 
       return Right(UserEntity(
         id: userModel.id,
