@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reallystick/core/themes/app_theme.dart';
+import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:reallystick/features/auth/presentation/bloc/auth_events.dart';
+import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
+import 'package:reallystick/features/auth/presentation/widgets/button.dart';
 
 class RootScreen extends StatefulWidget {
   @override
@@ -54,6 +59,26 @@ class RootScreenState extends State<RootScreen> {
               Text(
                 'Stick',
                 style: TextStyle(color: Colors.grey),
+              ),
+              Spacer(),
+              BlocListener<AuthBloc, AuthState>(
+                listener: (context, state) {
+                  if (state is AuthUnauthenticated) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Successfully logged out')),
+                    );
+                    context.go('/');
+                  }
+                },
+                child: Button(
+                  text: 'Logout',
+                  onPressed: () {
+                    BlocProvider.of<AuthBloc>(context)
+                        .add(AuthLogoutRequested());
+                  },
+                  isPrimary: true,
+                  size: ButtonSize.small,
+                ),
               )
             ],
           ),

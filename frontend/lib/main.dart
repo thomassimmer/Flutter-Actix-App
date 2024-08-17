@@ -21,82 +21,81 @@ void main() {
   runApp(const MyApp());
 }
 
-final _router = GoRouter(initialLocation: '/', routes: [
-  GoRoute(
-    path: '/',
-    builder: (context, state) => UnauthenticatedHomeScreen(),
-    redirect: (context, state) {
-      if (state is AuthAuthenticated) {
-        return '/home';
-      }
-      return null;
-    },
-  ),
-  GoRoute(
-    path: '/login',
-    builder: (context, state) => LoginScreen(),
-    redirect: (context, state) {
-      if (state is AuthAuthenticated) {
-        return '/home';
-      }
-      return null;
-    },
-  ),
-  GoRoute(
-    path: '/signup',
-    builder: (context, state) => SignupScreen(),
-    redirect: (context, state) {
-      if (state is AuthAuthenticated) {
-        return '/recovery-codes';
-      }
-      return null;
-    },
-  ),
-  GoRoute(
-    path: '/recovery-codes',
-    builder: (context, state) => RecoveryCodesScreen(),
-  ),
-  ShellRoute(
-    builder: (
-      BuildContext context,
-      GoRouterState state,
-      Widget child,
-    ) =>
-        RootScreen(),
-    routes: [
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => HabitsScreen(),
-      ),
-      GoRoute(
-        path: '/habits',
-        builder: (context, state) => HabitsScreen(),
-      ),
-      GoRoute(
-        path: '/challenges',
-        builder: (context, state) => ChallengesScreen(),
-      ),
-      GoRoute(
-        path: '/messages',
-        builder: (context, state) => MessagesScreen(),
-      ),
-      GoRoute(
-        path: '/profile',
-        builder: (context, state) => ProfileScreen(),
-      ),
-    ],
-    redirect: (context, state) {
-      final authState = context.read<AuthBloc>().state;
-      final isGoingHome = state.fullPath != '/';
-
-      if (authState is AuthAuthenticated) {
+final _router = GoRouter(
+  initialLocation: '/',
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => UnauthenticatedHomeScreen(),
+      redirect: (context, state) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated) {
+          return '/home';
+        }
         return null;
-      } else {
-        return isGoingHome ? null : '/';
-      }
-    },
-  )
-]);
+      },
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => LoginScreen(),
+      redirect: (context, state) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated) {
+          return '/home';
+        }
+        return null;
+      },
+    ),
+    GoRoute(
+      path: '/signup',
+      builder: (context, state) => SignupScreen(),
+      redirect: (context, state) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated) {
+          return '/home';
+        }
+        return null;
+      },
+    ),
+    GoRoute(
+      path: '/recovery-codes',
+      builder: (context, state) => RecoveryCodesScreen(),
+    ),
+    ShellRoute(
+      builder: (context, state, child) => RootScreen(),
+      routes: [
+        GoRoute(
+          path: '/home',
+          builder: (context, state) => HabitsScreen(),
+        ),
+        GoRoute(
+          path: '/habits',
+          builder: (context, state) => HabitsScreen(),
+        ),
+        GoRoute(
+          path: '/challenges',
+          builder: (context, state) => ChallengesScreen(),
+        ),
+        GoRoute(
+          path: '/messages',
+          builder: (context, state) => MessagesScreen(),
+        ),
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => ProfileScreen(),
+        ),
+      ],
+      redirect: (context, state) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated) {
+          return null;
+        } else {
+          return '/';
+        }
+      },
+    ),
+  ],
+);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

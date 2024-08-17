@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_events.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
+import 'package:reallystick/features/auth/presentation/widgets/background.dart';
+import 'package:reallystick/features/auth/presentation/widgets/button.dart';
 import 'package:reallystick/features/auth/presentation/widgets/custom_text_field.dart';
-import 'package:reallystick/features/auth/presentation/widgets/submit_button.dart';
 
 class LoginScreen extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
@@ -14,66 +15,94 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
+      body: Stack(fit: StackFit.expand, children: [
+        Background(),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: BlocListener<AuthBloc, AuthState>(listener: (context, state) {
             if (state is AuthAuthenticated) {
-              Navigator.pushNamed(context, '/otp-verification');
+              context.go('/home');
             } else if (state is AuthFailure) {
-              // Show error message
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.message)),
               );
             }
-          },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CustomTextField(
-                controller: _usernameController,
-                label: 'Username',
-                obscureText: false,
-              ),
-              SizedBox(height: 16),
-              CustomTextField(
-                controller: _passwordController,
-                label: 'Password',
-                obscureText: true,
-              ),
-              SizedBox(height: 24),
-              SubmitButton(
-                text: 'Login',
-                onPressed: () {
-                  BlocProvider.of<AuthBloc>(context).add(
-                    AuthLoginRequested(
-                      username: _usernameController.text,
-                      password: _passwordController.text,
+          }, child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+            if (state is AuthLoading) {
+              return Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              );
+            } else {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: Placeholder(),
+                  ),
+                  SizedBox(height: 40),
+                  Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border:
+                            Border.all(width: 1.0, color: Colors.blue.shade200),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Padding(
+                          padding: const EdgeInsets.all(30.0),
+                          child: Column(
+                            children: [
+                              CustomTextField(
+                                controller: _usernameController,
+                                label: 'Username',
+                              ),
+                              SizedBox(height: 16),
+                              CustomTextField(
+                                controller: _passwordController,
+                                label: 'Password',
+                                obscureText: true,
+                              ),
+                              SizedBox(height: 24),
+                              Button(
+                                text: 'Login',
+                                onPressed: () {
+                                  BlocProvider.of<AuthBloc>(context).add(
+                                    AuthLoginRequested(
+                                      username: _usernameController.text,
+                                      password: _passwordController.text,
+                                    ),
+                                  );
+                                },
+                                isPrimary: true,
+                              ),
+                            ],
+                          ))),
+                  SizedBox(height: 16),
+                  Button(
+                    text: 'Come back',
+                    onPressed: () {
+                      context.go('/');
+                    },
+                    isPrimary: false,
+                  ),
+                  SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      context.go('/signup');
+                    },
+                    child: Text(
+                      'No account? Create one',
+                      style: TextStyle(color: Colors.white),
                     ),
-                  );
-                },
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  context.go('/');
-                },
-                child: Text('Come back'),
-              ),
-              SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  context.go('/signup');
-                },
-                child: Text('No account? Create one'),
-              ),
-            ],
-          ),
+                  ),
+                ],
+              );
+            }
+          })),
         ),
-      ),
+      ]),
     );
   }
 }
