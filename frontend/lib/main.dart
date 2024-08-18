@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reallystick/core/presentation/root_screen.dart';
 import 'package:reallystick/features/auth/data/repositories/auth_repository.dart';
@@ -17,7 +18,9 @@ import 'package:reallystick/features/habits/presentation/habits_screen.dart';
 import 'package:reallystick/features/messages/presentation/messages_screen.dart';
 import 'package:reallystick/features/profile/presentation/profile_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   runApp(const MyApp());
 }
 
@@ -102,8 +105,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String apiUrl = dotenv.env['API_BASE_URL'] ?? 'http://localhost:8000';
+
     final AuthRepository authRepository =
-        AuthRepository(baseUrl: 'http://localhost:8000/api');
+        AuthRepository(baseUrl: '${apiUrl}/api');
 
     return BlocProvider(
       create: (_) => AuthBloc(

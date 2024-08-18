@@ -46,4 +46,4 @@ app.*.map.json
 target/
 
 # environment variable
-.env*
+.env
