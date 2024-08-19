@@ -1,5 +1,6 @@
+use crate::schema::users;
 use crate::{
-    model::{
+    models::{
         AppState, DisableOTPSchema, GenerateOTPSchema, User, UserLoginSchema, UserRegisterSchema,
         VerifyOTPSchema,
     },
@@ -15,6 +16,8 @@ use argon2::{
 };
 use base32;
 use chrono::prelude::*;
+use diesel::{query_dsl::methods::FilterDsl, ExpressionMethods, OptionalExtension};
+use diesel_async::RunQueryDsl;
 use rand::{distributions::Alphanumeric, Rng};
 use serde_json::json;
 use totp_rs::{Algorithm, Secret, TOTP};
@@ -32,29 +35,53 @@ async fn register_user_handler(
     body: web::Json<UserRegisterSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
-    let mut vec = data.db.lock().unwrap();
+    let mut conn = match data.pool.get().await {
+        Ok(conn) => conn,
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Could not get database connection"}))
+        }
+    };
 
-    for user in vec.iter() {
-        if user.username == body.username.to_lowercase() {
-            let error_response = GenericResponse {
-                status: "fail".to_string(),
-                message: format!("User with username: {} already exists", user.username),
-            };
-            return HttpResponse::Conflict().json(error_response);
+    let body = body.into_inner();
+    let username_lower = body.username.to_lowercase();
+
+    // Check if user already exists
+    let existing_user = users::table
+        .filter(users::username.eq(&username_lower))
+        .first::<User>(&mut conn)
+        .await
+        .optional();
+
+    match existing_user {
+        Ok(existing_user) => {
+            if existing_user.is_some() {
+                let error_response = GenericResponse {
+                    status: "fail".to_string(),
+                    message: format!("User with username: {} already exists", username_lower),
+                };
+                return HttpResponse::Conflict().json(error_response);
+            }
+        }
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Database query error"}))
         }
     }
 
+    // Hash the password
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
-
-    let password_hash = if let Ok(result) = argon2.hash_password(body.password.as_bytes(), &salt) {
-        result.to_string()
-    } else {
-        return HttpResponse::BadRequest()
-            .json(json!({"status": "fail", "message": "Failed to hash password"}));
+    let password_hash = match argon2.hash_password(body.password.as_bytes(), &salt) {
+        Ok(hash) => hash.to_string(),
+        Err(_) => {
+            return HttpResponse::BadRequest()
+                .json(json!({"status": "fail", "message": "Failed to hash password"}))
+        }
     };
 
-    let mut recovery_codes = Vec::new();
+    // Generate recovery codes
+    let mut clear_recovery_codes = Vec::new();
     let mut hashed_recovery_codes = Vec::new();
     for _ in 0..5 {
         let code: String = rand::thread_rng()
@@ -63,40 +90,60 @@ async fn register_user_handler(
             .map(char::from)
             .collect();
 
-        recovery_codes.push(code.clone());
+        clear_recovery_codes.push(code.clone());
 
-        let hashed_code = if let Ok(result) = argon2.hash_password(code.as_bytes(), &salt) {
-            result.to_string()
-        } else {
-            return HttpResponse::BadRequest()
-                .json(json!({"status": "fail", "message": "Failed to hash recovery code"}));
+        let hashed_code = match argon2.hash_password(code.as_bytes(), &salt) {
+            Ok(hash) => hash.to_string(),
+            Err(_) => {
+                return HttpResponse::BadRequest()
+                    .json(json!({"status": "fail", "message": "Failed to hash recovery code"}))
+            }
         };
 
         hashed_recovery_codes.push(hashed_code);
     }
 
-    let uuid_id = Uuid::new_v4();
-    let datetime = Utc::now();
-
-    let user = User {
-        id: uuid_id.to_string(),
-        username: body.username.to_owned(),
+    let new_user = User {
+        id: Uuid::new_v4(),
+        username: username_lower,
         password: password_hash,
         otp_enabled: false,
         otp_verified: false,
         otp_base32: None,
         otp_auth_url: None,
-        createdAt: Some(datetime),
-        updatedAt: Some(datetime),
+        created_at: Some(Utc::now()),
+        updated_at: Some(Utc::now()),
         recovery_codes: hashed_recovery_codes,
     };
 
-    vec.push(user.clone());
+    // Insert the new user into the database
+    let insert_result = diesel::insert_into(users::table)
+        .values(&new_user)
+        .execute(&mut conn)
+        .await
+        .map_err(|_| {
+            HttpResponse::InternalServerError().json(
+                json!({"status": "error", "message": "Failed to insert user into the database"}),
+            )
+        });
+
+    match insert_result {
+        Ok(inner_result) => {
+            if inner_result == 0 {
+                return HttpResponse::InternalServerError()
+                    .json(json!({"status": "error", "message": "User registration failed"}));
+            }
+        }
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "User registration failed"}));
+        }
+    }
 
     let json_response = UserSignupResponse {
         status: "success".to_string(),
-        user: user_to_response(&user),
-        recovery_codes: recovery_codes,
+        user: user_to_response(&new_user),
+        recovery_codes: clear_recovery_codes,
     };
 
     HttpResponse::Ok().json(json_response)
@@ -107,21 +154,41 @@ async fn login_user_handler(
     body: web::Json<UserLoginSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
-    let vec = data.db.lock().unwrap();
+    let mut conn = match data.pool.get().await {
+        Ok(conn) => conn,
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Could not get database connection"}))
+        }
+    };
 
-    let user = vec
-        .iter()
-        .find(|user| user.username == body.username.to_lowercase());
+    let body = body.into_inner();
+    let username_lower = body.username.to_lowercase();
 
-    if user.is_none() {
-        return HttpResponse::BadRequest()
-            .json(json!({"status": "fail", "message": "Invalid email or password"}));
-    }
+    // Check if user already exists
+    let existing_user = users::table
+        .filter(users::username.eq(&username_lower))
+        .first::<User>(&mut conn)
+        .await
+        .optional();
 
-    let user: User = user.unwrap().clone();
+    let user = match existing_user {
+        Ok(existing_user) => {
+            if let Some(user) = existing_user {
+                user
+            } else {
+                return HttpResponse::BadRequest()
+                    .json(json!({"status": "fail", "message": "Invalid email or password"}));
+            }
+        }
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Database query error"}))
+        }
+    };
 
-    let parsed_hash = if let Ok(password) = PasswordHash::new(&user.password) {
-        password
+    let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&user.password) {
+        parsed_hash
     } else {
         return HttpResponse::BadRequest()
             .json(json!({"status": "fail", "message": "Failed to retrieve hashed password"}));
@@ -141,7 +208,7 @@ async fn login_user_handler(
     if user.otp_enabled {
         return HttpResponse::Ok().json(UserLoginWhenOtpEnabledResponse {
             status: "success".to_string(),
-            user_id: user.id,
+            user_id: user.id.to_string(),
         });
     }
 
@@ -156,20 +223,42 @@ async fn generate_otp_handler(
     body: web::Json<GenerateOTPSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
-    let mut vec = data.db.lock().unwrap();
+    let mut conn = match data.pool.get().await {
+        Ok(conn) => conn,
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Could not get database connection"}))
+        }
+    };
 
-    let user = vec
-        .iter_mut()
-        .find(|user| user.id == body.user_id.to_owned());
+    let body = body.into_inner();
+    let username_lower = body.username.to_lowercase();
 
-    if user.is_none() {
-        let json_error = GenericResponse {
-            status: "fail".to_string(),
-            message: format!("No user with Id: {} found", body.user_id),
-        };
+    // Check if user already exists
+    let existing_user = users::table
+        .filter(users::username.eq(&username_lower))
+        .first::<User>(&mut conn)
+        .await
+        .optional();
 
-        return HttpResponse::NotFound().json(json_error);
-    }
+    let mut user = match existing_user {
+        Ok(existing_user) => {
+            if let Some(user) = existing_user {
+                user
+            } else {
+                let json_error = GenericResponse {
+                    status: "fail".to_string(),
+                    message: format!("No user with Id: {} found", body.user_id),
+                };
+
+                return HttpResponse::NotFound().json(json_error);
+            }
+        }
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Database query error"}))
+        }
+    };
 
     let mut rng = rand::thread_rng();
     let data_byte: [u8; 21] = rng.gen();
@@ -192,12 +281,25 @@ async fn generate_otp_handler(
 
     // let otp_auth_url = format!("otpauth://totp/<issuer>:<account_name>?secret=<secret>&issuer=<issuer>");
 
-    let user = user.unwrap();
     user.otp_base32 = Some(otp_base32.to_owned());
     user.otp_auth_url = Some(otp_auth_url.to_owned());
 
-    HttpResponse::Ok()
-        .json(json!({"otp_base32":otp_base32.to_owned(), "otp_auth_url": otp_auth_url.to_owned()} ))
+    let updated_user_result =
+        diesel::update(users::table.filter(users::username.eq(&username_lower)))
+            .set((
+                users::otp_base32.eq(user.otp_base32),
+                users::otp_auth_url.eq(user.otp_auth_url),
+            ))
+            .execute(&mut conn)
+            .await;
+
+    match updated_user_result {
+        Ok(_) => HttpResponse::Ok().json(
+            json!({"otp_base32":otp_base32.to_owned(), "otp_auth_url": otp_auth_url.to_owned()} ),
+        ),
+        Err(_) => HttpResponse::InternalServerError()
+            .json(json!({"status": "error", "message": "Failed to update user"})),
+    }
 }
 
 #[post("/auth/otp/verify")]
@@ -205,22 +307,42 @@ async fn verify_otp_handler(
     body: web::Json<VerifyOTPSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
-    let mut vec = data.db.lock().unwrap();
+    let mut conn = match data.pool.get().await {
+        Ok(conn) => conn,
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Could not get database connection"}))
+        }
+    };
 
-    let user = vec
-        .iter_mut()
-        .find(|user| user.id == body.user_id.to_owned());
+    let body = body.into_inner();
+    let user_id = &body.user_id;
 
-    if user.is_none() {
-        let json_error = GenericResponse {
-            status: "fail".to_string(),
-            message: format!("No user with Id: {} found", body.user_id),
-        };
+    // Check if user already exists
+    let existing_user = users::table
+        .filter(users::id.eq(&user_id))
+        .first::<User>(&mut conn)
+        .await
+        .optional();
 
-        return HttpResponse::NotFound().json(json_error);
-    }
+    let mut user = match existing_user {
+        Ok(existing_user) => {
+            if let Some(user) = existing_user {
+                user
+            } else {
+                let json_error = GenericResponse {
+                    status: "fail".to_string(),
+                    message: format!("No user with Id: {} found", body.user_id),
+                };
 
-    let user = user.unwrap();
+                return HttpResponse::NotFound().json(json_error);
+            }
+        }
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Database query error"}))
+        }
+    };
 
     let otp_base32 = user.otp_base32.to_owned().unwrap();
 
@@ -247,7 +369,21 @@ async fn verify_otp_handler(
     user.otp_enabled = true;
     user.otp_verified = true;
 
-    HttpResponse::Ok().json(json!({"otp_verified": true, "user": user_to_response(user)}))
+    let updated_user_result = diesel::update(users::table.filter(users::id.eq(&user_id)))
+        .set((
+            users::otp_enabled.eq(user.otp_enabled),
+            users::otp_verified.eq(user.otp_verified),
+        ))
+        .execute(&mut conn)
+        .await;
+
+    match updated_user_result {
+        Ok(_) => {
+            HttpResponse::Ok().json(json!({"otp_verified": true, "user": user_to_response(&user)}))
+        }
+        Err(_) => HttpResponse::InternalServerError()
+            .json(json!({"status": "error", "message": "Failed to update user"})),
+    }
 }
 
 #[post("/auth/otp/validate")]
@@ -255,20 +391,42 @@ async fn validate_otp_handler(
     body: web::Json<VerifyOTPSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
-    let vec = data.db.lock().unwrap();
+    let mut conn = match data.pool.get().await {
+        Ok(conn) => conn,
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Could not get database connection"}))
+        }
+    };
 
-    let user = vec.iter().find(|user| user.id == body.user_id.to_owned());
+    let body = body.into_inner();
+    let user_id = &body.user_id;
 
-    if user.is_none() {
-        let json_error = GenericResponse {
-            status: "fail".to_string(),
-            message: format!("No user with Id: {} found", body.user_id),
-        };
+    // Check if user already exists
+    let existing_user = users::table
+        .filter(users::id.eq(&user_id))
+        .first::<User>(&mut conn)
+        .await
+        .optional();
 
-        return HttpResponse::NotFound().json(json_error);
-    }
+    let user = match existing_user {
+        Ok(existing_user) => {
+            if let Some(user) = existing_user {
+                user
+            } else {
+                let json_error = GenericResponse {
+                    status: "fail".to_string(),
+                    message: format!("No user with Id: {} found", body.user_id),
+                };
 
-    let user = user.unwrap();
+                return HttpResponse::NotFound().json(json_error);
+            }
+        }
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Database query error"}))
+        }
+    };
 
     if !user.otp_enabled {
         let json_error = GenericResponse {
@@ -305,29 +463,65 @@ async fn disable_otp_handler(
     body: web::Json<DisableOTPSchema>,
     data: web::Data<AppState>,
 ) -> impl Responder {
-    let mut vec = data.db.lock().unwrap();
+    let mut conn = match data.pool.get().await {
+        Ok(conn) => conn,
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Could not get database connection"}))
+        }
+    };
 
-    let user = vec
-        .iter_mut()
-        .find(|user| user.id == body.user_id.to_owned());
+    let body = body.into_inner();
+    let user_id = &body.user_id;
 
-    if user.is_none() {
-        let json_error = GenericResponse {
-            status: "fail".to_string(),
-            message: format!("No user with Id: {} found", body.user_id),
-        };
+    // Check if user already exists
+    let existing_user = users::table
+        .filter(users::id.eq(&user_id))
+        .first::<User>(&mut conn)
+        .await
+        .optional();
 
-        return HttpResponse::NotFound().json(json_error);
-    }
+    let mut user = match existing_user {
+        Ok(existing_user) => {
+            if let Some(user) = existing_user {
+                user
+            } else {
+                let json_error = GenericResponse {
+                    status: "fail".to_string(),
+                    message: format!("No user with Id: {} found", body.user_id),
+                };
 
-    let user = user.unwrap();
+                return HttpResponse::NotFound().json(json_error);
+            }
+        }
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(json!({"status": "error", "message": "Database query error"}))
+        }
+    };
 
     user.otp_enabled = false;
     user.otp_verified = false;
     user.otp_auth_url = None;
     user.otp_base32 = None;
 
-    HttpResponse::Ok().json(json!({"user": user_to_response(user), "otp_disabled": true}))
+    let updated_user_result = diesel::update(users::table.filter(users::id.eq(&user_id)))
+        .set((
+            users::otp_enabled.eq(user.otp_enabled),
+            users::otp_verified.eq(user.otp_verified),
+            users::otp_auth_url.eq(user.otp_auth_url.clone()),
+            users::otp_base32.eq(user.otp_base32.clone()),
+        ))
+        .execute(&mut conn)
+        .await;
+
+    match updated_user_result {
+        Ok(_) => {
+            HttpResponse::Ok().json(json!({"user": user_to_response(&user), "otp_disabled": true}))
+        }
+        Err(_) => HttpResponse::InternalServerError()
+            .json(json!({"status": "error", "message": "Failed to update user"})),
+    }
 }
 
 fn user_to_response(user: &User) -> UserData {
@@ -338,8 +532,8 @@ fn user_to_response(user: &User) -> UserData {
         otp_base32: user.otp_base32.to_owned(),
         otp_enabled: user.otp_enabled,
         otp_verified: user.otp_verified,
-        createdAt: user.createdAt.unwrap(),
-        updatedAt: user.updatedAt.unwrap(),
+        createdAt: user.created_at.unwrap(),
+        updatedAt: user.updated_at.unwrap(),
     }
 }
 
