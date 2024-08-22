@@ -1,20 +1,10 @@
-use crate::schema::users;
-use bb8::Pool;
-use chrono::prelude::*;
-use diesel::{
-    prelude::{Insertable, Queryable},
-    Selectable,
-};
-use diesel_async::{pooled_connection::AsyncDieselConnectionManager, AsyncPgConnection};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+use sqlx::prelude::FromRow;
 
 #[allow(non_snake_case)]
-#[derive(Debug, Deserialize, Serialize, Clone, Queryable, Selectable, Insertable)]
-#[diesel(table_name = users)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
+#[derive(Debug, Deserialize, Serialize, Clone, FromRow)]
 pub struct User {
-    pub id: Uuid,
+    pub id: uuid::Uuid,
     pub username: String,
     pub password: String,
 
@@ -23,29 +13,25 @@ pub struct User {
     pub otp_base32: Option<String>,
     pub otp_auth_url: Option<String>,
 
-    pub created_at: Option<DateTime<Utc>>,
-    pub updated_at: Option<DateTime<Utc>>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
 
-    pub recovery_codes: Vec<String>,
-}
-pub struct AppState {
-    pub pool: Pool<AsyncDieselConnectionManager<AsyncPgConnection>>,
+    pub recovery_codes: String,
 }
 
-impl AppState {
-    pub async fn init() -> AppState {
-        let manager = AsyncDieselConnectionManager::<AsyncPgConnection>::new(
-            std::env::var("DATABASE_URL").expect("DATABASE_URL must be set"),
-        );
+#[allow(non_snake_case)]
+#[derive(Debug, Deserialize, Serialize, Clone, FromRow)]
+pub struct UserToken {
+    pub id: uuid::Uuid,
+    pub user_id: uuid::Uuid,
+    pub token_id: String,
+    pub expires_at: chrono::DateTime<chrono::Utc>,
+}
 
-        let pool = Pool::builder()
-            .max_size(15)
-            .build(manager)
-            .await
-            .expect("Failed to create pool.");
-
-        AppState { pool }
-    }
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub exp: u64,
+    pub jti: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -68,11 +54,16 @@ pub struct GenerateOTPSchema {
 
 #[derive(Debug, Deserialize)]
 pub struct VerifyOTPSchema {
-    pub user_id: Uuid,
+    pub user_id: String,
     pub token: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct DisableOTPSchema {
-    pub user_id: Uuid,
+    pub user_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RefreshTokenRequest {
+    pub refresh_token: String,
 }

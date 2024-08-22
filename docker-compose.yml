@@ -9,6 +9,8 @@ services:
         max-file: "10"
     build:
       context: ./frontend
+    env_file:
+      - ./db/.env
     ports:
       - "3000:3000"
     volumes:
@@ -24,6 +26,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
     ports:
       - "8000:8000"
     volumes:
@@ -38,8 +42,10 @@ services:
     build:
       context: ./db
       dockerfile: Dockerfile
+    env_file:
+      - ./db/.env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
     ports:
       - 5432:5432
     expose:
