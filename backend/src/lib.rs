@@ -6,6 +6,7 @@ pub mod startup;
 pub mod auth {
     pub mod helpers {
         pub mod token;
+        pub mod errors;
     }
 
     pub mod routes {
@@ -13,6 +14,7 @@ pub mod auth {
         pub mod profile;
         pub mod signup;
         pub mod token;
+        pub mod otp;
     }
 }
 

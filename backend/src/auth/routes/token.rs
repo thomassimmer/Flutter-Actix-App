@@ -1,23 +1,28 @@
 use crate::{
     auth::helpers::token::generate_tokens,
     models::{Claims, RefreshTokenRequest},
-    response::RefreshTokenResponse,
+    response::{GenericResponse, RefreshTokenResponse},
 };
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{post, web, HttpResponse, Responder};
 use chrono::offset;
 use jsonwebtoken::{decode, DecodingKey, Validation};
-use serde_json::json;
 use sqlx::PgPool;
 
+#[post("/refresh-token")]
 pub async fn refresh_token(
     body: web::Json<RefreshTokenRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
 ) -> impl Responder {
-    let mut transaction = pool
-        .begin()
-        .await
-        .expect("Failed to acquire a Postgres connection from the pool");
+    let mut transaction = match pool.begin().await {
+        Ok(t) => t,
+        Err(_) => {
+            return HttpResponse::InternalServerError().json(GenericResponse {
+                status: "error".to_string(),
+                message: "Failed to get a transaction".to_string(),
+            })
+        }
+    };
 
     let refresh_token = body.refresh_token.clone();
 
@@ -25,8 +30,10 @@ pub async fn refresh_token(
     let token_data = decode::<Claims>(&refresh_token, &decoding_key, &Validation::default());
 
     if let Err(_) = token_data {
-        return HttpResponse::BadRequest()
-            .json(json!({"status": "fail", "message": "Invalid refresh token"}));
+        return HttpResponse::BadRequest().json(GenericResponse {
+            status: "fail".to_string(),
+            message: "Invalid refresh token".to_string(),
+        });
     }
 
     let claims = token_data.unwrap().claims;
@@ -43,16 +50,27 @@ pub async fn refresh_token(
     .fetch_optional(&mut *transaction)
     .await;
 
+    if let Err(_) = transaction.commit().await {
+        return HttpResponse::InternalServerError().json(GenericResponse {
+            status: "error".to_string(),
+            message: "Failed to commit transaction".to_string(),
+        });
+    }
+
     match stored_token {
         Ok(Some(expires_at)) => {
             if offset::Utc::now() > expires_at {
-                return HttpResponse::Unauthorized()
-                    .json(json!({"status": "fail", "message": "Refresh token expired"}));
+                return HttpResponse::Unauthorized().json(GenericResponse {
+                    status: "fail".to_string(),
+                    message: "Refresh token expired".to_string(),
+                });
             }
         }
         _ => {
-            return HttpResponse::Unauthorized()
-                .json(json!({"status": "fail", "message": "Refresh token not found"}))
+            return HttpResponse::Unauthorized().json(GenericResponse {
+                status: "fail".to_string(),
+                message: "Refresh token not found".to_string(),
+            })
         }
     };
 

@@ -6,7 +6,7 @@ use crate::helpers::{spawn_app, TestApp};
 
 pub async fn user_logs_in(app: &TestApp, client: Client) -> (String, String) {
     let response = client
-        .post(&format!("{}/auth/login", &app.address))
+        .post(&format!("{}/api/auth/login", &app.address))
         .json(&serde_json::json!({
             "username": "testusername",
             "password": "password",
@@ -58,7 +58,7 @@ async fn logged_in_user_can_access_profile_information() {
 
     // User can access a route protected by token authentication
     let response = client
-        .get(&format!("{}/users/me", &app.address))
+        .get(&format!("{}/api/users/me", &app.address))
         .bearer_auth(access_token.clone())
         .send()
         .await
