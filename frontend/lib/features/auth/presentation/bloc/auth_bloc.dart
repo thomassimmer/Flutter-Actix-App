@@ -14,31 +14,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.loginUseCase,
     required this.signupUseCase,
     required this.otpUseCase,
-  }) : super(AuthInitial()) {
-    on<AuthLoginRequested>(_onLoginRequested);
+  }) : super(AuthUnauthenticated()) {
     on<AuthSignupRequested>(_onSignupRequested);
-    on<AuthOtpRequested>(_onOTPRequested);
-    on<AuthOtpFirstTimeVerified>(_onOTPFirstTimeVerified);
-    on<AuthOTPVerified>(_onOTPVerified);
+    on<AuthOtpGenerationRequested>(_onOtpGenerationRequested);
+    on<AuthOtpVerificationRequested>(_onOtpVerificationRequested);
+    on<AuthLoginRequested>(_onLoginRequested);
+    on<AuthOtpValidationRequested>(_onOtpValidationRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
-  }
-
-  void _onLoginRequested(
-      AuthLoginRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
-
-    final result = await loginUseCase.login(event.username, event.password);
-
-    result.fold((failure) => emit(AuthFailure(message: failure.message)),
-        (userOrUserId) {
-      userOrUserId.fold((userId) => emit(AuthOtpRequired(userId: userId)),
-          (user) => emit(AuthAuthenticated(user: user)));
-    });
-  }
-
-  void _onLogoutRequested(
-      AuthLogoutRequested event, Emitter<AuthState> emit) async {
-    emit(AuthUnauthenticated());
   }
 
   void _onSignupRequested(
@@ -48,44 +30,91 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await signupUseCase.signup(event.username, event.password);
 
     result.fold(
+      (userTokenEntity) => emit(AuthAuthenticatedAfterRegistration(
+          accessToken: userTokenEntity.accessToken,
+          refreshToken: userTokenEntity.refreshToken,
+          expiresIn: userTokenEntity.expiresIn,
+          recoveryCodes: userTokenEntity.recoveryCodes,
+          hasVerifiedOtp: false)),
       (failure) => emit(AuthFailure(message: failure.message)),
-      (user) => emit(AuthAuthenticated(user: user)),
     );
   }
 
-  void _onOTPRequested(AuthOtpRequested event, Emitter<AuthState> emit) async {
+  void _onOtpGenerationRequested(
+      AuthOtpGenerationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await otpUseCase.generateOTP(event.user.id, event.username);
+    final result = await otpUseCase.generateOtp(event.accessToken);
 
     result.fold(
+      (otpGenerationEntity) => emit(AuthOtpVerify(
+          accessToken: event.accessToken,
+          refreshToken: event.refreshToken,
+          expiresIn: event.expiresIn,
+          otpAuthUrl: otpGenerationEntity.otpAuthUrl,
+          otpBase32: otpGenerationEntity.otpBase32)),
       (failure) => emit(AuthFailure(message: failure.message)),
-      (otp) => emit(AuthOtpFirstTimeRequired(user: event.user, otp: otp)),
     );
   }
 
-  void _onOTPFirstTimeVerified(
-      AuthOtpFirstTimeVerified event, Emitter<AuthState> emit) async {
+  void _onOtpVerificationRequested(
+      AuthOtpVerificationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await otpUseCase.verifyOTP(event.user.id, event.code);
+    final result = await otpUseCase.verifyOtp(event.accessToken, event.code);
 
     result.fold(
-      (failure) => emit(
-          AuthOtpFirstTimeFailure(message: failure.message, user: event.user)),
-      (user) => emit(AuthAuthenticated(user: user)),
+      (_) => emit(AuthAuthenticatedAfterRegistration(
+          accessToken: event.accessToken,
+          refreshToken: event.refreshToken,
+          expiresIn: event.expiresIn,
+          hasVerifiedOtp: true)),
+      (failure) => emit(AuthOtpVerify(
+          message: failure.message,
+          accessToken: event.accessToken,
+          refreshToken: event.refreshToken,
+          expiresIn: event.expiresIn,
+          otpAuthUrl: event.otpAuthUrl,
+          otpBase32: event.otpBase32)),
     );
   }
 
-  void _onOTPVerified(AuthOTPVerified event, Emitter<AuthState> emit) async {
+  void _onLoginRequested(
+      AuthLoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await otpUseCase.verifyOTP(event.userId, event.otp);
+    final result = await loginUseCase.login(event.username, event.password);
+
+    result.fold((userOrUserId) {
+      userOrUserId.fold(
+          (userTokenEntity) => emit(AuthAuthenticatedAfterLogin(
+              accessToken: userTokenEntity.accessToken,
+              refreshToken: userTokenEntity.refreshToken,
+              expiresIn: userTokenEntity.expiresIn,
+              hasValidatedOtp: false)),
+          (userId) => emit(AuthOtpValidate(userId: userId)));
+    }, (failure) => emit(AuthFailure(message: failure.message)));
+  }
+
+  void _onOtpValidationRequested(
+      AuthOtpValidationRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+
+    final result = await otpUseCase.validateOtp(event.userId, event.code);
 
     result.fold(
+      (userTokenModel) => emit(AuthAuthenticatedAfterLogin(
+          accessToken: userTokenModel.accessToken,
+          refreshToken: userTokenModel.refreshToken,
+          expiresIn: userTokenModel.expiresIn,
+          hasValidatedOtp: true)),
       (failure) =>
-          emit(AuthOtpFailure(message: failure.message, userId: event.userId)),
-      (user) => emit(AuthAuthenticated(user: user)),
+          emit(AuthOtpValidate(message: failure.message, userId: event.userId)),
     );
+  }
+
+  void _onLogoutRequested(
+      AuthLogoutRequested event, Emitter<AuthState> emit) async {
+    emit(AuthUnauthenticated());
   }
 }

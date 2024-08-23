@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:reallystick/features/auth/data/repositories/auth_repository.dart';
-import 'package:reallystick/features/auth/domain/entities/user_entity.dart';
+import 'package:reallystick/features/auth/domain/entities/user_token_entity.dart';
 import 'package:reallystick/features/auth/domain/errors/failures.dart';
 
 class LoginUseCase {
@@ -8,27 +8,22 @@ class LoginUseCase {
 
   LoginUseCase(this.authRepository);
 
-  Future<Either<Failure, Either<String, UserEntity>>> login(
+  Future<Either<Either<UserTokenEntity, String>, Failure>> login(
       String username, String password) async {
     try {
       final result =
           await authRepository.login(username: username, password: password);
 
       return result.fold(
-        (userId) => Right(Left(userId)),
-        (userModel) => Right(Right(UserEntity(
-          id: userModel.id,
-          username: userModel.username,
-          otpEnabled: userModel.otpEnabled,
-          otpVerified: userModel.otpVerified,
-          otpBase32: userModel.otpBase32,
-          otpAuthUrl: userModel.otpAuthUrl,
-          createdAt: userModel.createdAt,
-          updatedAt: userModel.updatedAt,
-        ))),
+        (userTokenModel) => Left(Left(UserTokenEntity(
+            accessToken: userTokenModel.accessToken,
+            refreshToken: userTokenModel.refreshToken,
+            expiresIn: userTokenModel.expiresIn,
+            recoveryCodes: userTokenModel.recoveryCodes))),
+        (userId) => Left(Right(userId)),
       );
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Right(ServerFailure(message: e.toString()));
     }
   }
 }

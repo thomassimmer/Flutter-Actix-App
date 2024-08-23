@@ -10,7 +10,7 @@ services:
     build:
       context: ./frontend
     env_file:
-      - ./db/.env
+      - ./frontend/.env
     ports:
       - "3000:3000"
     volumes:
@@ -27,7 +27,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     env_file:
-      - ./backend/.env
+      - ./backend/.env.docker
     ports:
       - "8000:8000"
     volumes:
@@ -51,6 +51,8 @@ services:
     expose:
       - "5432"
     command: -p 5432
+    networks:
+      - app-network
 
 volumes:
   postgres_data:

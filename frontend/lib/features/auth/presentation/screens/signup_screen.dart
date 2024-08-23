@@ -20,13 +20,19 @@ class SignupScreen extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.all(16.0),
         child: BlocListener<AuthBloc, AuthState>(listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            context.go('/recovery-codes');
+          if (state is AuthAuthenticatedAfterRegistration) {
+            if (state.recoveryCodes != null) {
+              context.go('/recovery-codes');
+            } else {
+              context.go('/home');
+            }
           }
           if (state is AuthFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            if (state.message != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message!)),
+              );
+            }
           }
         }, child: BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
           if (state is AuthLoading) {
