@@ -182,9 +182,9 @@ pub async fn register_user(
     let json_response = UserSignupResponse {
         status: "success".to_string(),
         recovery_codes: clear_recovery_codes,
-        access_token: access_token,
-        refresh_token: refresh_token,
-        expires_in: new_token.expires_at,
+        access_token,
+        refresh_token,
+        expires_in: new_token.expires_at.timestamp() as u64,
     };
 
     HttpResponse::Ok().json(json_response)

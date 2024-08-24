@@ -3,8 +3,8 @@ import 'package:equatable/equatable.dart';
 class UserTokenModel extends Equatable {
   final String accessToken;
   final String refreshToken;
-  final String expiresIn;
-  final String? recoveryCodes;
+  final int expiresIn;
+  final List<String>? recoveryCodes;
 
   const UserTokenModel(
       {required this.accessToken,
@@ -17,8 +17,10 @@ class UserTokenModel extends Equatable {
     return UserTokenModel(
         accessToken: json['access_token'] as String,
         refreshToken: json['refresh_token'] as String,
-        expiresIn: json['expires_in'] as String,
-        recoveryCodes: json['recovery_codes'] as String?);
+        expiresIn: json['expires_in'] as int,
+        recoveryCodes: json.containsKey('recovery_codes')
+            ? List<String>.from(json['recovery_codes'] as List)
+            : null);
   }
 
   @override

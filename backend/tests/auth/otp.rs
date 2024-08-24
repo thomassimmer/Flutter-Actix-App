@@ -47,7 +47,7 @@ async fn user_verifies_otp(app: &TestApp, client: Client, access_token: &str, ot
     let response = client
         .post(&format!("{}/api/auth/otp/verify", &app.address))
         .bearer_auth(access_token.to_owned())
-        .json(&serde_json::json!({"token": code}))
+        .json(&serde_json::json!({"code": code}))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -122,7 +122,7 @@ async fn registered_user_can_validate_otp() {
         .post(&format!("{}/api/auth/otp/validate", &app.address))
         .json(&serde_json::json!({
             "user_id": user_id,
-            "token": code,
+            "code": code,
         }))
         .send()
         .await
