@@ -29,3 +29,8 @@ class AuthFailure extends Failure {
 class ServerFailure extends Failure {
   const ServerFailure({required String message}) : super(message: message);
 }
+
+// Failure class specific to storage issues
+class StorageFailure extends Failure {
+  const StorageFailure({required String message}) : super(message: message);
+}
