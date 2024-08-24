@@ -50,34 +50,25 @@ pub async fn get_profile_information(
 
             match existing_user {
                 Ok(existing_user) => match existing_user {
-                    Some(existing_user) => {
-                        return HttpResponse::Ok().json(UserResponse {
-                            status: "success".to_string(),
-                            user: user_to_response(&existing_user),
-                        });
-                    }
-                    None => {
-                        return HttpResponse::InternalServerError().json(GenericResponse {
-                            status: "error".to_string(),
-                            message: "No user found for this token".to_string(),
-                        })
-                    }
-                },
-                Err(e) => {
-                    println!("{:?}", e);
-                    return HttpResponse::InternalServerError().json(GenericResponse {
+                    Some(existing_user) => HttpResponse::Ok().json(UserResponse {
+                        status: "success".to_string(),
+                        user: user_to_response(&existing_user),
+                    }),
+                    None => HttpResponse::InternalServerError().json(GenericResponse {
                         status: "error".to_string(),
-                        message: "Database query error".to_string(),
-                    });
-                }
+                        message: "No user found for this token".to_string(),
+                    }),
+                },
+                Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
+                    status: "error".to_string(),
+                    message: "Database query error".to_string(),
+                }),
             }
         }
 
-        Err(e) => {
-            return HttpResponse::Unauthorized().json(GenericResponse {
-                status: "fail".to_string(),
-                message: e.to_string(),
-            })
-        }
+        Err(e) => HttpResponse::Unauthorized().json(GenericResponse {
+            status: "fail".to_string(),
+            message: e.to_string(),
+        }),
     }
 }

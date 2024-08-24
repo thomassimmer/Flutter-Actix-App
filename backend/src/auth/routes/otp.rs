@@ -55,7 +55,7 @@ pub async fn generate(
                     } else {
                         return HttpResponse::NotFound().json(GenericResponse {
                             status: "fail".to_string(),
-                            message: format!("No user with this token"),
+                            message: "No user with this token".to_string(),
                         });
                     }
                 }
@@ -106,7 +106,7 @@ pub async fn generate(
             .fetch_optional(&mut *transaction)
             .await;
 
-            if let Err(_) = transaction.commit().await {
+            if (transaction.commit().await).is_err() {
                 return HttpResponse::InternalServerError().json(GenericResponse {
                     status: "error".to_string(),
                     message: "Failed to commit transaction".to_string(),
@@ -125,12 +125,10 @@ pub async fn generate(
                 }),
             }
         }
-        Err(e) => {
-            return HttpResponse::Unauthorized().json(GenericResponse {
-                status: "fail".to_string(),
-                message: e.to_string(),
-            })
-        }
+        Err(e) => HttpResponse::Unauthorized().json(GenericResponse {
+            status: "fail".to_string(),
+            message: e.to_string(),
+        }),
     }
 }
 
@@ -174,7 +172,7 @@ pub async fn verify(
                     } else {
                         return HttpResponse::NotFound().json(GenericResponse {
                             status: "fail".to_string(),
-                            message: format!("No user with this token"),
+                            message: "No user with this token".to_string(),
                         });
                     }
                 }
@@ -224,7 +222,7 @@ pub async fn verify(
             .fetch_optional(&mut *transaction)
             .await;
 
-            if let Err(_) = transaction.commit().await {
+            if (transaction.commit().await).is_err() {
                 return HttpResponse::InternalServerError().json(GenericResponse {
                     status: "error".to_string(),
                     message: "Failed to commit transaction".to_string(),
@@ -242,12 +240,10 @@ pub async fn verify(
                 }),
             }
         }
-        Err(e) => {
-            return HttpResponse::Unauthorized().json(GenericResponse {
-                status: "fail".to_string(),
-                message: e.to_string(),
-            })
-        }
+        Err(e) => HttpResponse::Unauthorized().json(GenericResponse {
+            status: "fail".to_string(),
+            message: e.to_string(),
+        }),
     }
 }
 
@@ -336,7 +332,7 @@ async fn validate(
 
     let new_token = UserToken {
         id: Uuid::new_v4(),
-        user_id: user.id.clone(),
+        user_id: user.id,
         token_id: claim.jti,
         expires_at: DateTime::<Utc>::from_timestamp(claim.exp as i64, 0).unwrap(),
     };
@@ -355,27 +351,26 @@ async fn validate(
     .execute(&mut *transaction)
     .await;
 
-    if let Err(_) = transaction.commit().await {
+    if (transaction.commit().await).is_err() {
         return HttpResponse::InternalServerError().json(GenericResponse {
             status: "error".to_string(),
             message: "Failed to commit transaction".to_string(),
         });
     }
 
-    if let Err(e) = insert_result {
-        println!("{:?}", e);
+    if insert_result.is_err() {
         return HttpResponse::InternalServerError().json(GenericResponse {
             status: "error".to_string(),
             message: "Failed to insert user token into the database".to_string(),
         });
     }
 
-    return HttpResponse::Ok().json(UserLoginResponse {
+    HttpResponse::Ok().json(UserLoginResponse {
         status: "success".to_string(),
         access_token,
         refresh_token,
         expires_in: claim.exp,
-    });
+    })
 }
 
 #[get("/disable")]
@@ -449,7 +444,7 @@ async fn disable(
             .fetch_optional(&mut *transaction)
             .await;
 
-            if let Err(_) = transaction.commit().await {
+            if (transaction.commit().await).is_err() {
                 return HttpResponse::InternalServerError().json(GenericResponse {
                     status: "error".to_string(),
                     message: "Failed to commit transaction".to_string(),
@@ -468,11 +463,9 @@ async fn disable(
             }
         }
 
-        Err(e) => {
-            return HttpResponse::Unauthorized().json(GenericResponse {
-                status: "fail".to_string(),
-                message: e.to_string(),
-            })
-        }
+        Err(e) => HttpResponse::Unauthorized().json(GenericResponse {
+            status: "fail".to_string(),
+            message: e.to_string(),
+        }),
     }
 }
