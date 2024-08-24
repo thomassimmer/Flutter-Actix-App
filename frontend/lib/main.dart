@@ -7,6 +7,7 @@ import 'package:reallystick/features/auth/data/repositories/auth_repository.dart
 import 'package:reallystick/features/auth/domain/usecases/login_usecase.dart';
 import 'package:reallystick/features/auth/domain/usecases/otp_usecase.dart';
 import 'package:reallystick/features/auth/domain/usecases/read_authentication_use_case.dart';
+import 'package:reallystick/features/auth/domain/usecases/remove_authentication_use_case.dart';
 import 'package:reallystick/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:reallystick/features/auth/domain/usecases/store_authentication_use_case.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
@@ -37,6 +38,7 @@ Future<void> main() async {
     otpUseCase: OtpUseCase(authRepository),
     storeAuthenticationUseCase: StoreAuthenticationUseCase(),
     readAuthenticationUseCase: ReadAuthenticationUseCase(),
+    removeAuthenticationUseCase: RemoveAuthenticationUseCase(),
   );
 
   authBloc.add(AuthInitRequested());
