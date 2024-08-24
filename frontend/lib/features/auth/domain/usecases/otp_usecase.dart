@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
+import 'package:reallystick/core/constants/errors.dart';
+import 'package:reallystick/features/auth/data/repositories/auth_repository.dart';
 import 'package:reallystick/features/auth/domain/entities/otp_generation_entity.dart';
 import 'package:reallystick/features/auth/domain/entities/user_token_entity.dart';
 import 'package:reallystick/features/auth/domain/errors/failures.dart';
-
-import '../../data/repositories/auth_repository.dart';
 
 class OtpUseCase {
   final AuthRepository authRepository;
