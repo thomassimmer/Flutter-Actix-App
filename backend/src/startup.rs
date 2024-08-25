@@ -1,3 +1,5 @@
+// Inspired by : https://github.com/actix/actix-web/issues/1147
+
 use std::net::TcpListener;
 
 use crate::auth::routes::login::log_user_in;
@@ -8,58 +10,70 @@ use crate::auth::routes::token::refresh_token;
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::core::routes::health_check::health_check;
 use actix_cors::Cors;
-use actix_web::dev::Server;
+use actix_web::body::MessageBody;
+use actix_web::dev::{Server, ServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::http::header;
 use actix_web::middleware::Logger;
-use actix_web::{web, App, HttpServer};
+use actix_web::{web, App, Error, HttpServer};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 
 pub fn run(listener: TcpListener, configuration: Settings) -> Result<Server, std::io::Error> {
-    // Wrap the pool using web::Data, which boils down to an Arc smart pointer
-    let connection_pool = get_connection_pool(&configuration.database);
-    let secret = configuration.application.secret;
-
-    let server = HttpServer::new(move || {
-        let cors = Cors::default()
-            .allow_any_origin()
-            // .allowed_origin("localhost:3000")
-            .allowed_methods(vec!["GET", "POST"])
-            .allowed_headers(vec![
-                header::CONTENT_TYPE,
-                header::AUTHORIZATION,
-                header::ACCEPT,
-            ])
-            .supports_credentials();
-
-        App::new()
-            .service(
-                web::scope("/api")
-                    .service(health_check)
-                    .service(
-                        web::scope("/auth")
-                            .service(register_user)
-                            .service(log_user_in)
-                            .service(refresh_token)
-                            .service(
-                                web::scope("/otp")
-                                    .service(generate)
-                                    .service(verify)
-                                    .service(validate)
-                                    .service(disable),
-                            ),
-                    )
-                    .service(web::scope("/users").service(get_profile_information)),
-            )
-            .wrap(cors)
-            .wrap(Logger::default())
-            .app_data(web::Data::new(connection_pool.clone()))
-            .app_data(web::Data::new(secret.clone()))
-    })
-    .listen(listener)?
-    .run();
+    let server = HttpServer::new(move || create_app(&configuration))
+        .listen(listener)?
+        .run();
 
     Ok(server)
+}
+
+pub fn create_app(
+    configuration: &Settings,
+) -> App<
+    impl ServiceFactory<
+        ServiceRequest,
+        Config = (),
+        Response = ServiceResponse<impl MessageBody>,
+        Error = Error,
+        InitError = (),
+    >,
+> {
+    let connection_pool = get_connection_pool(&configuration.database);
+    let secret = &configuration.application.secret;
+
+    let cors = Cors::default()
+        .allow_any_origin()
+        // .allowed_origin("localhost:3000")
+        .allowed_methods(vec!["GET", "POST"])
+        .allowed_headers(vec![
+            header::CONTENT_TYPE,
+            header::AUTHORIZATION,
+            header::ACCEPT,
+        ])
+        .supports_credentials();
+
+    App::new()
+        .service(
+            web::scope("/api")
+                .service(health_check)
+                .service(
+                    web::scope("/auth")
+                        .service(register_user)
+                        .service(log_user_in)
+                        .service(refresh_token)
+                        .service(
+                            web::scope("/otp")
+                                .service(generate)
+                                .service(verify)
+                                .service(validate)
+                                .service(disable),
+                        ),
+                )
+                .service(web::scope("/users").service(get_profile_information)),
+        )
+        .wrap(cors)
+        .wrap(Logger::default())
+        .app_data(web::Data::new(connection_pool.clone()))
+        .app_data(web::Data::new(secret.clone()))
 }
 
 pub struct Application {

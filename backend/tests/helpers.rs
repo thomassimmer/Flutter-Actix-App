@@ -1,17 +1,19 @@
+use actix_http::Request;
+use actix_web::{
+    body::MessageBody,
+    dev::{Service, ServiceResponse},
+    test::init_service,
+    Error,
+};
 use reallystick::{
     configuration::{get_configuration, DatabaseSettings},
-    startup::{get_connection_pool, Application},
+    startup::create_app,
 };
-use sqlx::{Connection, PgConnection, PgPool, Executor, migrate};
+use sqlx::{migrate, Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 
-pub struct TestApp {
-    pub address: String,
-    pub port: u16,
-    pub db_pool: PgPool,
-}
-
-pub async fn spawn_app() -> TestApp {
+pub async fn spawn_app(
+) -> impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error> {
     // Randomise configuration to ensure test isolation
     let configuration = {
         let mut c = get_configuration().expect("Failed to read configuration.");
@@ -23,23 +25,8 @@ pub async fn spawn_app() -> TestApp {
         c
     };
 
-    // Create and migrate the database
     configure_database(&configuration.database).await;
-
-    // Launch the application as a background task
-    let application = Application::build(configuration.clone())
-        .await
-        .expect("Failed to build application.");
-    let application_port = application.port();
-    let _ = tokio::spawn(application.run_until_stopped());
-
-    let test_app = TestApp {
-        address: format!("http://localhost:{}", application_port),
-        port: application_port,
-        db_pool: get_connection_pool(&configuration.database),
-    };
-
-    test_app
+    init_service(create_app(&configuration)).await
 }
 
 async fn configure_database(config: &DatabaseSettings) -> PgPool {

@@ -2,7 +2,7 @@ use actix_web::HttpRequest;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use sha2::{Digest, Sha256};
 
-use crate::models::Claims;
+use crate::{core::helpers::mock_now::now, models::Claims};
 
 use super::errors::AuthError;
 
@@ -13,7 +13,7 @@ pub fn hash_token(token: &str) -> String {
 }
 
 pub fn generate_tokens(secret_key: &[u8], jti: String) -> (String, String, Claims) {
-    let exp = chrono::Utc::now()
+    let exp = now()
         .checked_add_signed(chrono::Duration::minutes(15)) // Access token expires in 15 minutes
         .expect("invalid timestamp")
         .timestamp();

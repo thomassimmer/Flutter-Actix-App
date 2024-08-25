@@ -1,10 +1,10 @@
 use crate::{
     auth::helpers::token::generate_tokens,
+    core::helpers::mock_now::now,
     models::{Claims, RefreshTokenRequest},
     response::{GenericResponse, RefreshTokenResponse},
 };
 use actix_web::{post, web, HttpResponse, Responder};
-use chrono::offset;
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use sqlx::PgPool;
 
@@ -59,7 +59,7 @@ pub async fn refresh_token(
 
     match stored_token {
         Ok(Some(expires_at)) => {
-            if offset::Utc::now() > expires_at {
+            if now() > expires_at {
                 return HttpResponse::Unauthorized().json(GenericResponse {
                     status: "fail".to_string(),
                     message: "Refresh token expired".to_string(),

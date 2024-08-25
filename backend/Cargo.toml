@@ -16,6 +16,7 @@ path = "tests/mod.rs"
 
 [dependencies]
 actix-cors = "0.7.0"
+actix-http = "3.9.0"
 actix-rt = "2.10.0"
 actix-web = "4.9.0"
 argon2 = "0.5.3"
@@ -25,6 +26,7 @@ config = "0.14.0"
 dotenv = "0.15.0"
 env_logger = "0.11.5"
 jsonwebtoken = "=9.3.0"
+lazy_static = "1.5.0"
 rand = "0.8.5"
 reqwest = { version = "0.12.7", default-features = false, features = ["json", "rustls-tls", "cookies"] }
 secrecy = { version = "0.8", features = ["serde"] }
