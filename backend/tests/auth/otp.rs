@@ -3,10 +3,11 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
-use reallystick::response::{
-    DisableOtpResponse, GenerateOtpResponse, GenericResponse, UserLoginResponse,
-    UserLoginWhenOtpEnabledResponse, VerifyOtpResponse,
+use reallystick::auth::structs::response::{
+    DisableOtpResponse, GenerateOtpResponse, UserLoginResponse, UserLoginWhenOtpEnabledResponse,
+    VerifyOtpResponse,
 };
+use reallystick::core::structs::response::GenericResponse;
 use totp_rs::{Algorithm, Secret, TOTP};
 
 use crate::auth::signup::user_signs_up;

@@ -1,8 +1,9 @@
 use crate::{
-    auth::helpers::token::retrieve_claims_for_token,
-    core::helpers::mock_now::now,
-    models::User,
-    response::{user_to_response, GenericResponse, UserResponse},
+    auth::{
+        helpers::{serializer::user_to_response, token::retrieve_claims_for_token},
+        structs::{model::User, response::UserResponse},
+    },
+    core::{helpers::mock_now::now, structs::response::GenericResponse},
 };
 use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
 use chrono::{DateTime, Utc};

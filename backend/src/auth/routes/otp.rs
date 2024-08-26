@@ -1,13 +1,12 @@
 use crate::auth::helpers::token::{generate_tokens, retrieve_claims_for_token};
-use crate::core::helpers::mock_now::now;
-use crate::models::{UserToken, ValidateOTPSchema};
-use crate::response::{
+use crate::auth::structs::model::{User, UserToken};
+use crate::auth::structs::request::{ValidateOtpRequest, VerifyOtpRequest};
+use crate::auth::structs::response::{
     DisableOtpResponse, GenerateOtpResponse, UserLoginResponse, VerifyOtpResponse,
 };
-use crate::{
-    models::{User, VerifyOTPSchema},
-    response::GenericResponse,
-};
+use crate::core::helpers::mock_now::now;
+use crate::core::structs::response::GenericResponse;
+
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 
 use base32;
@@ -135,7 +134,7 @@ pub async fn generate(
 #[post("/verify")]
 pub async fn verify(
     req: HttpRequest,
-    body: web::Json<VerifyOTPSchema>,
+    body: web::Json<VerifyOtpRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
 ) -> impl Responder {
@@ -249,7 +248,7 @@ pub async fn verify(
 
 #[post("/validate")]
 async fn validate(
-    body: web::Json<ValidateOTPSchema>,
+    body: web::Json<ValidateOtpRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
 ) -> impl Responder {

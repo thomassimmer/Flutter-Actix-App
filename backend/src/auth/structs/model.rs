@@ -1,5 +1,7 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
+use uuid::Uuid;
 
 #[allow(non_snake_case)]
 #[derive(Debug, Deserialize, Serialize, Clone, FromRow)]
@@ -22,7 +24,7 @@ pub struct User {
 #[allow(non_snake_case)]
 #[derive(Debug, Deserialize, Serialize, Clone, FromRow)]
 pub struct UserToken {
-    pub id: uuid::Uuid,
+    pub id: Uuid,
     pub user_id: uuid::Uuid,
     pub token_id: String,
     pub expires_at: chrono::DateTime<chrono::Utc>,
@@ -34,41 +36,17 @@ pub struct Claims {
     pub jti: String,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct UserRegisterSchema {
+#[allow(non_snake_case)]
+#[derive(Serialize, Debug, Deserialize)]
+pub struct UserData {
+    pub id: Uuid,
     pub username: String,
-    pub password: String,
-}
 
-#[derive(Debug, Deserialize)]
-pub struct UserLoginSchema {
-    pub username: String,
-    pub password: String,
-}
+    pub otp_enabled: bool,
+    pub otp_verified: bool,
+    pub otp_base32: Option<String>,
+    pub otp_auth_url: Option<String>,
 
-#[derive(Debug, Deserialize)]
-pub struct GenerateOTPSchema {
-    pub username: String,
-    pub user_id: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct VerifyOTPSchema {
-    pub code: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct ValidateOTPSchema {
-    pub code: String,
-    pub user_id: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct DisableOTPSchema {
-    pub user_id: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct RefreshTokenRequest {
-    pub refresh_token: String,
+    pub createdAt: DateTime<Utc>,
+    pub updatedAt: DateTime<Utc>,
 }

@@ -1,5 +1,5 @@
 use actix_web::test;
-use reallystick::response::GenericResponse;
+use reallystick::core::structs::response::GenericResponse;
 
 use crate::helpers::spawn_app;
 

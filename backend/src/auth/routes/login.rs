@@ -1,10 +1,11 @@
 use crate::auth::helpers::token::generate_tokens;
+use crate::auth::structs::model::UserToken;
 use crate::core::helpers::mock_now::now;
-use crate::models::UserToken;
-use crate::response::GenericResponse;
+use crate::core::structs::response::GenericResponse;
 use crate::{
-    models::{User, UserLoginSchema},
-    response::{UserLoginResponse, UserLoginWhenOtpEnabledResponse},
+    auth::structs::model::User,
+    auth::structs::request::UserLoginRequest,
+    auth::structs::response::{UserLoginResponse, UserLoginWhenOtpEnabledResponse},
 };
 use actix_web::{post, web, HttpResponse, Responder};
 use argon2::{
@@ -16,7 +17,7 @@ use uuid::Uuid;
 
 #[post("/login")]
 pub async fn log_user_in(
-    body: web::Json<UserLoginSchema>,
+    body: web::Json<UserLoginRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
 ) -> impl Responder {

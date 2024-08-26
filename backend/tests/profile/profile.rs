@@ -4,7 +4,7 @@ use actix_web::{
     dev::{Service, ServiceResponse},
     test, Error,
 };
-use reallystick::response::UserResponse;
+use reallystick::auth::structs::response::UserResponse;
 
 pub async fn user_accesses_protected_route(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
