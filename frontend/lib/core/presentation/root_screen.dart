@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reallystick/core/themes/app_theme.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
@@ -82,7 +83,7 @@ class RootScreen extends StatelessWidget {
                 ),
                 Spacer(),
                 Button(
-                  text: 'Logout',
+                  text: AppLocalizations.of(context)!.logout,
                   onPressed: () {
                     BlocProvider.of<AuthBloc>(context)
                         .add(AuthLogoutRequested());

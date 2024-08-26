@@ -18,6 +18,7 @@ pub async fn user_signs_up(
         .set_json(&serde_json::json!({
         "username": "testusername",
         "password": "password",
+        "locale": "en"
         }))
         .to_request();
     let response = test::call_service(&app, req).await;

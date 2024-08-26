@@ -38,3 +38,7 @@ To check everything is fine: flutter doctor --verbose
 To build the apk: flutter build apk --flavor dev --release
 
 To install on device: flutter install --flavor dev
+
+# Sources
+
+Install localizations on ios : https://medium.com/@gauravswarankar/internationalizing-flutter-apps-a2b82e804ca6

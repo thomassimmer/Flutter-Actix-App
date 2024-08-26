@@ -1,0 +1,7 @@
+{
+  "hello": "Bonjour {userName}",
+  "profileSettings": "Paramètres du profil",
+  "language": "Langue",
+  "selectLanguage": "Sélection de la langue",
+  "logout": "Se déconnecter"
+}

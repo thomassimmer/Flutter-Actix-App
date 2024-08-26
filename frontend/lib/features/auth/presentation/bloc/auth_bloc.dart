@@ -7,6 +7,7 @@ import 'package:reallystick/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:reallystick/features/auth/domain/usecases/store_authentication_use_case.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_events.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
+import 'package:universal_io/io.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
@@ -53,7 +54,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthSignupRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await signupUseCase.signup(event.username, event.password);
+    // We use the device locale by default on signup
+    final result = await signupUseCase.signup(
+        event.username, event.password, Platform.localeName);
 
     await result.fold(
       (userTokenEntity) async {

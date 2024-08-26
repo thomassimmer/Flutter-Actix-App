@@ -15,6 +15,7 @@ class AuthRepository extends ApiRepository {
   Future<UserTokenModel> register({
     required String username,
     required String password,
+    required String locale
   }) async {
     final url = Uri.parse('$baseUrl/auth/register');
     final response = await http.post(
@@ -23,6 +24,7 @@ class AuthRepository extends ApiRepository {
       body: json.encode({
         'username': username,
         'password': password,
+        'locale': locale,
       }),
     );
 

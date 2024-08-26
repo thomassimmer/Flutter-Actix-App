@@ -1,0 +1,16 @@
+{
+  "hello": "Hello {userName}",
+  "@hello": {
+    "description": "A message with a single parameter",
+    "placeholders": {
+      "userName": {
+        "type": "String",
+        "example": "Bob"
+      }
+    }
+  },
+  "profileSettings": "Profile Settings",
+  "language": "Language",
+  "selectLanguage": "Select Language",
+  "logout": "Log out"
+}

@@ -7,13 +7,10 @@ use uuid::Uuid;
 use crate::{
     auth::{
         helpers::token::generate_tokens,
-        structs::{
-            model::{User, UserToken},
-            request::UserRegisterRequest,
-            response::UserSignupResponse,
-        },
+        structs::{model::UserToken, request::UserRegisterRequest, response::UserSignupResponse},
     },
     core::{helpers::mock_now::now, structs::response::GenericResponse},
+    profile::structs::model::User,
 };
 
 #[post("/register")]
@@ -108,6 +105,7 @@ pub async fn register_user(
         id: Uuid::new_v4(),
         username: username_lower,
         password: password_hash,
+        locale: body.locale,
         otp_enabled: false,
         otp_verified: false,
         otp_base32: None,
