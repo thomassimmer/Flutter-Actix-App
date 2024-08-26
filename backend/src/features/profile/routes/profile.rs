@@ -135,15 +135,17 @@ pub async fn post_profile_information(
 
             user.username = body.username.clone();
             user.locale = body.locale.clone();
+            user.theme = body.theme.clone();
 
             let updated_user_result = sqlx::query!(
                 r#"
                 UPDATE users
-                SET username = $1, locale = $2
-                WHERE id = $3
+                SET username = $1, locale = $2, theme = $3
+                WHERE id = $4
                 "#,
                 user.username,
                 user.locale,
+                user.theme,
                 user.id
             )
             .fetch_optional(&mut *transaction)

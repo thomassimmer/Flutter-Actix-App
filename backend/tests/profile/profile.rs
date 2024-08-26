@@ -42,6 +42,7 @@ pub async fn user_update_its_profile() {
         .set_json(&serde_json::json!({
             "username": "testusername",
             "locale": "fr",
+            "theme": "light",
         }))
         .to_request();
     let response = test::call_service(&app, req).await;
@@ -53,4 +54,5 @@ pub async fn user_update_its_profile() {
 
     assert_eq!(response.user.username, "testusername");
     assert_eq!(response.user.locale, "fr");
+    assert_eq!(response.user.theme, "light");
 }

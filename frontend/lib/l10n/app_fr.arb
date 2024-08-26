@@ -3,5 +3,9 @@
   "profileSettings": "Paramètres du profil",
   "language": "Langue",
   "selectLanguage": "Sélection de la langue",
-  "logout": "Se déconnecter"
+  "logout": "Se déconnecter",
+  "theme": "Thème",
+  "selectTheme": "Sélection du thème",
+  "dark": "Sombre",
+  "light": "Clair"
 }

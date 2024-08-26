@@ -9,6 +9,7 @@ pub struct UserData {
     pub id: Uuid,
     pub username: String,
     pub locale: String,
+    pub theme: String,
 
     pub otp_enabled: bool,
     pub otp_verified: bool,
@@ -24,8 +25,9 @@ pub struct UserData {
 pub struct User {
     pub id: uuid::Uuid,
     pub username: String,
-    pub locale: String,
     pub password: String,
+    pub locale: String,
+    pub theme: String,
 
     pub otp_enabled: bool,
     pub otp_verified: bool,

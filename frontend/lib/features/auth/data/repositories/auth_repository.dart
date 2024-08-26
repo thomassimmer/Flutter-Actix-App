@@ -12,11 +12,11 @@ import 'package:reallystick/features/auth/data/models/user_token_model.dart';
 class AuthRepository extends ApiRepository {
   AuthRepository({required super.baseUrl});
 
-  Future<UserTokenModel> register({
-    required String username,
-    required String password,
-    required String locale
-  }) async {
+  Future<UserTokenModel> register(
+      {required String username,
+      required String password,
+      required String locale,
+      required String theme}) async {
     final url = Uri.parse('$baseUrl/auth/register');
     final response = await http.post(
       url,
@@ -25,6 +25,7 @@ class AuthRepository extends ApiRepository {
         'username': username,
         'password': password,
         'locale': locale,
+        'theme': theme,
       }),
     );
 

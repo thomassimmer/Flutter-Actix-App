@@ -12,5 +12,9 @@
   "profileSettings": "Profile Settings",
   "language": "Language",
   "selectLanguage": "Select Language",
-  "logout": "Log out"
+  "logout": "Log out",
+  "theme": "Theme",
+  "selectTheme": "Select Theme",
+  "dark": "Dark",
+  "light": "Light"
 }
