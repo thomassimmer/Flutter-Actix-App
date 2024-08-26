@@ -1,7 +1,7 @@
 use crate::{
-    auth::helpers::{serializer::user_to_response, token::retrieve_claims_for_token},
     core::{helpers::mock_now::now, structs::response::GenericResponse},
-    profile::structs::{model::User, request::UserUpdateRequest, response::UserResponse},
+    features::auth::helpers::{serializer::user_to_response, token::retrieve_claims_for_token},
+    features::profile::structs::{model::User, request::UserUpdateRequest, response::UserResponse},
 };
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use chrono::{DateTime, Utc};

@@ -2,7 +2,7 @@ use actix_web::HttpRequest;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use sha2::{Digest, Sha256};
 
-use crate::{auth::structs::model::Claims, core::helpers::mock_now::now};
+use crate::{features::auth::structs::model::Claims, core::helpers::mock_now::now};
 
 use super::error::AuthError;
 

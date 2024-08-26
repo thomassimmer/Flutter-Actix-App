@@ -1,36 +1,38 @@
 pub mod configuration;
 pub mod startup;
 
-pub mod auth {
-    pub mod helpers {
-        pub mod error;
-        pub mod serializer;
-        pub mod token;
+pub mod features {
+    pub mod auth {
+        pub mod helpers {
+            pub mod error;
+            pub mod serializer;
+            pub mod token;
+        }
+
+        pub mod routes {
+            pub mod login;
+            pub mod otp;
+            pub mod signup;
+            pub mod token;
+        }
+
+        pub mod structs {
+            pub mod model;
+            pub mod request;
+            pub mod response;
+        }
     }
 
-    pub mod routes {
-        pub mod login;
-        pub mod otp;
-        pub mod signup;
-        pub mod token;
-    }
+    pub mod profile {
+        pub mod routes {
+            pub mod profile;
+        }
 
-    pub mod structs {
-        pub mod model;
-        pub mod request;
-        pub mod response;
-    }
-}
-
-pub mod profile {
-    pub mod routes {
-        pub mod profile;
-    }
-
-    pub mod structs {
-        pub mod model;
-        pub mod request;
-        pub mod response;
+        pub mod structs {
+            pub mod model;
+            pub mod request;
+            pub mod response;
+        }
     }
 }
 
