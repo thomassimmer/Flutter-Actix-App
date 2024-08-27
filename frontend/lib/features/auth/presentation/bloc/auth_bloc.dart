@@ -1,10 +1,8 @@
 import 'package:bloc/bloc.dart';
+import 'package:reallystick/features/auth/data/storage/token_storage.dart';
 import 'package:reallystick/features/auth/domain/usecases/login_usecase.dart';
 import 'package:reallystick/features/auth/domain/usecases/otp_usecase.dart';
-import 'package:reallystick/features/auth/domain/usecases/read_authentication_use_case.dart';
-import 'package:reallystick/features/auth/domain/usecases/remove_authentication_use_case.dart';
 import 'package:reallystick/features/auth/domain/usecases/signup_usecase.dart';
-import 'package:reallystick/features/auth/domain/usecases/store_authentication_use_case.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_events.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
 import 'package:universal_io/io.dart';
@@ -13,18 +11,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final SignupUseCase signupUseCase;
   final OtpUseCase otpUseCase;
-  final StoreAuthenticationUseCase storeAuthenticationUseCase;
-  final ReadAuthenticationUseCase readAuthenticationUseCase;
-  final RemoveAuthenticationUseCase removeAuthenticationUseCase;
 
-  AuthBloc(
-      {required this.loginUseCase,
-      required this.signupUseCase,
-      required this.otpUseCase,
-      required this.storeAuthenticationUseCase,
-      required this.readAuthenticationUseCase,
-      required this.removeAuthenticationUseCase})
-      : super(AuthLoading()) {
+  AuthBloc({
+    required this.loginUseCase,
+    required this.signupUseCase,
+    required this.otpUseCase,
+  }) : super(AuthLoading()) {
     on<AuthInitRequested>(_onInitializeAuth);
     on<AuthSignupRequested>(_onSignupRequested);
     on<AuthOtpGenerationRequested>(_onOtpGenerationRequested);
@@ -37,17 +29,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   // Function to check initial authentication state
   Future<void> _onInitializeAuth(
       AuthInitRequested event, Emitter<AuthState> emit) async {
-    final result = await this.readAuthenticationUseCase.readAuthentication();
+    final result = await TokenStorage().getAccessToken();
 
-    return result.fold(
-      (failure) => emit(AuthUnauthenticated()),
-      (authData) => emit(AuthAuthenticatedAfterLogin(
-        accessToken: authData.accessToken,
-        refreshToken: authData.refreshToken,
-        expiresIn: authData.expiresIn,
+    if (result == null) {
+      emit(AuthUnauthenticated());
+    } else {
+      emit(AuthAuthenticatedAfterLogin(
         hasValidatedOtp: false,
-      )),
-    );
+      ));
+    }
+    ;
   }
 
   void _onSignupRequested(
@@ -61,23 +52,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       (userTokenEntity) async {
         // Store tokens securely after successful login
-        final storeResult =
-            await storeAuthenticationUseCase.storeAuthentication(
+        await TokenStorage().saveTokens(
           userTokenEntity.accessToken,
           userTokenEntity.refreshToken,
           userTokenEntity.expiresIn,
         );
 
-        storeResult.fold(
-          (success) => emit(AuthAuthenticatedAfterRegistration(
-              accessToken: userTokenEntity.accessToken,
-              refreshToken: userTokenEntity.refreshToken,
-              expiresIn: userTokenEntity.expiresIn,
-              recoveryCodes: userTokenEntity.recoveryCodes,
-              hasVerifiedOtp: false)),
-          (failure) =>
-              emit(AuthFailure(message: 'Failed to store tokens securely.')),
-        );
+        emit(AuthAuthenticatedAfterRegistration(
+            recoveryCodes: userTokenEntity.recoveryCodes,
+            hasVerifiedOtp: false));
       },
       (failure) {
         emit(AuthFailure(message: failure.message));
@@ -89,13 +72,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthOtpGenerationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await otpUseCase.generateOtp(event.accessToken);
+    final result = await otpUseCase.generateOtp();
 
     result.fold(
       (otpGenerationEntity) => emit(AuthOtpVerify(
-          accessToken: event.accessToken,
-          refreshToken: event.refreshToken,
-          expiresIn: event.expiresIn,
           otpAuthUrl: otpGenerationEntity.otpAuthUrl,
           otpBase32: otpGenerationEntity.otpBase32)),
       (failure) => emit(AuthFailure(message: failure.message)),
@@ -106,19 +86,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthOtpVerificationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await otpUseCase.verifyOtp(event.accessToken, event.code);
+    final result = await otpUseCase.verifyOtp(event.code);
 
     result.fold(
-      (_) => emit(AuthAuthenticatedAfterRegistration(
-          accessToken: event.accessToken,
-          refreshToken: event.refreshToken,
-          expiresIn: event.expiresIn,
-          hasVerifiedOtp: true)),
+      (_) => emit(AuthAuthenticatedAfterRegistration(hasVerifiedOtp: true)),
       (failure) => emit(AuthOtpVerify(
           message: failure.message,
-          accessToken: event.accessToken,
-          refreshToken: event.refreshToken,
-          expiresIn: event.expiresIn,
           otpAuthUrl: event.otpAuthUrl,
           otpBase32: event.otpBase32)),
     );
@@ -136,23 +109,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await userOrUserId.fold(
           (userTokenEntity) async {
             // Store tokens securely after successful login
-            final storeResult =
-                await storeAuthenticationUseCase.storeAuthentication(
+            await TokenStorage().saveTokens(
               userTokenEntity.accessToken,
               userTokenEntity.refreshToken,
               userTokenEntity.expiresIn,
             );
 
-            storeResult.fold(
-              (success) => emit(AuthAuthenticatedAfterLogin(
-                accessToken: userTokenEntity.accessToken,
-                refreshToken: userTokenEntity.refreshToken,
-                expiresIn: userTokenEntity.expiresIn,
-                hasValidatedOtp: false,
-              )),
-              (failure) => emit(
-                  AuthFailure(message: 'Failed to store tokens securely.')),
-            );
+            emit(AuthAuthenticatedAfterLogin(
+              hasValidatedOtp: false,
+            ));
           },
           (userId) {
             emit(AuthOtpValidate(userId: userId));
@@ -172,11 +137,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await otpUseCase.validateOtp(event.userId, event.code);
 
     result.fold(
-      (userTokenModel) => emit(AuthAuthenticatedAfterLogin(
-          accessToken: userTokenModel.accessToken,
-          refreshToken: userTokenModel.refreshToken,
-          expiresIn: userTokenModel.expiresIn,
-          hasValidatedOtp: true)),
+      (userTokenModel) =>
+          emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true)),
       (failure) =>
           emit(AuthOtpValidate(message: failure.message, userId: event.userId)),
     );
@@ -184,7 +146,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void _onLogoutRequested(
       AuthLogoutRequested event, Emitter<AuthState> emit) async {
-    await removeAuthenticationUseCase.removeAuthentication();
+    await TokenStorage().deleteTokens();
 
     emit(AuthUnauthenticated());
   }

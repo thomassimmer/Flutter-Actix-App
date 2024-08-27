@@ -19,7 +19,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       required this.authBloc,
       required this.postProfileUsecase})
       : super(ProfileLoading()) {
-    // Écoute les changements d'état du AuthBloc
     authBlocSubscription = authBloc.stream.listen((authState) {
       if (authState is AuthAuthenticated) {
         add(ProfileLoadRequested());
@@ -35,15 +34,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onInitializeProfile(
       ProfileLoadRequested event, Emitter<ProfileState> emit) async {
-    if (authBloc.state is AuthAuthenticated) {
-      final accessToken = (authBloc.state as AuthAuthenticated).accessToken;
-      final profile = await this.getProfileUsecase.getProfile(accessToken);
+    final profile = await this.getProfileUsecase.getProfile();
 
-      profile.fold((profile) => emit(ProfileAuthenticated(profile: profile)),
-          (failure) => emit(ProfileUnauthenticated(message: failure.message)));
-    } else {
-      emit(ProfileUnauthenticated());
-    }
+    profile.fold((profile) => emit(ProfileAuthenticated(profile: profile)),
+        (failure) => emit(ProfileUnauthenticated(message: failure.message)));
   }
 
   Future<void> _onLogoutRequested(
@@ -53,15 +47,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onProfileUpdateRequest(
       ProfileUpdateRequested event, Emitter<ProfileState> emit) async {
-    if (authBloc.state is AuthAuthenticated) {
-      final accessToken = (authBloc.state as AuthAuthenticated).accessToken;
-      final profile =
-          await this.postProfileUsecase.postProfile(accessToken, event.profile);
+    final profile = await this.postProfileUsecase.postProfile(event.profile);
 
-      profile.fold((profile) => emit(ProfileAuthenticated(profile: profile)),
-          (failure) => emit(ProfileUnauthenticated(message: failure.message)));
-    } else {
-      emit(ProfileUnauthenticated());
-    }
+    profile.fold((profile) => emit(ProfileAuthenticated(profile: profile)),
+        (failure) => emit(ProfileUnauthenticated(message: failure.message)));
   }
 }

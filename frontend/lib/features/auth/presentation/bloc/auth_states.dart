@@ -11,57 +11,26 @@ class AuthUnauthenticated extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
-class AuthAuthenticated extends AuthState {
-  final String accessToken;
-  final String refreshToken;
-  final int expiresIn;
-
-  const AuthAuthenticated({
-    required this.accessToken,
-    required this.refreshToken,
-    required this.expiresIn,
-  });
-
-  @override
-  List<Object?> get props => [
-        accessToken,
-        refreshToken,
-        expiresIn,
-      ];
-}
+class AuthAuthenticated extends AuthState {}
 
 class AuthAuthenticatedAfterRegistration extends AuthAuthenticated {
   final List<String>? recoveryCodes;
   final bool hasVerifiedOtp;
 
-  const AuthAuthenticatedAfterRegistration(
-      {required super.accessToken,
-      required super.refreshToken,
-      required super.expiresIn,
-      this.recoveryCodes,
-      required this.hasVerifiedOtp});
+  AuthAuthenticatedAfterRegistration(
+      {this.recoveryCodes, required this.hasVerifiedOtp});
 
   @override
-  List<Object?> get props =>
-      [accessToken, refreshToken, expiresIn, recoveryCodes, hasVerifiedOtp];
+  List<Object?> get props => [recoveryCodes, hasVerifiedOtp];
 }
 
 class AuthAuthenticatedAfterLogin extends AuthAuthenticated {
   final bool hasValidatedOtp;
 
-  const AuthAuthenticatedAfterLogin(
-      {required super.accessToken,
-      required super.refreshToken,
-      required super.expiresIn,
-      required this.hasValidatedOtp});
+  AuthAuthenticatedAfterLogin({required this.hasValidatedOtp});
 
   @override
-  List<Object?> get props => [
-        accessToken,
-        refreshToken,
-        expiresIn,
-        hasValidatedOtp,
-      ];
+  List<Object?> get props => [hasValidatedOtp];
 }
 
 class AuthFailure extends AuthState {
@@ -78,28 +47,19 @@ class AuthOtpGenerate extends AuthAuthenticated {
   final String otpBase32;
   final String otpAuthUrl;
 
-  const AuthOtpGenerate({
-    required super.accessToken,
-    required super.refreshToken,
-    required super.expiresIn,
+  AuthOtpGenerate({
     this.message,
     required this.otpBase32,
     required this.otpAuthUrl,
   });
 
   @override
-  List<Object?> get props =>
-      [accessToken, refreshToken, expiresIn, message, otpBase32, otpAuthUrl];
+  List<Object?> get props => [message, otpBase32, otpAuthUrl];
 }
 
 class AuthOtpVerify extends AuthOtpGenerate {
-  const AuthOtpVerify(
-      {required super.accessToken,
-      required super.refreshToken,
-      required super.expiresIn,
-      super.message,
-      required super.otpBase32,
-      required super.otpAuthUrl});
+  AuthOtpVerify(
+      {super.message, required super.otpBase32, required super.otpAuthUrl});
 }
 
 class AuthOtpValidate extends AuthState {

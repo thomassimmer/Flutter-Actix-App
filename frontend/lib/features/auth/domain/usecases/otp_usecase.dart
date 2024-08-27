@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:reallystick/core/constants/errors.dart';
 import 'package:reallystick/features/auth/data/repositories/auth_repository.dart';
+import 'package:reallystick/features/auth/data/storage/token_storage.dart';
 import 'package:reallystick/features/auth/domain/entities/otp_generation_entity.dart';
 import 'package:reallystick/features/auth/domain/entities/user_token_entity.dart';
 import 'package:reallystick/features/auth/domain/errors/failures.dart';
@@ -11,11 +12,12 @@ class OtpUseCase {
   OtpUseCase(this.authRepository);
 
   /// Verifies the OTP provided by the user. It's for enabling 2FA.
-  Future<Either<bool, Failure>> verifyOtp(
-      String accessToken, String code) async {
+  Future<Either<bool, Failure>> verifyOtp(String code) async {
+    final accessToken = await TokenStorage().getAccessToken();
+
     try {
       final otp_verified =
-          await authRepository.verifyOtp(accessToken: accessToken, code: code);
+          await authRepository.verifyOtp(accessToken: accessToken!, code: code);
 
       return Left(otp_verified);
     } catch (e) {
@@ -41,11 +43,12 @@ class OtpUseCase {
   }
 
   /// Generates a new OTP's base32 and url for the user.
-  Future<Either<OtpGenerationEntity, Failure>> generateOtp(
-      String accessToken) async {
+  Future<Either<OtpGenerationEntity, Failure>> generateOtp() async {
+    final accessToken = await TokenStorage().getAccessToken();
+
     try {
       final otpGenerationModel =
-          await authRepository.generateOtp(accessToken: accessToken);
+          await authRepository.generateOtp(accessToken: accessToken!);
 
       return Left(OtpGenerationEntity(
           otpBase32: otpGenerationModel.otpBase32,
@@ -56,9 +59,11 @@ class OtpUseCase {
   }
 
   /// Disable OTP authentication for the user.
-  Future<Either<bool, Failure>> disableOtp(String accessToken) async {
+  Future<Either<bool, Failure>> disableOtp() async {
+    final accessToken = await TokenStorage().getAccessToken();
+
     try {
-      final result = await authRepository.disableOtp(accessToken: accessToken);
+      final result = await authRepository.disableOtp(accessToken: accessToken!);
 
       return Left(result);
     } catch (e) {
