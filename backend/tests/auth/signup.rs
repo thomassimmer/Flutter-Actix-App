@@ -7,7 +7,7 @@ use actix_web::{
 };
 use reallystick::features::auth::structs::response::UserSignupResponse;
 
-use crate::{helpers::spawn_app, profile::profile::user_accesses_protected_route};
+use crate::{helpers::spawn_app, profile::profile::user_has_access_to_protected_route};
 
 pub async fn user_signs_up(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
@@ -44,7 +44,7 @@ async fn registered_user_can_access_profile_information() {
     let (access_token, _) = user_signs_up(&app).await;
 
     // User can access a route protected by token authentication
-    user_accesses_protected_route(&app, access_token).await;
+    user_has_access_to_protected_route(&app, access_token).await;
 }
 
 #[tokio::test]

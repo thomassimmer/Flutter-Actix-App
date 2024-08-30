@@ -3,16 +3,16 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
+use reallystick::core::structs::response::GenericResponse;
 use reallystick::features::auth::structs::response::{
     DisableOtpResponse, GenerateOtpResponse, UserLoginResponse, UserLoginWhenOtpEnabledResponse,
     VerifyOtpResponse,
 };
-use reallystick::core::structs::response::GenericResponse;
 use totp_rs::{Algorithm, Secret, TOTP};
 
 use crate::auth::signup::user_signs_up;
 use crate::helpers::spawn_app;
-use crate::profile::profile::user_accesses_protected_route;
+use crate::profile::profile::user_has_access_to_protected_route;
 
 async fn user_generates_otp(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
@@ -122,7 +122,7 @@ async fn registered_user_can_validate_otp() {
     let body = test::read_body(response).await;
     let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
 
-    user_accesses_protected_route(&app, response.access_token).await;
+    user_has_access_to_protected_route(&app, response.access_token).await;
 }
 
 #[tokio::test]
