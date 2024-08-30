@@ -39,3 +39,20 @@ pub struct User {
 
     pub recovery_codes: String,
 }
+
+impl User {
+    fn to_user_data(&self) -> UserData {
+        UserData {
+            id: self.id,
+            username: self.username.to_owned(),
+            locale: self.locale.to_owned(),
+            theme: self.theme.to_owned(),
+            otp_auth_url: self.otp_auth_url.to_owned(),
+            otp_base32: self.otp_base32.to_owned(),
+            otp_enabled: self.otp_enabled,
+            otp_verified: self.otp_verified,
+            createdAt: self.created_at,
+            updatedAt: self.updated_at,
+        }
+    }
+}
