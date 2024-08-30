@@ -1,8 +1,8 @@
-class OtpGenerationEntity {
+class GeneratedOtpConfig {
   final String otpBase32;
   final String otpAuthUrl;
 
-  const OtpGenerationEntity({
+  const GeneratedOtpConfig({
     required this.otpBase32,
     required this.otpAuthUrl,
   });

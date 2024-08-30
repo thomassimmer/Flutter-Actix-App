@@ -1,8 +1,8 @@
-class UserEntity {
+class User {
   final String username;
   final String locale;
   final String theme;
 
-  const UserEntity(
+  const User(
       {required this.username, required this.locale, required this.theme});
 }

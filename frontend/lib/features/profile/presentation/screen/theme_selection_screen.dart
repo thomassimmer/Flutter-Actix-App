@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:reallystick/features/profile/domain/entities/user_entity.dart';
+import 'package:reallystick/features/profile/domain/entities/user.dart';
 import 'package:reallystick/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:reallystick/features/profile/presentation/bloc/profile_events.dart';
 import 'package:reallystick/features/profile/presentation/bloc/profile_states.dart';
@@ -29,20 +29,20 @@ class ThemeSelectionScreen extends StatelessWidget {
 
   Widget _buildThemeSelectionView(
       BuildContext context, ProfileAuthenticated state) {
-    final List<Map<String, String>> _themes = [
+    final List<Map<String, String>> themes = [
       {'code': 'light', 'name': AppLocalizations.of(context)!.light},
       {'code': 'dark', 'name': AppLocalizations.of(context)!.dark},
     ];
 
     return Column(
-        children: _themes.map((theme) {
+        children: themes.map((theme) {
       return ListTile(
         title: Text(theme['name']!),
         leading: Radio<String>(
           value: theme['code']!,
           groupValue: state.profile.theme,
           onChanged: (String? value) {
-            final profile = UserEntity(
+            final profile = User(
               username: state.profile.username,
               locale: state.profile.locale,
               theme: value!,
