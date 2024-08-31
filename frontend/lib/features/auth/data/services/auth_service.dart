@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:reallystick/features/auth/data/errors/data_error.dart';
 import 'package:reallystick/features/auth/data/storage/token_storage.dart';
 
 class AuthService {
@@ -9,10 +10,11 @@ class AuthService {
 
   AuthService({required this.baseUrl, required this.tokenStorage});
 
-  Future<bool> refreshToken() async {
+  Future<void> refreshToken() async {
     final refreshToken = await tokenStorage.getRefreshToken();
+
     if (refreshToken == null) {
-      return false;
+      throw UnauthorizedError();
     }
 
     final url = Uri.parse('$baseUrl/auth/refresh');
@@ -29,9 +31,10 @@ class AuthService {
       final expiresIn = jsonBody['expiresIn'] as int;
 
       await tokenStorage.saveTokens(newAccessToken, newRefreshToken, expiresIn);
-      return true;
+      return;
     }
 
-    return false;
+    await tokenStorage.deleteTokens();
+    throw UnauthorizedError();
   }
 }

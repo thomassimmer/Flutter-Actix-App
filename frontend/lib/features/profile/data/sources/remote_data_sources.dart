@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http_interceptor/http_interceptor.dart';
+import 'package:reallystick/core/errors/data_error.dart';
 import 'package:reallystick/features/profile/data/models/user_model.dart';
 import 'package:reallystick/features/profile/data/models/user_request_model.dart';
 
@@ -18,9 +19,18 @@ class ProfileRemoteDataSource {
     final response = await apiClient.get(
       url,
     );
-    final jsonBody = json.decode(response.body);
 
-    return UserModel.fromJson(jsonBody['user']);
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return UserModel.fromJson(jsonBody['user']);
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
   }
 
   Future<UserModel> postProfileInformation(
@@ -31,10 +41,19 @@ class ProfileRemoteDataSource {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: profile.toJson(),
+      body: json.encode(profile.toJson()),
     );
-    final jsonBody = json.decode(response.body);
 
-    return UserModel.fromJson(jsonBody['user']);
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return UserModel.fromJson(jsonBody['user']);
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
   }
 }

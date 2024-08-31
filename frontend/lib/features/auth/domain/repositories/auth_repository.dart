@@ -16,7 +16,7 @@ abstract class AuthRepository {
 
   Future<GeneratedOtpConfig> generateOtpConfig({required String accessToken});
 
-  Future<bool> verifyOtp({
+  Future<void> verifyOtp({
     required String accessToken,
     required String code,
   });
@@ -26,7 +26,7 @@ abstract class AuthRepository {
     required String code,
   });
 
-  Future<bool> disableOtp({
+  Future<void> disableOtp({
     required String accessToken,
   });
 }
