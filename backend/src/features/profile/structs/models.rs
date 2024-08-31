@@ -41,7 +41,7 @@ pub struct User {
 }
 
 impl User {
-    fn to_user_data(&self) -> UserData {
+    pub fn to_user_data(&self) -> UserData {
         UserData {
             id: self.id,
             username: self.username.to_owned(),
