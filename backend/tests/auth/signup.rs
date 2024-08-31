@@ -5,7 +5,7 @@ use actix_web::{
     http::header::ContentType,
     test, Error,
 };
-use reallystick::features::auth::structs::responses::UserSignupResponse;
+use flutteractixapp::features::auth::structs::responses::UserSignupResponse;
 
 use crate::{helpers::spawn_app, profile::profile::user_has_access_to_protected_route};
 

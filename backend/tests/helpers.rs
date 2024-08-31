@@ -5,7 +5,7 @@ use actix_web::{
     test::init_service,
     Error,
 };
-use reallystick::{
+use flutteractixapp::{
     configuration::{get_configuration, DatabaseSettings},
     startup::create_app,
 };

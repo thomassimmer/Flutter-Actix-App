@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:reallystick/features/auth/domain/entities/otp_generation.dart';
-import 'package:reallystick/features/auth/domain/entities/user_token.dart';
+import 'package:flutteractixapp/features/auth/domain/entities/otp_generation.dart';
+import 'package:flutteractixapp/features/auth/domain/entities/user_token.dart';
 
 abstract class AuthRepository {
   Future<UserToken> register(

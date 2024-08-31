@@ -1,11 +1,11 @@
+use crate::core::helpers::mock_now::now;
+use crate::core::structs::responses::GenericResponse;
 use crate::features::auth::helpers::token::{generate_tokens, retrieve_claims_for_token};
 use crate::features::auth::structs::models::UserToken;
 use crate::features::auth::structs::requests::{ValidateOtpRequest, VerifyOtpRequest};
 use crate::features::auth::structs::responses::{
     DisableOtpResponse, GenerateOtpResponse, UserLoginResponse, VerifyOtpResponse,
 };
-use crate::core::helpers::mock_now::now;
-use crate::core::structs::responses::GenericResponse;
 use crate::features::profile::structs::models::User;
 
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
@@ -83,7 +83,7 @@ pub async fn generate(
 
             let otp_base32 = totp.get_secret_base32();
             let username = user.username.to_owned();
-            let issuer = "ReallyStick";
+            let issuer = "Flutter Actix App";
 
             // Format should be:
             // let otp_auth_url = format!("otpauth://totp/<issuer>:<account_name>?secret=<secret>&issuer=<issuer>");

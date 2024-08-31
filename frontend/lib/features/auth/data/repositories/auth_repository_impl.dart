@@ -3,16 +3,16 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
+import 'package:flutteractixapp/core/errors/data_error.dart';
+import 'package:flutteractixapp/core/errors/domain_error.dart';
+import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
+import 'package:flutteractixapp/features/auth/data/models/user_token_request_model.dart';
+import 'package:flutteractixapp/features/auth/data/sources/remote_data_sources.dart';
+import 'package:flutteractixapp/features/auth/domain/entities/otp_generation.dart';
+import 'package:flutteractixapp/features/auth/domain/entities/user_token.dart';
+import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
+import 'package:flutteractixapp/features/auth/domain/repositories/auth_repository.dart';
 import 'package:logger/web.dart';
-import 'package:reallystick/core/errors/data_error.dart';
-import 'package:reallystick/core/errors/domain_error.dart';
-import 'package:reallystick/features/auth/data/errors/data_error.dart';
-import 'package:reallystick/features/auth/data/models/user_token_request_model.dart';
-import 'package:reallystick/features/auth/data/sources/remote_data_sources.dart';
-import 'package:reallystick/features/auth/domain/entities/otp_generation.dart';
-import 'package:reallystick/features/auth/domain/entities/user_token.dart';
-import 'package:reallystick/features/auth/domain/errors/domain_error.dart';
-import 'package:reallystick/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -37,7 +37,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return UserToken(
           accessToken: userTokenModel.accessToken,
           refreshToken: userTokenModel.refreshToken,
-          expiresIn: userTokenModel.expiresIn);
+          expiresIn: userTokenModel.expiresIn,
+          recoveryCodes: userTokenModel.recoveryCodes);
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
       throw NetworkDomainError('Unable to register due to a network error.');

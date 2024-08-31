@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
-import 'package:reallystick/features/auth/presentation/widgets/background.dart';
-import 'package:reallystick/features/auth/presentation/widgets/button.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
+import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 
 class UnauthenticatedHomeScreen extends StatelessWidget {
   @override
@@ -46,7 +46,7 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 40),
                         Text(
-                          'Welcome to ReallyStick',
+                          'Welcome to Flutter Actix App',
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,

@@ -1,4 +1,4 @@
-use reallystick::{configuration::get_configuration, startup::Application};
+use flutteractixapp::{configuration::get_configuration, startup::Application};
 
 #[tokio::main]
 async fn main() {

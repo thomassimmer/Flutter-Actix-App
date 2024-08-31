@@ -4,9 +4,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http_interceptor/http_interceptor.dart';
-import 'package:reallystick/core/errors/data_error.dart';
-import 'package:reallystick/features/profile/data/models/user_model.dart';
-import 'package:reallystick/features/profile/data/models/user_request_model.dart';
+import 'package:flutteractixapp/core/errors/data_error.dart';
+import 'package:flutteractixapp/features/profile/data/models/user_model.dart';
+import 'package:flutteractixapp/features/profile/data/models/user_request_model.dart';
 
 class ProfileRemoteDataSource {
   final InterceptedClient apiClient;

@@ -5,7 +5,7 @@ use actix_web::{
     http::header::ContentType,
     test, Error,
 };
-use reallystick::features::profile::structs::responses::UserResponse;
+use flutteractixapp::features::profile::structs::responses::UserResponse;
 
 use crate::{auth::signup::user_signs_up, helpers::spawn_app};
 

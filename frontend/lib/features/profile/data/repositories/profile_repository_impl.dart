@@ -3,15 +3,15 @@
 import 'dart:async';
 
 import 'package:logger/web.dart';
-import 'package:reallystick/core/errors/data_error.dart';
-import 'package:reallystick/core/errors/domain_error.dart';
-import 'package:reallystick/features/auth/data/errors/data_error.dart';
-import 'package:reallystick/features/auth/domain/errors/domain_error.dart';
-import 'package:reallystick/features/profile/data/models/user_request_model.dart';
-import 'package:reallystick/features/profile/data/sources/remote_data_sources.dart';
-import 'package:reallystick/features/profile/domain/entities/user.dart';
-import 'package:reallystick/features/profile/domain/errors/domain_error.dart';
-import 'package:reallystick/features/profile/domain/repositories/profile_repository.dart';
+import 'package:flutteractixapp/core/errors/data_error.dart';
+import 'package:flutteractixapp/core/errors/domain_error.dart';
+import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
+import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
+import 'package:flutteractixapp/features/profile/data/models/user_request_model.dart';
+import 'package:flutteractixapp/features/profile/data/sources/remote_data_sources.dart';
+import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
+import 'package:flutteractixapp/features/profile/domain/errors/domain_error.dart';
+import 'package:flutteractixapp/features/profile/domain/repositories/profile_repository.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;

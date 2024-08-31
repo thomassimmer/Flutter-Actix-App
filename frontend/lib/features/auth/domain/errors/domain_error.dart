@@ -1,5 +1,5 @@
 // domain/errors/domain_error.dart
-import 'package:reallystick/core/errors/domain_error.dart';
+import 'package:flutteractixapp/core/errors/domain_error.dart';
 
 class UnauthorizedDomainError extends DomainError {
   UnauthorizedDomainError([String message = 'You are not authenticated'])

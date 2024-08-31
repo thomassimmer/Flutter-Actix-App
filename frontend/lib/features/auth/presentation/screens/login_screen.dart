@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_events.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
-import 'package:reallystick/features/auth/presentation/widgets/background.dart';
-import 'package:reallystick/features/auth/presentation/widgets/button.dart';
-import 'package:reallystick/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
+import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
+import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
 
 class LoginScreen extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();

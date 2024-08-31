@@ -1,14 +1,14 @@
 import 'package:bloc/bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:reallystick/features/auth/data/storage/token_storage.dart';
-import 'package:reallystick/features/auth/domain/usecases/disable_otp_use_case.dart';
-import 'package:reallystick/features/auth/domain/usecases/generate_otp_config_use_case.dart';
-import 'package:reallystick/features/auth/domain/usecases/login_usecase.dart';
-import 'package:reallystick/features/auth/domain/usecases/signup_usecase.dart';
-import 'package:reallystick/features/auth/domain/usecases/validate_otp_usecase.dart';
-import 'package:reallystick/features/auth/domain/usecases/verify_otp_usecase.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_events.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
+import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/disable_otp_use_case.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/generate_otp_config_use_case.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/login_usecase.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/signup_usecase.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/validate_otp_usecase.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/verify_otp_usecase.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
 import 'package:universal_io/io.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
