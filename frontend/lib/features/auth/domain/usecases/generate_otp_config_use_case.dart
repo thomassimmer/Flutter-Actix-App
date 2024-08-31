@@ -11,7 +11,7 @@ class GenerateOtpConfigUseCase {
   GenerateOtpConfigUseCase(this.authRepository);
 
   /// Generates a new OTP's base32 and url for the user.
-  Future<Either<GeneratedOtpConfig, Failure>> generateOtpConfig() async {
+  Future<Either<GeneratedOtpConfig, Failure>> call() async {
     final accessToken = await TokenStorage().getAccessToken();
 
     try {

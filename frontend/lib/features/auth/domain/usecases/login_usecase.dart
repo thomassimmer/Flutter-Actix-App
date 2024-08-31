@@ -9,7 +9,7 @@ class LoginUseCase {
 
   LoginUseCase(this.authRepository);
 
-  Future<Either<Either<UserToken, String>, Failure>> login(
+  Future<Either<Either<UserToken, String>, Failure>> call(
       String username, String password) async {
     try {
       final result =

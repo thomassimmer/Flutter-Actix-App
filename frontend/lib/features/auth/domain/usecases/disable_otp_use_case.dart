@@ -10,7 +10,7 @@ class DisableOtpUseCase {
   DisableOtpUseCase(this.authRepository);
 
   /// Disable OTP authentication for the user.
-  Future<Either<bool, Failure>> disableOtp() async {
+  Future<Either<bool, Failure>> call() async {
     final accessToken = await TokenStorage().getAccessToken();
 
     try {

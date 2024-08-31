@@ -10,7 +10,7 @@ class ValidateOtpUsecase {
   ValidateOtpUsecase(this.authRepository);
 
   /// Validates the OTP provided by the user. It's for login.
-  Future<Either<UserToken, Failure>> validateOtp(
+  Future<Either<UserToken, Failure>> call(
       String userId, String code) async {
     try {
       final userTokenModel =

@@ -10,7 +10,7 @@ class GetProfileUsecase {
 
   GetProfileUsecase(this.profileRepository);
 
-  Future<Either<User, Failure>> getProfile() async {
+  Future<Either<User, Failure>> call() async {
     final accessToken = await TokenStorage().getAccessToken();
 
     try {
