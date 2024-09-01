@@ -22,3 +22,18 @@ class ProfileUpdateRequested extends ProfileEvent {
   @override
   List<Object> get props => [profile];
 }
+
+class ProfileOtpGenerationRequested extends ProfileEvent {}
+
+class ProfileOtpDisablingRequested extends ProfileEvent {}
+
+class ProfileOtpVerificationRequested extends ProfileEvent {
+  final String code;
+
+  const ProfileOtpVerificationRequested({
+    required this.code,
+  });
+
+  @override
+  List<Object> get props => [code];
+}

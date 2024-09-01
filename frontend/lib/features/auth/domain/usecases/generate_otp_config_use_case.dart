@@ -10,11 +10,6 @@ class GenerateOtpConfigUseCase {
   /// Generates a new OTP's base32 and url for the user.
   Future<GeneratedOtpConfig> call() async {
     final accessToken = await TokenStorage().getAccessToken();
-    final otpGenerationModel =
-        await authRepository.generateOtpConfig(accessToken: accessToken!);
-
-    return GeneratedOtpConfig(
-        otpBase32: otpGenerationModel.otpBase32,
-        otpAuthUrl: otpGenerationModel.otpAuthUrl);
+    return await authRepository.generateOtpConfig(accessToken: accessToken!);
   }
 }

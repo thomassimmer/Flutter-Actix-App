@@ -7,7 +7,7 @@ class RefreshUserTokenRequestModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'refreshToken': refreshToken,
+      'refresh_token': refreshToken,
     };
   }
 }
@@ -47,37 +47,6 @@ class LoginUserRequestModel {
     return {
       'username': username,
       'password': password,
-    };
-  }
-}
-
-class VerifyOtpRequestModel {
-  final String code;
-
-  const VerifyOtpRequestModel({
-    required this.code,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'code': code,
-    };
-  }
-}
-
-class ValidateOtpRequestModel {
-  final String userId;
-  final String code;
-
-  const ValidateOtpRequestModel({
-    required this.userId,
-    required this.code,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'userId': userId,
-      'code': code,
     };
   }
 }

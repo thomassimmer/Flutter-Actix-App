@@ -1,8 +1,16 @@
 class User {
-  final String username;
-  final String locale;
-  final String theme;
+  String username;
+  String locale;
+  String theme;
+  String? otpBase32;
+  String? otpAuthUrl;
+  bool otpVerified;
 
-  const User(
-      {required this.username, required this.locale, required this.theme});
+  User(
+      {required this.username,
+      required this.locale,
+      required this.theme,
+      required this.otpBase32,
+      required this.otpAuthUrl,
+      required this.otpVerified});
 }

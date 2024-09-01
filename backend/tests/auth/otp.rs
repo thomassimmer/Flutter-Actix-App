@@ -144,7 +144,7 @@ async fn registered_user_can_disable_otp() {
     let body = test::read_body(response).await;
     let response: DisableOtpResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.otp_enabled, false);
+    assert_eq!(response.two_fa_enabled, false);
 }
 
 #[tokio::test]

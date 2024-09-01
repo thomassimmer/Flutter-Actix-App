@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutteractixapp/core/errors/data_error.dart';
-import 'package:flutteractixapp/features/auth/data/models/otp_generation_model.dart';
+import 'package:flutteractixapp/features/auth/data/models/otp_model.dart';
+import 'package:flutteractixapp/features/auth/data/models/otp_request_model.dart';
 import 'package:flutteractixapp/features/auth/data/models/user_token_model.dart';
 import 'package:flutteractixapp/features/auth/data/models/user_token_request_model.dart';
 import 'package:http_interceptor/http_interceptor.dart';
@@ -141,7 +142,7 @@ class AuthRemoteDataSource {
       try {
         final jsonBody = json.decode(response.body);
 
-        return jsonBody['otp_enabled'] as bool;
+        return jsonBody['two_fa_enabled'] as bool;
       } catch (e) {
         throw ParsingError('Failed to parse response data: ${e.toString()}');
       }

@@ -92,15 +92,17 @@ pub async fn generate(
 
             user.otp_base32 = Some(otp_base32.to_owned());
             user.otp_auth_url = Some(otp_auth_url.to_owned());
+            user.otp_verified = false;
 
             let updated_user_result = sqlx::query!(
                 r#"
                 UPDATE users
-                SET otp_base32 = $1, otp_auth_url = $2
-                WHERE id = $3
+                SET otp_base32 = $1, otp_auth_url = $2, otp_verified = $3
+                WHERE id = $4
                 "#,
                 user.otp_base32,
                 user.otp_auth_url,
+                user.otp_verified,
                 user.id
             )
             .fetch_optional(&mut *transaction)
@@ -206,16 +208,14 @@ pub async fn verify(
                 return HttpResponse::Forbidden().json(json_error);
             }
 
-            user.otp_enabled = true;
             user.otp_verified = true;
 
             let updated_user_result = sqlx::query_scalar!(
                 r#"
                 UPDATE users
-                SET otp_enabled = $1, otp_verified = $2
-                WHERE id = $3
+                SET otp_verified = $1
+                WHERE id = $2
                 "#,
-                user.otp_enabled,
                 user.otp_verified,
                 user.id
             )
@@ -298,7 +298,7 @@ async fn validate(
         }
     };
 
-    if !user.otp_enabled {
+    if !user.otp_verified {
         let json_error = GenericResponse {
             status: "fail".to_string(),
             message: "2FA not enabled".to_string(),
@@ -428,7 +428,6 @@ async fn disable(
                 }
             };
 
-            user.otp_enabled = false;
             user.otp_verified = false;
             user.otp_auth_url = None;
             user.otp_base32 = None;
@@ -436,10 +435,9 @@ async fn disable(
             let updated_user_result = sqlx::query_scalar!(
                 r#"
                 UPDATE users
-                SET otp_enabled = $1, otp_verified = $2, otp_auth_url = $3, otp_base32 = $4
-                WHERE id = $5
+                SET otp_verified = $1, otp_auth_url = $2, otp_base32 = $3
+                WHERE id = $4
                 "#,
-                user.otp_enabled,
                 user.otp_verified,
                 user.otp_auth_url,
                 user.otp_base32,
@@ -458,7 +456,7 @@ async fn disable(
             match updated_user_result {
                 Ok(_) => HttpResponse::Ok().json(DisableOtpResponse {
                     status: "success".to_string(),
-                    otp_enabled: false,
+                    two_fa_enabled: false,
                 }),
                 Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
                     status: "error".to_string(),

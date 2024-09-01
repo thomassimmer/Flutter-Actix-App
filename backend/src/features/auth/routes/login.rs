@@ -88,7 +88,7 @@ pub async fn log_user_in(
         });
     }
 
-    if user.otp_enabled {
+    if user.otp_verified {
         return HttpResponse::Ok().json(UserLoginWhenOtpEnabledResponse {
             status: "success".to_string(),
             user_id: user.id.to_string(),

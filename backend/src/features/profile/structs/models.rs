@@ -11,7 +11,6 @@ pub struct UserData {
     pub locale: String,
     pub theme: String,
 
-    pub otp_enabled: bool,
     pub otp_verified: bool,
     pub otp_base32: Option<String>,
     pub otp_auth_url: Option<String>,
@@ -29,7 +28,6 @@ pub struct User {
     pub locale: String,
     pub theme: String,
 
-    pub otp_enabled: bool,
     pub otp_verified: bool,
     pub otp_base32: Option<String>,
     pub otp_auth_url: Option<String>,
@@ -49,7 +47,6 @@ impl User {
             theme: self.theme.to_owned(),
             otp_auth_url: self.otp_auth_url.to_owned(),
             otp_base32: self.otp_base32.to_owned(),
-            otp_enabled: self.otp_enabled,
             otp_verified: self.otp_verified,
             createdAt: self.created_at,
             updatedAt: self.updated_at,

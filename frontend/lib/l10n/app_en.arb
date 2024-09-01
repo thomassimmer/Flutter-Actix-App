@@ -1,7 +1,6 @@
 {
   "hello": "Hello {userName}",
   "@hello": {
-    "description": "A message with a single parameter",
     "placeholders": {
       "userName": {
         "type": "String",
@@ -16,5 +15,25 @@
   "theme": "Theme",
   "selectTheme": "Select Theme",
   "dark": "Dark",
-  "light": "Light"
+  "light": "Light",
+  "twoFA": "Two-Factor Authentication",
+  "twoFASetup": "Enable two-factor authentication to enforce security on your account.",
+  "twoFAScanQrCode": "Scan this QR code in your authentication app.",
+  "twoFASecretKey": "Your secret key is: {secretKey}",
+  "@twoFASecretKey": {
+    "placeholders": {
+      "secretKey": {
+        "type": "String",
+        "example": "Bob"
+      }
+    }
+  },
+  "twoFAIsWellSetup": "Two-Factor Authentication is well set up on your accounts.",
+  "generateNewQrCode": "Generate a new QR code",
+  "disableTwoFA": "Disable",
+  "validationCode": "Enter your validation code",
+  "verify": "Verify",
+  "regenerateQrCode": "Regenerate a QR code",
+  "cancel": "Cancel",
+  "enable": "Enable"
 }

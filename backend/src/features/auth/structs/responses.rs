@@ -46,5 +46,5 @@ pub struct VerifyOtpResponse {
 #[derive(Serialize, Deserialize)]
 pub struct DisableOtpResponse {
     pub status: String,
-    pub otp_enabled: bool,
+    pub two_fa_enabled: bool,
 }
