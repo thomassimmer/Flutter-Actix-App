@@ -16,7 +16,7 @@ use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
 use uuid::Uuid;
 
-#[get("generate")]
+#[get("/generate")]
 pub async fn generate(
     req: HttpRequest,
     pool: web::Data<PgPool>,
@@ -127,9 +127,9 @@ pub async fn generate(
                 }),
             }
         }
-        Err(e) => HttpResponse::Unauthorized().json(GenericResponse {
+        Err(_) => HttpResponse::Unauthorized().json(GenericResponse {
             status: "fail".to_string(),
-            message: e.to_string(),
+            message: "Invalid access token".to_string(),
         }),
     }
 }
@@ -240,9 +240,9 @@ pub async fn verify(
                 }),
             }
         }
-        Err(e) => HttpResponse::Unauthorized().json(GenericResponse {
+        Err(_) => HttpResponse::Unauthorized().json(GenericResponse {
             status: "fail".to_string(),
-            message: e.to_string(),
+            message: "Invalid access token".to_string(),
         }),
     }
 }
@@ -465,9 +465,9 @@ async fn disable(
             }
         }
 
-        Err(e) => HttpResponse::Unauthorized().json(GenericResponse {
+        Err(_) => HttpResponse::Unauthorized().json(GenericResponse {
             status: "fail".to_string(),
-            message: e.to_string(),
+            message: "Invalid access token".to_string(),
         }),
     }
 }

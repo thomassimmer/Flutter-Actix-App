@@ -1,0 +1,131 @@
+use actix_http::Request;
+use actix_web::body::MessageBody;
+use actix_web::dev::{Service, ServiceResponse};
+use actix_web::http::header::ContentType;
+use actix_web::{test, Error};
+use flutteractixapp::core::structs::responses::GenericResponse;
+use flutteractixapp::features::auth::structs::responses::UserLoginResponse;
+
+use crate::auth::signup::user_signs_up;
+use crate::helpers::spawn_app;
+use crate::profile::profile::user_has_access_to_protected_route;
+
+pub async fn user_recovers_account(
+    app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
+    recovery_code: String,
+) -> (String, String) {
+    let req = test::TestRequest::post()
+        .uri("/api/auth/recover")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+            "username": "testusername",
+            "recovery_code": recovery_code,
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(200, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
+
+    (response.access_token, response.refresh_token)
+}
+
+#[tokio::test]
+async fn user_can_recover_account() {
+    let app = spawn_app().await;
+    let (_, _, recovery_codes) = user_signs_up(&app).await;
+    let (access_token, _) = user_recovers_account(&app, recovery_codes[0].clone()).await;
+
+    user_has_access_to_protected_route(&app, access_token).await;
+
+    let (access_token, _) = user_recovers_account(&app, recovery_codes[1].clone()).await;
+
+    user_has_access_to_protected_route(&app, access_token).await;
+
+    let (access_token, _) = user_recovers_account(&app, recovery_codes[2].clone()).await;
+
+    user_has_access_to_protected_route(&app, access_token).await;
+
+    let (access_token, _) = user_recovers_account(&app, recovery_codes[3].clone()).await;
+
+    user_has_access_to_protected_route(&app, access_token).await;
+
+    let (access_token, _) = user_recovers_account(&app, recovery_codes[4].clone()).await;
+
+    user_has_access_to_protected_route(&app, access_token).await;
+}
+
+#[tokio::test]
+async fn user_cannot_recover_account_with_wrong_code() {
+    let app = spawn_app().await;
+    user_signs_up(&app).await;
+    let req = test::TestRequest::post()
+        .uri("/api/auth/recover")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+            "username": "testusername",
+            "recovery_code": "wrong_recovery_code",
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(400, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.status, "fail");
+    assert_eq!(response.message, "Invalid username or recovery code");
+}
+
+#[tokio::test]
+async fn user_cannot_recover_account_with_wrong_username() {
+    let app = spawn_app().await;
+    let (_, _, recovery_codes) = user_signs_up(&app).await;
+    let req = test::TestRequest::post()
+        .uri("/api/auth/recover")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+            "username": "wrong_username",
+            "recovery_code": recovery_codes[0],
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(400, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.status, "fail");
+    assert_eq!(response.message, "Invalid username or recovery code");
+}
+
+#[tokio::test]
+async fn user_cannot_recover_account_using_code_twice() {
+    let app = spawn_app().await;
+    let (_, _, recovery_codes) = user_signs_up(&app).await;
+    let (access_token, _) = user_recovers_account(&app, recovery_codes[0].clone()).await;
+
+    user_has_access_to_protected_route(&app, access_token).await;
+
+    let req = test::TestRequest::post()
+        .uri("/api/auth/recover")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+            "username": "testusername",
+            "recovery_code": recovery_codes[0],
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(400, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.status, "fail");
+    assert_eq!(response.message, "Invalid username or recovery code");
+}

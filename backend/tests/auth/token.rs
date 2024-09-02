@@ -40,17 +40,40 @@ pub async fn user_refreshes_token(
 async fn user_can_refresh_token() {
     let app = spawn_app().await;
     user_signs_up(&app).await;
-    let (_, refresh_token) = user_logs_in(&app).await;
+    let (_, refresh_token) = user_logs_in(&app, "testusername", "password").await;
     let access_token = user_refreshes_token(&app, refresh_token).await;
 
     user_has_access_to_protected_route(&app, access_token).await;
 }
 
 #[tokio::test]
+async fn user_cannot_refresh_using_a_wrong_refresh_token() {
+    let app = spawn_app().await;
+    user_signs_up(&app).await;
+
+    let req = test::TestRequest::post()
+        .uri("/api/auth/refresh-token")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+            "refresh_token": "wrong token",
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(400, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.status, "fail");
+    assert_eq!(response.message, "Invalid refresh token");
+}
+
+#[tokio::test]
 async fn access_token_becomes_expired_after_15_minutes() {
     let app = spawn_app().await;
 
-    let (access_token, _) = user_signs_up(&app).await;
+    let (access_token, _, _) = user_signs_up(&app).await;
 
     user_has_access_to_protected_route(&app, access_token.clone()).await;
 
@@ -85,7 +108,7 @@ async fn access_token_becomes_expired_after_15_minutes() {
 async fn refresh_token_becomes_expired_after_7_days() {
     let app = spawn_app().await;
     user_signs_up(&app).await;
-    let (_, refresh_token) = user_logs_in(&app).await;
+    let (_, refresh_token) = user_logs_in(&app, "testusername", "password").await;
 
     let access_token = user_refreshes_token(&app, refresh_token.clone()).await;
     user_has_access_to_protected_route(&app, access_token).await;

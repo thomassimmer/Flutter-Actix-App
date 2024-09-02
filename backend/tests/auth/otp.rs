@@ -68,7 +68,7 @@ async fn user_verifies_otp(
 async fn registered_user_can_generate_and_verify_otp() {
     let app = spawn_app().await;
 
-    let (access_token, _) = user_signs_up(&app).await;
+    let (access_token, _, _) = user_signs_up(&app).await;
     let otp_base32 = user_generates_otp(&app, &access_token).await;
     user_verifies_otp(&app, &access_token, &otp_base32).await;
 }
@@ -77,7 +77,7 @@ async fn registered_user_can_generate_and_verify_otp() {
 async fn registered_user_can_validate_otp() {
     let app = spawn_app().await;
 
-    let (access_token, _) = user_signs_up(&app).await;
+    let (access_token, _, _) = user_signs_up(&app).await;
     let otp_base32 = user_generates_otp(&app, &access_token).await;
     user_verifies_otp(&app, &access_token, &otp_base32).await;
 
@@ -129,7 +129,7 @@ async fn registered_user_can_validate_otp() {
 async fn registered_user_can_disable_otp() {
     let app = spawn_app().await;
 
-    let (access_token, _) = user_signs_up(&app).await;
+    let (access_token, _, _) = user_signs_up(&app).await;
     let otp_base32 = user_generates_otp(&app, &access_token).await;
     user_verifies_otp(&app, &access_token, &otp_base32).await;
 
@@ -163,5 +163,5 @@ async fn wrong_token_user_can_generate_otp() {
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.status, "fail");
-    assert_eq!(response.message, "Token decoding error: InvalidToken");
+    assert_eq!(response.message, "Invalid access token");
 }

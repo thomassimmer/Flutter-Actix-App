@@ -6,6 +6,7 @@ use crate::configuration::{DatabaseSettings, Settings};
 use crate::core::routes::health_check::health_check;
 use crate::features::auth::routes::login::log_user_in;
 use crate::features::auth::routes::otp::{disable, generate, validate, verify};
+use crate::features::auth::routes::recovery::recover_account;
 use crate::features::auth::routes::signup::register_user;
 use crate::features::auth::routes::token::refresh_token;
 use crate::features::profile::routes::profile::{
@@ -62,6 +63,7 @@ pub fn create_app(
                         .service(register_user)
                         .service(log_user_in)
                         .service(refresh_token)
+                        .service(recover_account)
                         .service(
                             web::scope("/otp")
                                 .service(generate)
