@@ -14,7 +14,7 @@ use crate::features::auth::routes::recovery::{
 use crate::features::auth::routes::signup::register_user;
 use crate::features::auth::routes::token::refresh_token;
 use crate::features::profile::routes::profile::{
-    get_profile_information, post_profile_information,
+    get_profile_information, is_otp_enabled, post_profile_information,
 };
 use actix_cors::Cors;
 use actix_web::body::MessageBody;
@@ -81,7 +81,8 @@ pub fn create_app(
                 .service(
                     web::scope("/users")
                         .service(get_profile_information)
-                        .service(post_profile_information),
+                        .service(post_profile_information)
+                        .service(is_otp_enabled),
                 ),
         )
         .wrap(cors)

@@ -1,8 +1,12 @@
 use crate::{
     core::{helpers::mock_now::now, structs::responses::GenericResponse},
-    features::auth::helpers::token::retrieve_claims_for_token,
-    features::profile::structs::{
-        models::User, requests::UserUpdateRequest, responses::UserResponse,
+    features::{
+        auth::helpers::token::retrieve_claims_for_token,
+        profile::structs::{
+            models::User,
+            requests::{IsOtpEnabledRequest, UserUpdateRequest},
+            responses::{IsOtpEnabledResponse, UserResponse},
+        },
     },
 };
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
@@ -175,6 +179,53 @@ pub async fn post_profile_information(
         Err(_) => HttpResponse::Unauthorized().json(GenericResponse {
             status: "fail".to_string(),
             message: "Invalid access token".to_string(),
+        }),
+    }
+}
+
+#[post("/is-otp-enabled")]
+pub async fn is_otp_enabled(
+    body: web::Json<IsOtpEnabledRequest>,
+    pool: web::Data<PgPool>,
+) -> impl Responder {
+    let mut transaction = match pool.begin().await {
+        Ok(t) => t,
+        Err(_) => {
+            return HttpResponse::InternalServerError().json(GenericResponse {
+                status: "error".to_string(),
+                message: "Failed to get a transaction".to_string(),
+            })
+        }
+    };
+
+    // Check if user already exists
+    let existing_user = sqlx::query_as!(
+        User,
+        r#"
+        SELECT *
+        FROM users
+        WHERE username = $1
+        "#,
+        body.username,
+    )
+    .fetch_optional(&mut *transaction)
+    .await;
+
+    match existing_user {
+        Ok(existing_user) => match existing_user {
+            Some(existing_user) => HttpResponse::Ok().json(IsOtpEnabledResponse {
+                status: "success".to_string(),
+                otp_enabled: existing_user.otp_verified,
+            }),
+            // If user does not exist, say false to avoid scrapping usernames
+            None => HttpResponse::Ok().json(IsOtpEnabledResponse {
+                status: "success".to_string(),
+                otp_enabled: false,
+            }),
+        },
+        Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
+            status: "error".to_string(),
+            message: "Database query error".to_string(),
         }),
     }
 }
