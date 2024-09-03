@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutteractixapp/core/themes/app_theme.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
@@ -10,6 +9,7 @@ import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
+import 'package:go_router/go_router.dart';
 
 class RootScreen extends StatelessWidget {
   final Widget child;
@@ -55,7 +55,9 @@ class RootScreen extends StatelessWidget {
           BlocListener<AuthBloc, AuthState>(listener: (context, state) {
             if (state is AuthUnauthenticated) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Successfully logged out')),
+                SnackBar(
+                    content:
+                        Text(AppLocalizations.of(context)!.successfullyLogout)),
               );
               context.go('/');
             }
@@ -110,26 +112,26 @@ class RootScreen extends StatelessWidget {
                     selectedIndex: _calculateSelectedIndex(context),
                     onDestinationSelected: onItemTapped,
                     labelType: NavigationRailLabelType.all,
-                    destinations: const <NavigationRailDestination>[
+                    destinations: <NavigationRailDestination>[
                       NavigationRailDestination(
                         icon: Icon(Icons.check_circle_outline),
                         selectedIcon: Icon(Icons.check_circle),
-                        label: Text('Habits'),
+                        label: Text(AppLocalizations.of(context)!.habits),
                       ),
                       NavigationRailDestination(
                         icon: Icon(Icons.flag_outlined),
                         selectedIcon: Icon(Icons.flag),
-                        label: Text('Challenges'),
+                        label: Text(AppLocalizations.of(context)!.challenges),
                       ),
                       NavigationRailDestination(
                         icon: Icon(Icons.message_outlined),
                         selectedIcon: Icon(Icons.message),
-                        label: Text('Messages'),
+                        label: Text(AppLocalizations.of(context)!.messages),
                       ),
                       NavigationRailDestination(
                         icon: Icon(Icons.person_outline),
                         selectedIcon: Icon(Icons.person),
-                        label: Text('Profile'),
+                        label: Text(AppLocalizations.of(context)!.profile),
                       ),
                     ],
                   ),
