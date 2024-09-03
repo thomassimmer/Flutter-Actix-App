@@ -42,7 +42,21 @@ pub struct RefreshTokenRequest {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct RecoverAccountRequest {
+pub struct RecoverAccountUsingPasswordRequest {
+    pub username: String,
+    pub password: String,
+    pub recovery_code: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RecoverAccountUsing2FARequest {
+    pub username: String,
+    pub code: String,
+    pub recovery_code: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RecoverAccountWithout2FAEnabledRequest {
     pub username: String,
     pub recovery_code: String,
 }

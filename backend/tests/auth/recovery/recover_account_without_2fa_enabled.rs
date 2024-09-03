@@ -10,7 +10,7 @@ use crate::auth::signup::user_signs_up;
 use crate::helpers::spawn_app;
 use crate::profile::profile::user_has_access_to_protected_route;
 
-pub async fn user_recovers_account(
+pub async fn user_recovers_account_without_2fa_enabled(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
     recovery_code: String,
 ) -> (String, String) {
@@ -33,32 +33,20 @@ pub async fn user_recovers_account(
 }
 
 #[tokio::test]
-async fn user_can_recover_account() {
+async fn user_can_recover_account_without_2fa_enabled() {
     let app = spawn_app().await;
     let (_, _, recovery_codes) = user_signs_up(&app).await;
-    let (access_token, _) = user_recovers_account(&app, recovery_codes[0].clone()).await;
 
-    user_has_access_to_protected_route(&app, access_token).await;
+    for recovery_code in recovery_codes {
+        let (access_token, _) =
+            user_recovers_account_without_2fa_enabled(&app, recovery_code.clone()).await;
 
-    let (access_token, _) = user_recovers_account(&app, recovery_codes[1].clone()).await;
-
-    user_has_access_to_protected_route(&app, access_token).await;
-
-    let (access_token, _) = user_recovers_account(&app, recovery_codes[2].clone()).await;
-
-    user_has_access_to_protected_route(&app, access_token).await;
-
-    let (access_token, _) = user_recovers_account(&app, recovery_codes[3].clone()).await;
-
-    user_has_access_to_protected_route(&app, access_token).await;
-
-    let (access_token, _) = user_recovers_account(&app, recovery_codes[4].clone()).await;
-
-    user_has_access_to_protected_route(&app, access_token).await;
+        user_has_access_to_protected_route(&app, access_token).await;
+    }
 }
 
 #[tokio::test]
-async fn user_cannot_recover_account_with_wrong_code() {
+async fn user_cannot_recover_account_without_2fa_enabled_with_wrong_code() {
     let app = spawn_app().await;
     user_signs_up(&app).await;
     let req = test::TestRequest::post()
@@ -71,7 +59,7 @@ async fn user_cannot_recover_account_with_wrong_code() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(403, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
@@ -81,7 +69,7 @@ async fn user_cannot_recover_account_with_wrong_code() {
 }
 
 #[tokio::test]
-async fn user_cannot_recover_account_with_wrong_username() {
+async fn user_cannot_recover_accoun_without_2fa_enabled_with_wrong_username() {
     let app = spawn_app().await;
     let (_, _, recovery_codes) = user_signs_up(&app).await;
     let req = test::TestRequest::post()
@@ -94,7 +82,7 @@ async fn user_cannot_recover_account_with_wrong_username() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(403, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
@@ -104,10 +92,11 @@ async fn user_cannot_recover_account_with_wrong_username() {
 }
 
 #[tokio::test]
-async fn user_cannot_recover_account_using_code_twice() {
+async fn user_cannot_recover_account_without_2fa_enabled_using_code_twice() {
     let app = spawn_app().await;
     let (_, _, recovery_codes) = user_signs_up(&app).await;
-    let (access_token, _) = user_recovers_account(&app, recovery_codes[0].clone()).await;
+    let (access_token, _) =
+        user_recovers_account_without_2fa_enabled(&app, recovery_codes[0].clone()).await;
 
     user_has_access_to_protected_route(&app, access_token).await;
 
@@ -121,7 +110,7 @@ async fn user_cannot_recover_account_using_code_twice() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(403, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();

@@ -4,7 +4,8 @@ use crate::{
         auth::{
             helpers::token::generate_tokens,
             structs::{
-                models::UserToken, requests::RecoverAccountRequest, responses::UserLoginResponse,
+                models::UserToken, requests::RecoverAccountUsingPasswordRequest,
+                responses::UserLoginResponse,
             },
         },
         profile::structs::models::User,
@@ -15,9 +16,9 @@ use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-#[post("/recover")]
-pub async fn recover_account(
-    body: web::Json<RecoverAccountRequest>,
+#[post("/recover-using-password")]
+pub async fn recover_account_using_password(
+    body: web::Json<RecoverAccountUsingPasswordRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
 ) -> impl Responder {
@@ -52,9 +53,9 @@ pub async fn recover_account(
             if let Some(user) = existing_user {
                 user
             } else {
-                return HttpResponse::BadRequest().json(GenericResponse {
+                return HttpResponse::Forbidden().json(GenericResponse {
                     status: "fail".to_string(),
-                    message: "Invalid username or recovery code".to_string(),
+                    message: "Invalid username or password or recovery code".to_string(),
                 });
             }
         }
@@ -66,6 +67,40 @@ pub async fn recover_account(
         }
     };
 
+    // 2FA should be enabled to pass here
+    if !user.otp_verified {
+        let json_error = GenericResponse {
+            status: "fail".to_string(),
+            message: "2FA not enabled".to_string(),
+        };
+
+        return HttpResponse::Forbidden().json(json_error);
+    }
+
+    // Check password
+    let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&user.password) {
+        parsed_hash
+    } else {
+        return HttpResponse::BadRequest().json(GenericResponse {
+            status: "fail".to_string(),
+            message: "Failed to retrieve hashed password".to_string(),
+        });
+    };
+
+    let argon2 = Argon2::default();
+
+    let is_valid = argon2
+        .verify_password(body.password.as_bytes(), &parsed_hash)
+        .is_ok();
+
+    if !is_valid {
+        return HttpResponse::Forbidden().json(GenericResponse {
+            status: "fail".to_string(),
+            message: "Invalid username or password or recovery code".to_string(),
+        });
+    }
+
+    // Check recovery code
     let mut is_valid = false;
 
     for recovery_code in user.recovery_codes.split(";") {
@@ -118,9 +153,9 @@ pub async fn recover_account(
     }
 
     if !is_valid {
-        return HttpResponse::BadRequest().json(GenericResponse {
+        return HttpResponse::Forbidden().json(GenericResponse {
             status: "fail".to_string(),
-            message: "Invalid username or recovery code".to_string(),
+            message: "Invalid username or password or recovery code".to_string(),
         });
     }
 

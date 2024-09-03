@@ -55,7 +55,7 @@ async fn user_cannot_login_with_wrong_password() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(403, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
@@ -79,7 +79,7 @@ async fn user_cannot_login_with_wrong_username() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(403, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
