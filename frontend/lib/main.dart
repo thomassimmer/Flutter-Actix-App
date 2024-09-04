@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutteractixapp/core/presentation/root_screen.dart';
 import 'package:flutteractixapp/core/service_locator.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/login_screen.dart';
+import 'package:flutteractixapp/features/auth/presentation/screens/recover_account_screen.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/recovery_codes_screen.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/signup_screen.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/unauthenticated_home_screen.dart';
@@ -18,6 +18,7 @@ import 'package:flutteractixapp/features/messages/presentation/messages_screen.d
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
 import 'package:flutteractixapp/features/profile/presentation/screen/profile_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:universal_io/io.dart';
 
 Future<void> main() async {
@@ -80,6 +81,17 @@ final _router = GoRouter(
     GoRoute(
       path: '/recovery-codes',
       builder: (context, state) => RecoveryCodesScreen(),
+    ),
+    GoRoute(
+      path: '/recover-account',
+      builder: (context, state) => RecoverAccountScreen(),
+      redirect: (context, state) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated) {
+          return '/home';
+        }
+        return null;
+      },
     ),
     ShellRoute(
       builder: (context, state, child) => RootScreen(child: child),

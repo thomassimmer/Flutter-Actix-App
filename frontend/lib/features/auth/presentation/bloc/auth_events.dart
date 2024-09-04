@@ -4,7 +4,7 @@ abstract class AuthEvent extends Equatable {
   const AuthEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class AuthInitRequested extends AuthEvent {}
@@ -55,4 +55,63 @@ class AuthOtpValidationRequested extends AuthEvent {
 
   @override
   List<Object> get props => [userId, code];
+}
+
+class AuthAccountRecoveryForUsernameRequested extends AuthEvent {
+  final String username;
+  final bool passwordForgotten;
+
+  const AuthAccountRecoveryForUsernameRequested(
+      {required this.username, required this.passwordForgotten});
+
+  @override
+  List<Object> get props => [username, passwordForgotten];
+}
+
+class AuthDoesAccountHaveOtpEnabledRequested extends AuthEvent {
+  final String username;
+  final bool passwordForgotten;
+
+  const AuthDoesAccountHaveOtpEnabledRequested(
+      {required this.username, required this.passwordForgotten});
+
+  @override
+  List<Object?> get props => [username, passwordForgotten];
+}
+
+class AuthAccountRecoveryWithOtpDisabledRequested extends AuthEvent {
+  final String username;
+  final String recoveryCode;
+
+  const AuthAccountRecoveryWithOtpDisabledRequested(
+      {required this.username, required this.recoveryCode});
+
+  @override
+  List<Object?> get props => [username, recoveryCode];
+}
+
+class AuthAccountRecoveryWithOtpEnabledAndPasswordRequested extends AuthEvent {
+  final String username;
+  final String password;
+  final String recoveryCode;
+
+  const AuthAccountRecoveryWithOtpEnabledAndPasswordRequested(
+      {required this.username,
+      required this.password,
+      required this.recoveryCode});
+
+  @override
+  List<Object?> get props => [username, password, recoveryCode];
+}
+
+class AuthAccountRecoveryWithOtpEnabledAndOtpRequested extends AuthEvent {
+  final String username;
+  final String code;
+  final String recoveryCode;
+
+  const AuthAccountRecoveryWithOtpEnabledAndOtpRequested(
+      {required this.username, required this.code, required this.recoveryCode});
+
+  @override
+  List<Object?> get props => [username, code, recoveryCode];
 }

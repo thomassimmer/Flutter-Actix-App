@@ -150,4 +150,104 @@ class AuthRemoteDataSource {
       throw NetworkError('Failed with status code: ${response.statusCode}');
     }
   }
+
+  Future<bool> checkIfOtpEnabled(
+    CheckIfOtpEnabledRequestModel checkIfOtpEnabledRequestModel,
+  ) async {
+    final url = Uri.parse('$baseUrl/users/is-otp-enabled');
+    final response = await apiClient.post(url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(checkIfOtpEnabledRequestModel.toJson()));
+
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return jsonBody['otp_enabled'] as bool;
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
+  }
+
+  Future<UserTokenModel> recoverAccountWithRecoveryCodeAndPassword(
+      RecoverAccountWithRecoveryCodeAndPasswordRequestModel
+          recoverAccountWithRecoveryCodeAndPasswordRequestModel) async {
+    final url = Uri.parse('$baseUrl/auth/recover-using-password');
+    final response = await apiClient.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(
+          recoverAccountWithRecoveryCodeAndPasswordRequestModel.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return UserTokenModel.fromJson(jsonBody);
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
+  }
+
+  Future<UserTokenModel> recoverAccountWithRecoveryCodeAndOtp(
+      RecoverAccountWithRecoveryCodeAndOtpRequestModel
+          recoverAccountWithRecoveryCodeAndOtpRequestModel) async {
+    final url = Uri.parse('$baseUrl/auth/recover-using-2fa');
+    final response = await apiClient.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json
+          .encode(recoverAccountWithRecoveryCodeAndOtpRequestModel.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return UserTokenModel.fromJson(jsonBody);
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
+  }
+
+  Future<UserTokenModel> recoverAccountWithRecoveryCode(
+      RecoverAccountWithRecoveryCodeRequestModel
+          recoverAccountWithRecoveryCodeRequestModel) async {
+    final url = Uri.parse('$baseUrl/auth/recover');
+    final response = await apiClient.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(recoverAccountWithRecoveryCodeRequestModel.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return UserTokenModel.fromJson(jsonBody);
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
+  }
 }

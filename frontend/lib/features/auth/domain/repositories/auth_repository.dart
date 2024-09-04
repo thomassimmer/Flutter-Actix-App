@@ -29,4 +29,21 @@ abstract class AuthRepository {
   Future<void> disableOtp({
     required String accessToken,
   });
+
+  Future<bool> checkIfOtpEnabled({required String username});
+
+  Future<UserToken> recoverAccountWithRecoveryCodeAndPassword(
+      {required String username,
+      required String password,
+      required String recoveryCode});
+
+  Future<UserToken> recoverAccountWithRecoveryCodeAndOtp(
+      {required String username,
+      required String recoveryCode,
+      required String code});
+
+  Future<UserToken> recoverAccountWithRecoveryCode({
+    required String username,
+    required String recoveryCode,
+  });
 }
