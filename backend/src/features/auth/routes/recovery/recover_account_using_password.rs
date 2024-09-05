@@ -159,6 +159,23 @@ pub async fn recover_account_using_password(
         });
     }
 
+    // Delete any other existing tokens for that user
+    let delete_result = sqlx::query!(
+        r#"
+            DELETE FROM user_tokens WHERE user_id = $1
+            "#,
+        user.id,
+    )
+    .execute(&mut *transaction)
+    .await;
+
+    if delete_result.is_err() {
+        return HttpResponse::InternalServerError().json(GenericResponse {
+            status: "error".to_string(),
+            message: "Failed to delete user tokens into the database".to_string(),
+        });
+    }
+
     let jti = Uuid::new_v4().to_string();
     let (access_token, refresh_token, claim) = generate_tokens(secret.as_bytes(), jti);
 

@@ -66,6 +66,13 @@ pub async fn log_user_in(
         }
     };
 
+    if user.password_is_expired {
+        return HttpResponse::BadRequest().json(GenericResponse {
+            status: "fail".to_string(),
+            message: "Failed to connect. Password must be changed.".to_string(),
+        });
+    }
+
     let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&user.password) {
         parsed_hash
     } else {

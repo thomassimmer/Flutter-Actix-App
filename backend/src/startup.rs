@@ -16,6 +16,8 @@ use crate::features::auth::routes::token::refresh_token;
 use crate::features::profile::routes::profile::{
     get_profile_information, is_otp_enabled, post_profile_information,
 };
+use crate::features::profile::routes::set_password::set_password;
+use crate::features::profile::routes::update_password::update_password;
 use actix_cors::Cors;
 use actix_web::body::MessageBody;
 use actix_web::dev::{Server, ServiceFactory, ServiceRequest, ServiceResponse};
@@ -82,7 +84,9 @@ pub fn create_app(
                     web::scope("/users")
                         .service(get_profile_information)
                         .service(post_profile_information)
-                        .service(is_otp_enabled),
+                        .service(is_otp_enabled)
+                        .service(set_password)
+                        .service(update_password),
                 ),
         )
         .wrap(cors)
