@@ -122,7 +122,7 @@ async fn registered_user_can_validate_otp() {
     let body = test::read_body(response).await;
     let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
 
-    user_has_access_to_protected_route(&app, response.access_token).await;
+    user_has_access_to_protected_route(&app, &response.access_token).await;
 }
 
 #[tokio::test]

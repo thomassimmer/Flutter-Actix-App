@@ -12,7 +12,7 @@ use crate::profile::profile::user_has_access_to_protected_route;
 
 pub async fn user_recovers_account_without_2fa_enabled(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
-    recovery_code: String,
+    recovery_code: &str,
 ) -> (String, String) {
     let req = test::TestRequest::post()
         .uri("/api/auth/recover")
@@ -39,9 +39,9 @@ async fn user_can_recover_account_without_2fa_enabled() {
 
     for recovery_code in recovery_codes {
         let (access_token, _) =
-            user_recovers_account_without_2fa_enabled(&app, recovery_code.clone()).await;
+            user_recovers_account_without_2fa_enabled(&app, &recovery_code).await;
 
-        user_has_access_to_protected_route(&app, access_token).await;
+        user_has_access_to_protected_route(&app, &access_token).await;
     }
 }
 
@@ -96,9 +96,9 @@ async fn user_cannot_recover_account_without_2fa_enabled_using_code_twice() {
     let app = spawn_app().await;
     let (_, _, recovery_codes) = user_signs_up(&app).await;
     let (access_token, _) =
-        user_recovers_account_without_2fa_enabled(&app, recovery_codes[0].clone()).await;
+        user_recovers_account_without_2fa_enabled(&app, &recovery_codes[0]).await;
 
-    user_has_access_to_protected_route(&app, access_token).await;
+    user_has_access_to_protected_route(&app, &access_token).await;
 
     let req = test::TestRequest::post()
         .uri("/api/auth/recover")

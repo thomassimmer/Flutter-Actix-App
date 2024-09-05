@@ -17,7 +17,7 @@ use crate::{
 
 pub async fn user_has_access_to_protected_route(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
-    access_token: String,
+    access_token: &str,
 ) {
     let req = test::TestRequest::get()
         .uri("/api/users/me")
@@ -39,7 +39,7 @@ pub async fn user_update_its_profile() {
     let app = spawn_app().await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
-    user_has_access_to_protected_route(&app, access_token.clone()).await;
+    user_has_access_to_protected_route(&app, &access_token).await;
 
     let req = test::TestRequest::post()
         .uri("/api/users/me")
