@@ -3,10 +3,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:http_interceptor/http_interceptor.dart';
 import 'package:flutteractixapp/core/errors/data_error.dart';
 import 'package:flutteractixapp/features/profile/data/models/user_model.dart';
 import 'package:flutteractixapp/features/profile/data/models/user_request_model.dart';
+import 'package:http_interceptor/http_interceptor.dart';
 
 class ProfileRemoteDataSource {
   final InterceptedClient apiClient;
@@ -42,6 +42,54 @@ class ProfileRemoteDataSource {
         'Content-Type': 'application/json',
       },
       body: json.encode(profile.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return UserModel.fromJson(jsonBody['user']);
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
+  }
+
+  Future<UserModel> setPassword(String accessToken,
+      SetPasswordRequestModel setPasswordRequestModel) async {
+    final url = Uri.parse('$baseUrl/users/set-password');
+    final response = await apiClient.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(setPasswordRequestModel.toJson()),
+    );
+
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return UserModel.fromJson(jsonBody['user']);
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
+  }
+
+  Future<UserModel> updatePassword(String accessToken,
+      UpdatePasswordRequestModel updatePasswordRequestModel) async {
+    final url = Uri.parse('$baseUrl/users/update-password');
+    final response = await apiClient.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(updatePasswordRequestModel.toJson()),
     );
 
     if (response.statusCode == 200) {

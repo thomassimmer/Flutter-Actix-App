@@ -14,3 +14,30 @@ class UpdateUserRequestModel {
     };
   }
 }
+
+class SetPasswordRequestModel {
+  final String newPassword;
+
+  const SetPasswordRequestModel({required this.newPassword});
+
+  Map<String, dynamic> toJson() {
+    return {
+      'new_password': newPassword,
+    };
+  }
+}
+
+class UpdatePasswordRequestModel {
+  final String currentPassword;
+  final String newPassword;
+
+  const UpdatePasswordRequestModel(
+      {required this.currentPassword, required this.newPassword});
+
+  Map<String, dynamic> toJson() {
+    return {
+      'current_password': currentPassword,
+      'new_password': newPassword,
+    };
+  }
+}

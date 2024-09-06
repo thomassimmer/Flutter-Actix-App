@@ -20,6 +20,8 @@ import 'package:flutteractixapp/features/profile/data/sources/remote_data_source
 import 'package:flutteractixapp/features/profile/domain/repositories/profile_repository.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/post_profile_usecase.dart';
+import 'package:flutteractixapp/features/profile/domain/usecases/set_password_use_case.dart';
+import 'package:flutteractixapp/features/profile/domain/usecases/update_password_use_case.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_interceptor/http_interceptor.dart';
 
@@ -75,4 +77,8 @@ void setup() {
       GetProfileUsecase(sl<ProfileRepository>()));
   sl.registerSingleton<PostProfileUsecase>(
       PostProfileUsecase(sl<ProfileRepository>()));
+  sl.registerSingleton<SetPasswordUseCase>(
+      SetPasswordUseCase(sl<ProfileRepository>()));
+  sl.registerSingleton<UpdatePasswordUseCase>(
+      UpdatePasswordUseCase(sl<ProfileRepository>()));
 }

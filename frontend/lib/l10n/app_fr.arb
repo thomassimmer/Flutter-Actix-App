@@ -52,5 +52,11 @@
   "passwordForgotten": "Vous avez oublié votre mot de passe ?",
   "next": "Suivant",
   "previous": "Précédent",
-  "noContent": "Aucun contenu à afficher"
+  "noContent": "Aucun contenu à afficher",
+  "changePassword": "Changer mon mot de passe",
+  "setNewPassword": "Renseignez votre nouveau mot de passe",
+  "updatePassword": "Renseignez votre mot de passe actuel et le nouveau",
+  "save": "Enregistrer",
+  "currentPassword": "Password actuel",
+  "newPassword": "Nouveau password"
 }

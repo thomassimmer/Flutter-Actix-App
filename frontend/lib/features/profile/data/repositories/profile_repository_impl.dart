@@ -31,7 +31,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
           theme: userModel.theme,
           otpBase32: userModel.otpBase32,
           otpAuthUrl: userModel.otpAuthUrl,
-          otpVerified: userModel.otpVerified);
+          otpVerified: userModel.otpVerified,
+          passwordIsExpired: userModel.passwordIsExpired);
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
       throw NetworkDomainError(
@@ -64,7 +65,71 @@ class ProfileRepositoryImpl implements ProfileRepository {
           theme: userModel.theme,
           otpBase32: userModel.otpBase32,
           otpAuthUrl: userModel.otpAuthUrl,
-          otpVerified: userModel.otpVerified);
+          otpVerified: userModel.otpVerified,
+          passwordIsExpired: userModel.passwordIsExpired);
+    } on NetworkError catch (e) {
+      logger.e('Network error occurred: ${e.message}');
+      throw NetworkDomainError(
+          'Unable to update profile due to a network error.');
+    } on ParsingError catch (e) {
+      logger.e('ParsingError error occurred: ${e.message}');
+      throw InvalidProfileDomainError();
+    } on UnauthorizedError catch (e) {
+      logger.e('UnauthorizedError error occurred: ${e.message}');
+      throw UnauthorizedDomainError();
+    } catch (e) {
+      logger.e('Data error occurred: ${e.toString()}');
+      throw UnknownDomainError();
+    }
+  }
+
+  @override
+  Future<User> setPassword(String accessToken, String newPassword) async {
+    try {
+      final userModel = await remoteDataSource.setPassword(
+          accessToken, SetPasswordRequestModel(newPassword: newPassword));
+
+      return User(
+          username: userModel.username,
+          locale: userModel.locale,
+          theme: userModel.theme,
+          otpBase32: userModel.otpBase32,
+          otpAuthUrl: userModel.otpAuthUrl,
+          otpVerified: userModel.otpVerified,
+          passwordIsExpired: userModel.passwordIsExpired);
+    } on NetworkError catch (e) {
+      logger.e('Network error occurred: ${e.message}');
+      throw NetworkDomainError(
+          'Unable to update profile due to a network error.');
+    } on ParsingError catch (e) {
+      logger.e('ParsingError error occurred: ${e.message}');
+      throw InvalidProfileDomainError();
+    } on UnauthorizedError catch (e) {
+      logger.e('UnauthorizedError error occurred: ${e.message}');
+      throw UnauthorizedDomainError();
+    } catch (e) {
+      logger.e('Data error occurred: ${e.toString()}');
+      throw UnknownDomainError();
+    }
+  }
+
+  @override
+  Future<User> updatePassword(
+      String accessToken, String currentPassword, String newPassword) async {
+    try {
+      final userModel = await remoteDataSource.updatePassword(
+          accessToken,
+          UpdatePasswordRequestModel(
+              currentPassword: currentPassword, newPassword: newPassword));
+
+      return User(
+          username: userModel.username,
+          locale: userModel.locale,
+          theme: userModel.theme,
+          otpBase32: userModel.otpBase32,
+          otpAuthUrl: userModel.otpAuthUrl,
+          otpVerified: userModel.otpVerified,
+          passwordIsExpired: userModel.passwordIsExpired);
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
       throw NetworkDomainError(

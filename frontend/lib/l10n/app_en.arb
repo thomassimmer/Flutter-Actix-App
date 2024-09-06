@@ -68,5 +68,11 @@
   "passwordForgotten": "You forgot your password?",
   "next": "Next",
   "previous": "Previous",
-  "noContent": "No content to display"
+  "noContent": "No content to display",
+  "changePassword": "Change Password",
+  "setNewPassword": "Enter your new password",
+  "updatePassword": "Enter your current and new password",
+  "save": "Save",
+  "currentPassword": "Current password",
+  "newPassword": "New password"
 }
