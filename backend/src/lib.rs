@@ -9,15 +9,16 @@ pub mod features {
         }
 
         pub mod routes {
-            pub mod login;
-            pub mod otp;
-            pub mod recovery {
-                pub mod recover_account_using_2fa;
-                pub mod recover_account_using_password;
-                pub mod recover_account_without_2fa_enabled;
-            }
+            pub mod disable_otp;
+            pub mod generate_otp;
+            pub mod log_user_in;
+            pub mod recover_account_using_2fa;
+            pub mod recover_account_using_password;
+            pub mod recover_account_without_2fa_enabled;
             pub mod signup;
             pub mod token;
+            pub mod validate_otp;
+            pub mod verify_otp;
         }
 
         pub mod structs {
@@ -29,7 +30,9 @@ pub mod features {
 
     pub mod profile {
         pub mod routes {
-            pub mod profile;
+            pub mod get_profile_information;
+            pub mod post_profile_information;
+            pub mod is_otp_enabled;
             pub mod set_password;
             pub mod update_password;
         }
