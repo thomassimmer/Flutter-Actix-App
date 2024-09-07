@@ -31,8 +31,8 @@ pub mod features {
     pub mod profile {
         pub mod routes {
             pub mod get_profile_information;
-            pub mod post_profile_information;
             pub mod is_otp_enabled;
+            pub mod post_profile_information;
             pub mod set_password;
             pub mod update_password;
         }
@@ -56,5 +56,9 @@ pub mod core {
 
     pub mod structs {
         pub mod responses;
+    }
+
+    pub mod middlewares {
+        pub mod token_validator;
     }
 }
