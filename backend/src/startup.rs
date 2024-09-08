@@ -1,7 +1,6 @@
 // Inspired by : https://github.com/actix/actix-web/issues/1147
 
 use std::net::TcpListener;
-use std::rc::Rc;
 
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::core::middlewares::token_validator::TokenValidator;
@@ -84,9 +83,10 @@ pub fn create_app(
                                 // Nested scope with middleware for protected routes
                                 .service(
                                     web::scope("")
-                                        .wrap(TokenValidator {
-                                            secret: Rc::new(secret.to_owned()),
-                                        })
+                                        .wrap(TokenValidator::new(
+                                            secret.to_string(),
+                                            connection_pool.clone(),
+                                        ))
                                         .service(generate)
                                         .service(verify)
                                         .service(disable),
@@ -100,9 +100,10 @@ pub fn create_app(
                         // Nested scope with middleware for protected routes
                         .service(
                             web::scope("")
-                                .wrap(TokenValidator {
-                                    secret: Rc::new(secret.to_owned()),
-                                })
+                                .wrap(TokenValidator::new(
+                                    secret.to_string(),
+                                    connection_pool.clone(),
+                                ))
                                 .service(get_profile_information)
                                 .service(post_profile_information)
                                 .service(set_password)

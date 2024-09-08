@@ -1,6 +1,6 @@
+use crate::core::structs::responses::GenericResponse;
 use crate::features::auth::structs::responses::GenerateOtpResponse;
 use crate::features::profile::structs::models::User;
-use crate::{core::structs::responses::GenericResponse, features::auth::structs::models::Claims};
 
 use actix_web::{get, web, HttpResponse, Responder};
 
@@ -10,46 +10,13 @@ use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
 
 #[get("/generate")]
-pub async fn generate(pool: web::Data<PgPool>, claims: Claims) -> impl Responder {
+pub async fn generate(pool: web::Data<PgPool>, mut request_user: User) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
             return HttpResponse::InternalServerError().json(GenericResponse {
                 status: "error".to_string(),
                 message: "Failed to get a transaction".to_string(),
-            })
-        }
-    };
-
-    // Check if user already exists
-    let existing_user = sqlx::query_as!(
-        User,
-        r#"
-        SELECT u.*
-        FROM users u
-        JOIN user_tokens ut ON u.id = ut.user_id
-        WHERE ut.token_id = $1
-        "#,
-        claims.jti,
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
-
-    let mut user = match existing_user {
-        Ok(existing_user) => {
-            if let Some(user) = existing_user {
-                user
-            } else {
-                return HttpResponse::NotFound().json(GenericResponse {
-                    status: "fail".to_string(),
-                    message: "No user with this token".to_string(),
-                });
-            }
-        }
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Database query error".to_string(),
             })
         }
     };
@@ -68,7 +35,7 @@ pub async fn generate(pool: web::Data<PgPool>, claims: Claims) -> impl Responder
     .unwrap();
 
     let otp_base32 = totp.get_secret_base32();
-    let username = user.username.to_owned();
+    let username = request_user.username.to_owned();
     let issuer = "Flutter Actix App";
 
     // Format should be:
@@ -76,9 +43,9 @@ pub async fn generate(pool: web::Data<PgPool>, claims: Claims) -> impl Responder
     let otp_auth_url =
         format!("otpauth://totp/{issuer}:{username}?secret={otp_base32}&issuer={issuer}");
 
-    user.otp_base32 = Some(otp_base32.to_owned());
-    user.otp_auth_url = Some(otp_auth_url.to_owned());
-    user.otp_verified = false;
+    request_user.otp_base32 = Some(otp_base32.to_owned());
+    request_user.otp_auth_url = Some(otp_auth_url.to_owned());
+    request_user.otp_verified = false;
 
     let updated_user_result = sqlx::query!(
         r#"
@@ -86,10 +53,10 @@ pub async fn generate(pool: web::Data<PgPool>, claims: Claims) -> impl Responder
         SET otp_base32 = $1, otp_auth_url = $2, otp_verified = $3
         WHERE id = $4
         "#,
-        user.otp_base32,
-        user.otp_auth_url,
-        user.otp_verified,
-        user.id
+        request_user.otp_base32,
+        request_user.otp_auth_url,
+        request_user.otp_verified,
+        request_user.id
     )
     .fetch_optional(&mut *transaction)
     .await;
