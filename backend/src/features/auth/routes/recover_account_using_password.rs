@@ -2,7 +2,7 @@ use crate::{
     core::{helpers::mock_now::now, structs::responses::GenericResponse},
     features::{
         auth::{
-            helpers::token::generate_tokens,
+            helpers::{password::password_is_valid, token::generate_tokens},
             structs::{
                 models::UserToken, requests::RecoverAccountUsingPasswordRequest,
                 responses::UserLoginResponse,
@@ -78,22 +78,7 @@ pub async fn recover_account_using_password(
     }
 
     // Check password
-    let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&user.password) {
-        parsed_hash
-    } else {
-        return HttpResponse::BadRequest().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Failed to retrieve hashed password".to_string(),
-        });
-    };
-
-    let argon2 = Argon2::default();
-
-    let is_valid = argon2
-        .verify_password(body.password.as_bytes(), &parsed_hash)
-        .is_ok();
-
-    if !is_valid {
+    if !password_is_valid(&user, &body.password) {
         return HttpResponse::Forbidden().json(GenericResponse {
             status: "fail".to_string(),
             message: "Invalid username or password or recovery code".to_string(),

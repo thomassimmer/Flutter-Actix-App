@@ -5,6 +5,7 @@ pub mod features {
     pub mod auth {
         pub mod helpers {
             pub mod errors;
+            pub mod password;
             pub mod token;
         }
 

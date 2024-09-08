@@ -1,5 +1,6 @@
 use crate::core::helpers::mock_now::now;
 use crate::core::structs::responses::GenericResponse;
+use crate::features::auth::helpers::password::password_is_valid;
 use crate::features::auth::helpers::token::generate_tokens;
 use crate::features::auth::structs::models::UserToken;
 use crate::features::profile::structs::models::User;
@@ -8,10 +9,6 @@ use crate::{
     features::auth::structs::responses::{UserLoginResponse, UserLoginWhenOtpEnabledResponse},
 };
 use actix_web::{post, web, HttpResponse, Responder};
-use argon2::{
-    password_hash::{PasswordHash, PasswordVerifier},
-    Argon2,
-};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -73,22 +70,7 @@ pub async fn log_user_in(
         });
     }
 
-    let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&user.password) {
-        parsed_hash
-    } else {
-        return HttpResponse::BadRequest().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Failed to retrieve hashed password".to_string(),
-        });
-    };
-
-    let argon2 = Argon2::default();
-
-    let is_valid = argon2
-        .verify_password(body.password.as_bytes(), &parsed_hash)
-        .is_ok();
-
-    if !is_valid {
+    if !password_is_valid(&user, &body.password) {
         return HttpResponse::Forbidden().json(GenericResponse {
             status: "fail".to_string(),
             message: "Invalid username or password".to_string(),
