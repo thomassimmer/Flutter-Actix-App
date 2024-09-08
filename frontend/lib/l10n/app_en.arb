@@ -1,4 +1,5 @@
 {
+  "@@locale": "en",
   "hello": "Hello {userName}",
   "@hello": {
     "placeholders": {
@@ -74,5 +75,23 @@
   "updatePassword": "Enter your current and new password",
   "save": "Save",
   "currentPassword": "Current password",
-  "newPassword": "New password"
+  "newPassword": "New password",
+  "defaultError": "An error occurred. Please try again.",
+  "unknownError": "An unexpected error occurred. Please try again.",
+  "internalServerError": "An internal server error occurred. Please try again",
+  "unauthorizedError": "You are not authorized to perform this action",
+  "refreshTokenExpiredError": "Your authentication expired. Please connect again.",
+  "invalidRequestError": "The request you made was not accepted by the server.",
+  "invalidResponseError": "The response you received from the server could not be processed.",
+  "invalidUsernameOrCodeOrRecoveryCodeError": "Invalid username or one-time password or recovery code. Please try again.",
+  "twoFactorAuthenticationNotEnabledError": "The factor authentication is not enabled on your account.",
+  "invalidUsernameOrRecoveryCodeError": "Invalid username or recovery code. Please try again.",
+  "invalidUsernameOrPasswordOrRecoveryCodeError": "Invalid username or password or recovery code. Please try again.",
+  "userNotFoundError": "User not found",
+  "invalidOneTimePasswordError": "Invalid one-time password. Please try again.",
+  "invalidUsernameOrPasswordError": "Invalid username or password. Please try again.",
+  "forbiddenError": "You are not authorized to perform this action",
+  "passwordMustBeChangedError": "Your password must be changed to be able to login.",
+  "userAlreadyExistingError": "A user with this username already exists. Please choose another one.",
+  "passwordNotExpiredError": "Your password is not expired. You cannot set it like this."
 }

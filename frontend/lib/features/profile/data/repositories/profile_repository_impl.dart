@@ -9,7 +9,6 @@ import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/profile/data/models/user_request_model.dart';
 import 'package:flutteractixapp/features/profile/data/sources/remote_data_sources.dart';
 import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
-import 'package:flutteractixapp/features/profile/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/profile/domain/repositories/profile_repository.dart';
 import 'package:logger/web.dart';
 
@@ -33,16 +32,18 @@ class ProfileRepositoryImpl implements ProfileRepository {
           otpAuthUrl: userModel.otpAuthUrl,
           otpVerified: userModel.otpVerified,
           passwordIsExpired: userModel.passwordIsExpired);
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError(
-          'Unable to update profile due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidProfileDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on RefreshTokenExpiredError {
+      logger.e('RefreshTokenExpiredError occured.');
+      throw RefreshTokenExpiredDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -67,16 +68,18 @@ class ProfileRepositoryImpl implements ProfileRepository {
           otpAuthUrl: userModel.otpAuthUrl,
           otpVerified: userModel.otpVerified,
           passwordIsExpired: userModel.passwordIsExpired);
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError(
-          'Unable to update profile due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidProfileDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on RefreshTokenExpiredError {
+      logger.e('RefreshTokenExpiredError occured.');
+      throw RefreshTokenExpiredDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -97,16 +100,21 @@ class ProfileRepositoryImpl implements ProfileRepository {
           otpAuthUrl: userModel.otpAuthUrl,
           otpVerified: userModel.otpVerified,
           passwordIsExpired: userModel.passwordIsExpired);
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError(
-          'Unable to update profile due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidProfileDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on PasswordNotExpiredError {
+      logger.e('PasswordNotExpiredError occured.');
+      throw PasswordNotExpiredDomainError();
+    } on RefreshTokenExpiredError {
+      logger.e('RefreshTokenExpiredError occured.');
+      throw RefreshTokenExpiredDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -130,16 +138,21 @@ class ProfileRepositoryImpl implements ProfileRepository {
           otpAuthUrl: userModel.otpAuthUrl,
           otpVerified: userModel.otpVerified,
           passwordIsExpired: userModel.passwordIsExpired);
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError(
-          'Unable to update profile due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidProfileDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on InvalidUsernameOrPasswordError {
+      logger.e('InvalidUsernameOrPasswordError occured.');
+      throw InvalidUsernameOrPasswordDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on RefreshTokenExpiredError {
+      logger.e('RefreshTokenExpiredError occured.');
+      throw RefreshTokenExpiredDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();

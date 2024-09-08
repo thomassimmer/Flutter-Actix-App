@@ -1,4 +1,5 @@
 {
+  "@@locale": "fr",
   "hello": "Bonjour {userName}",
   "profileSettings": "Paramètres du profil",
   "language": "Langue",
@@ -57,6 +58,24 @@
   "setNewPassword": "Renseignez votre nouveau mot de passe",
   "updatePassword": "Renseignez votre mot de passe actuel et le nouveau",
   "save": "Enregistrer",
-  "currentPassword": "Password actuel",
-  "newPassword": "Nouveau password"
+  "currentPassword": "Mot de passe actuel",
+  "newPassword": "Nouveau mot de passe",
+  "defaultError": "Une erreur s'est produite. Veuillez réessayer.",
+  "unknownError": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+  "internalServerError": "Une erreur interne du serveur s'est produite. Veuillez réessayer.",
+  "unauthorizedError": "Vous n'êtes pas autorisé à effectuer cette opération.",
+  "refreshTokenExpiredError": "Votre authentification a expiré. Veuillez vous reconnecter.",
+  "invalidRequestError": "La demande que vous avez effectuée n'a pas été acceptée par le serveur.",
+  "invalidResponseError": "La réponse que vous avez reçue du serveur n'a pas pu être traitée.",
+  "invalidUsernameOrCodeOrRecoveryCodeError": "Nom d'utilisateur, mot de passe à usage unique ou code de récupération invalide. Veuillez réessayer.",
+  "twoFactorAuthenticationNotEnabledError": "L'authentification à deux facteurs n'est pas activée sur votre compte.",
+  "invalidUsernameOrRecoveryCodeError": "Nom d'utilisateur ou code de récupération invalide. Veuillez réessayer.",
+  "invalidUsernameOrPasswordOrRecoveryCodeError": "Nom d'utilisateur, mot de passe ou code de récupération invalide. Veuillez réessayer.",
+  "userNotFoundError": "Utilisateur non trouvé.",
+  "invalidOneTimePasswordError": "Mot de passe à usage unique invalide. Veuillez réessayer.",
+  "invalidUsernameOrPasswordError": "Nom d'utilisateur ou mot de passe invalide. Veuillez réessayer.",
+  "forbiddenError": "Vous n'êtes pas autorisé à effectuer cette action.",
+  "passwordMustBeChangedError": "Votre mot de passe doit être changé pour pouvoir vous connecter.",
+  "userAlreadyExistingError": "Un utilisateur avec ce nom d'utilisateur existe déjà. Veuillez en choisir un autre.",
+  "passwordNotExpiredError": "Votre mot de passe n'est pas expiré. Vous ne pouvez pas le définir ainsi."
 }

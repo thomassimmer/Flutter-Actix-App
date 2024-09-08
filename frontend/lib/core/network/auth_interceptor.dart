@@ -1,6 +1,8 @@
-import 'package:http_interceptor/http_interceptor.dart';
+import 'dart:convert';
+
 import 'package:flutteractixapp/features/auth/data/services/auth_service.dart';
 import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
+import 'package:http_interceptor/http_interceptor.dart';
 
 class AuthInterceptor extends InterceptorContract {
   final AuthService authService;
@@ -26,23 +28,30 @@ class AuthInterceptor extends InterceptorContract {
   @override
   Future<BaseResponse> interceptResponse(
       {required BaseResponse response}) async {
-    // Unauthorized, token might be expired
-    if (response.statusCode == 401) {
-      await authService.refreshToken();
+    if (response is Response) {
+      final jsonBody = json.decode(response.body) as Map<String, dynamic>;
+      final responseCode = jsonBody['code'] as String?;
 
-      // Retry the request with new token
-      String? newAccessToken = await tokenStorage.getAccessToken();
+      if (response.statusCode == 401 &&
+          responseCode == 'ACCESS_TOKEN_EXPIRED') {
+        await authService.refreshToken();
 
-      response.request!.headers['Authorization'] = 'Bearer $newAccessToken';
+        // Retry the request with a new token
+        String? newAccessToken = await tokenStorage.getAccessToken();
 
-      final retryResponse = await InterceptedClient.build(interceptors: [
-        AuthInterceptor(
+        // Retry logic: Update the header with the new token and retry the request
+        response.request!.headers['Authorization'] = 'Bearer $newAccessToken';
+
+        final retryResponse = await InterceptedClient.build(interceptors: [
+          AuthInterceptor(
             baseUrl: baseUrl,
             authService: authService,
-            tokenStorage: tokenStorage)
-      ]).send(response.request!);
+            tokenStorage: tokenStorage,
+          ),
+        ]).send(response.request!);
 
-      return retryResponse;
+        return retryResponse;
+      }
     }
 
     return response;

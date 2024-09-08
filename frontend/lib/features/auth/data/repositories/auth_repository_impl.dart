@@ -39,15 +39,15 @@ class AuthRepositoryImpl implements AuthRepository {
           accessToken: userTokenModel.accessToken,
           refreshToken: userTokenModel.refreshToken,
           recoveryCodes: userTokenModel.recoveryCodes);
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError('Unable to register due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidRegisterDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
-      throw UnauthorizedDomainError();
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UserAlreadyExistingError {
+      logger.e('UserAlreadyExistingError occured');
+      throw UserAlreadyExistingDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -69,15 +69,24 @@ class AuthRepositoryImpl implements AuthRepository {
                 refreshToken: userTokenModel.refreshToken,
               )),
           (string) => Right(string));
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError('Unable to login due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidLoginDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on InvalidUsernameOrPasswordError {
+      logger.e('InvalidUsernameOrPasswordError occured.');
+      throw InvalidUsernameOrPasswordDomainError();
+    } on ForbiddenError {
+      logger.e('ForbiddenError occured.');
+      throw ForbiddenDomainError();
+    } on PasswordMustBeChangedError {
+      logger.e('PasswordMustBeChangedError occured.');
+      throw PasswordMustBeChangedDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -85,25 +94,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<GeneratedOtpConfig> generateOtpConfig(
-      {required String accessToken}) async {
+  Future<GeneratedOtpConfig> generateOtpConfig() async {
     try {
       final generatedOtpConfigModel =
-          await remoteDataSource.generateOtpConfig(accessToken);
+          await remoteDataSource.generateOtpConfig();
 
       return GeneratedOtpConfig(
           otpBase32: generatedOtpConfigModel.otpBase32,
           otpAuthUrl: generatedOtpConfigModel.otpAuthUrl);
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError(
-          'Unable to generate otp configuration due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidOtpGenerationDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on RefreshTokenExpiredError {
+      logger.e('RefreshTokenExpiredError occured.');
+      throw RefreshTokenExpiredDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -112,22 +122,27 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<bool> verifyOtp({
-    required String accessToken,
     required String code,
   }) async {
     try {
       final result =
           await remoteDataSource.verifyOtp(VerifyOtpRequestModel(code: code));
       return result;
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError('Unable to verify otp due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidOtpVerificationDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on RefreshTokenExpiredError {
+      logger.e('RefreshTokenExpiredError occured.');
+      throw RefreshTokenExpiredDomainError();
+    } on InvalidOneTimePasswordError {
+      logger.e('InvalidOneTimePasswordError occured.');
+      throw InvalidOneTimePasswordDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -147,16 +162,21 @@ class AuthRepositoryImpl implements AuthRepository {
         accessToken: userTokenModel.accessToken,
         refreshToken: userTokenModel.refreshToken,
       );
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError(
-          'Unable to validate otp due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidOtpValidationDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
+    } on InvalidOneTimePasswordError {
+      logger.e('InvalidOneTimePasswordError occured.');
+      throw InvalidOneTimePasswordDomainError();
+    } on UserNotFoundError {
+      logger.e('UserNotFoundError occured.');
+      throw UserNotFoundDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -164,22 +184,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<bool> disableOtp({
-    required String accessToken,
-  }) async {
+  Future<bool> disableOtp() async {
     try {
-      final result =
-          await remoteDataSource.disableOtp(accessToken: accessToken);
+      final result = await remoteDataSource.disableOtp();
       return result;
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError('Unable to disable otp due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidOtpDisablingDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on RefreshTokenExpiredError {
+      logger.e('RefreshTokenExpiredError occured.');
+      throw RefreshTokenExpiredDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -192,15 +212,12 @@ class AuthRepositoryImpl implements AuthRepository {
       final result = await remoteDataSource
           .checkIfOtpEnabled(CheckIfOtpEnabledRequestModel(username: username));
       return result;
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError('Unable to disable otp due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidOtpDisablingDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
-      throw UnauthorizedDomainError();
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -225,16 +242,21 @@ class AuthRepositoryImpl implements AuthRepository {
         accessToken: userTokenModel.accessToken,
         refreshToken: userTokenModel.refreshToken,
       );
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError(
-          'Unable to validate otp due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidOtpValidationDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
+    } on InvalidUsernameOrPasswordOrRecoveryCodeError {
+      logger.e('InvalidUsernameOrPasswordOrRecoveryCodeError occured.');
+      throw InvalidUsernameOrPasswordOrRecoveryCodeDomainError;
+    } on TwoFactorAuthenticationNotEnabledError {
+      logger.e('TwoFactorAuthenticationNotEnabledError occured.');
+      throw TwoFactorAuthenticationNotEnabledDomainError;
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -257,16 +279,21 @@ class AuthRepositoryImpl implements AuthRepository {
         accessToken: userTokenModel.accessToken,
         refreshToken: userTokenModel.refreshToken,
       );
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError(
-          'Unable to validate otp due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidOtpValidationDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
+    } on InvalidUsernameOrCodeOrRecoveryCodeError {
+      logger.e('InvalidUsernameOrCodeOrRecoveryCodeError occured.');
+      throw InvalidUsernameOrCodeOrRecoveryCodeDomainError;
+    } on TwoFactorAuthenticationNotEnabledError {
+      logger.e('TwoFactorAuthenticationNotEnabledError occured.');
+      throw TwoFactorAuthenticationNotEnabledDomainError;
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();
@@ -288,16 +315,18 @@ class AuthRepositoryImpl implements AuthRepository {
         accessToken: userTokenModel.accessToken,
         refreshToken: userTokenModel.refreshToken,
       );
-    } on NetworkError catch (e) {
-      logger.e('Network error occurred: ${e.message}');
-      throw NetworkDomainError(
-          'Unable to validate otp due to a network error.');
-    } on ParsingError catch (e) {
-      logger.e('ParsingError error occurred: ${e.message}');
-      throw InvalidOtpValidationDomainError();
-    } on UnauthorizedError catch (e) {
-      logger.e('UnauthorizedError error occurred: ${e.message}');
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      throw InvalidResponseDomainError();
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      throw InternalServerDomainError();
+    } on InvalidUsernameOrRecoveryCodeError {
+      logger.e('InvalidUsernameOrRecoveryCodeError occured.');
+      throw InvalidUsernameOrRecoveryCodeDomainError;
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
       throw UnknownDomainError();

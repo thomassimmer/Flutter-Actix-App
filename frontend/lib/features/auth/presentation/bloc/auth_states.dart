@@ -1,32 +1,28 @@
 import 'package:equatable/equatable.dart';
 
 abstract class AuthState extends Equatable {
-  final String? message;
+  final Exception? error;
 
-  const AuthState({this.message});
+  const AuthState({this.error});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [error];
 }
 
 class AuthUnauthenticated extends AuthState {
-  final String? message;
-
-  const AuthUnauthenticated({this.message});
+  const AuthUnauthenticated({super.error});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [error];
 }
 
 class AuthLoading extends AuthState {}
 
 class AuthAuthenticated extends AuthState {
-  final String? message;
-
-  const AuthAuthenticated({this.message});
+  const AuthAuthenticated({super.error});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [error];
 }
 
 class AuthAuthenticatedAfterRegistration extends AuthAuthenticated {
@@ -34,26 +30,19 @@ class AuthAuthenticatedAfterRegistration extends AuthAuthenticated {
   final bool hasVerifiedOtp;
 
   AuthAuthenticatedAfterRegistration(
-      {super.message, this.recoveryCodes, required this.hasVerifiedOtp});
+      {super.error, this.recoveryCodes, required this.hasVerifiedOtp});
 
   @override
-  List<Object?> get props => [message, recoveryCodes, hasVerifiedOtp];
+  List<Object?> get props => [error, recoveryCodes, hasVerifiedOtp];
 }
 
 class AuthAuthenticatedAfterLogin extends AuthAuthenticated {
   final bool hasValidatedOtp;
 
-  AuthAuthenticatedAfterLogin({super.message, required this.hasValidatedOtp});
+  AuthAuthenticatedAfterLogin({super.error, required this.hasValidatedOtp});
 
   @override
-  List<Object?> get props => [message, hasValidatedOtp];
-}
-
-class AuthFailure extends AuthState {
-  const AuthFailure({super.message});
-
-  @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [error, hasValidatedOtp];
 }
 
 class AuthOtpGenerate extends AuthAuthenticated {
@@ -61,27 +50,27 @@ class AuthOtpGenerate extends AuthAuthenticated {
   final String otpAuthUrl;
 
   AuthOtpGenerate({
-    super.message,
+    super.error,
     required this.otpBase32,
     required this.otpAuthUrl,
   });
 
   @override
-  List<Object?> get props => [message, otpBase32, otpAuthUrl];
+  List<Object?> get props => [error, otpBase32, otpAuthUrl];
 }
 
 class AuthOtpVerify extends AuthOtpGenerate {
   AuthOtpVerify(
-      {super.message, required super.otpBase32, required super.otpAuthUrl});
+      {super.error, required super.otpBase32, required super.otpAuthUrl});
 }
 
 class AuthOtpValidate extends AuthState {
   final String userId;
 
-  const AuthOtpValidate({super.message, required this.userId});
+  const AuthOtpValidate({super.error, required this.userId});
 
   @override
-  List<Object?> get props => [message, userId];
+  List<Object?> get props => [error, userId];
 }
 
 class AuthRecoveringAccountUsernameStep extends AuthUnauthenticated {
@@ -89,32 +78,26 @@ class AuthRecoveringAccountUsernameStep extends AuthUnauthenticated {
   final bool passwordForgotten;
 
   AuthRecoveringAccountUsernameStep(
-      {super.message, required this.username, required this.passwordForgotten});
+      {super.error, required this.username, required this.passwordForgotten});
 
   @override
-  List<Object?> get props => [message, username, passwordForgotten];
+  List<Object?> get props => [error, username, passwordForgotten];
 }
 
 class AuthRecoveringAccountWithOtpDisabled
     extends AuthRecoveringAccountUsernameStep {
   AuthRecoveringAccountWithOtpDisabled(
-      {super.message,
-      required super.username,
-      required super.passwordForgotten});
+      {super.error, required super.username, required super.passwordForgotten});
 }
 
 class AuthRecoveringAccountWithOtpEnabledAndUsingPassword
     extends AuthRecoveringAccountUsernameStep {
   AuthRecoveringAccountWithOtpEnabledAndUsingPassword(
-      {super.message,
-      required super.username,
-      required super.passwordForgotten});
+      {super.error, required super.username, required super.passwordForgotten});
 }
 
 class AuthRecoveringAccountWithOtpEnabledAndUsingOtp
     extends AuthRecoveringAccountUsernameStep {
   AuthRecoveringAccountWithOtpEnabledAndUsingOtp(
-      {super.message,
-      required super.username,
-      required super.passwordForgotten});
+      {super.error, required super.username, required super.passwordForgotten});
 }

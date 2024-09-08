@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutteractixapp/core/errors/data_error.dart';
+import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
 import 'package:flutteractixapp/features/profile/data/models/user_model.dart';
 import 'package:flutteractixapp/features/profile/data/models/user_request_model.dart';
 import 'package:http_interceptor/http_interceptor.dart';
@@ -20,17 +21,25 @@ class ProfileRemoteDataSource {
       url,
     );
 
+    final jsonBody = json.decode(response.body);
+
     if (response.statusCode == 200) {
       try {
-        final jsonBody = json.decode(response.body);
-
         return UserModel.fromJson(jsonBody['user']);
       } catch (e) {
-        throw ParsingError('Failed to parse response data: ${e.toString()}');
+        throw ParsingError();
       }
-    } else {
-      throw NetworkError('Failed with status code: ${response.statusCode}');
     }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedError();
+    }
+
+    if (response.statusCode == 500) {
+      throw InternalServerError();
+    }
+
+    throw UnknownError();
   }
 
   Future<UserModel> postProfileInformation(
@@ -44,17 +53,25 @@ class ProfileRemoteDataSource {
       body: json.encode(profile.toJson()),
     );
 
+    final jsonBody = json.decode(response.body);
+
     if (response.statusCode == 200) {
       try {
-        final jsonBody = json.decode(response.body);
-
         return UserModel.fromJson(jsonBody['user']);
       } catch (e) {
-        throw ParsingError('Failed to parse response data: ${e.toString()}');
+        throw ParsingError();
       }
-    } else {
-      throw NetworkError('Failed with status code: ${response.statusCode}');
     }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedError();
+    }
+
+    if (response.statusCode == 500) {
+      throw InternalServerError();
+    }
+
+    throw UnknownError();
   }
 
   Future<UserModel> setPassword(String accessToken,
@@ -68,17 +85,34 @@ class ProfileRemoteDataSource {
       body: json.encode(setPasswordRequestModel.toJson()),
     );
 
+    final jsonBody = json.decode(response.body);
+    final responseCode = jsonBody['code'] as String;
+
     if (response.statusCode == 200) {
       try {
-        final jsonBody = json.decode(response.body);
-
         return UserModel.fromJson(jsonBody['user']);
       } catch (e) {
-        throw ParsingError('Failed to parse response data: ${e.toString()}');
+        throw ParsingError();
       }
-    } else {
-      throw NetworkError('Failed with status code: ${response.statusCode}');
     }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedError();
+    }
+
+    if (response.statusCode == 403) {
+      if (responseCode == 'PASSWORD_NOT_EXPIRED') {
+        throw PasswordNotExpiredError();
+      }
+
+      throw ForbiddenError();
+    }
+
+    if (response.statusCode == 500) {
+      throw InternalServerError();
+    }
+
+    throw UnknownError();
   }
 
   Future<UserModel> updatePassword(String accessToken,
@@ -92,16 +126,28 @@ class ProfileRemoteDataSource {
       body: json.encode(updatePasswordRequestModel.toJson()),
     );
 
+    final jsonBody = json.decode(response.body);
+    final responseCode = jsonBody['code'] as String;
+
     if (response.statusCode == 200) {
       try {
-        final jsonBody = json.decode(response.body);
-
         return UserModel.fromJson(jsonBody['user']);
       } catch (e) {
-        throw ParsingError('Failed to parse response data: ${e.toString()}');
+        throw ParsingError();
       }
-    } else {
-      throw NetworkError('Failed with status code: ${response.statusCode}');
     }
+
+    if (response.statusCode == 401) {
+      if (responseCode == 'INVALID_USERNAME_OR_PASSWORD') {
+        throw InvalidUsernameOrPasswordError();
+      }
+      throw UnauthorizedError();
+    }
+
+    if (response.statusCode == 500) {
+      throw InternalServerError();
+    }
+
+    throw UnknownError();
   }
 }

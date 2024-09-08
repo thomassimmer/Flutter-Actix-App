@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutteractixapp/core/errors/mapper.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
@@ -53,9 +54,12 @@ class RecoveryCodesScreen extends StatelessWidget {
                           } else if (state is AuthOtpVerify) {
                             _otpController.text = '';
 
-                            if (state.message != null) {
+                            if (state.error != null) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(state.message!)),
+                                SnackBar(
+                                    content: Text(
+                                        ErrorMapper.mapFailureToMessage(
+                                            context, state.error!))),
                               );
                             }
                           }

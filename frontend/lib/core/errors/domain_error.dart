@@ -1,31 +1,11 @@
-import 'package:equatable/equatable.dart';
+abstract class DomainError implements Exception {}
 
-// Base class for handling failures in the app.
-abstract class DomainError extends Equatable implements Exception {
-  final String message;
+class UnknownDomainError extends DomainError {}
 
-  DomainError({this.message = "An error occurred. Please try again."});
+class InternalServerDomainError extends DomainError {}
 
-  @override
-  String toString() => message;
-}
+class InvalidRequestDomainError extends DomainError {}
 
-class NetworkDomainError extends DomainError {
-  NetworkDomainError(
-      [String message =
-          'A network error occurred while fetching data. Please try again.'])
-      : super();
+class InvalidResponseDomainError extends DomainError {}
 
-  @override
-  List<Object?> get props => [message];
-}
-
-class UnknownDomainError extends DomainError {
-  UnknownDomainError(
-      [String message =
-          'An unexpected domain error occurred. Please try again.'])
-      : super();
-
-  @override
-  List<Object?> get props => [message];
-}
+class ForbiddenDomainError extends DomainError {}

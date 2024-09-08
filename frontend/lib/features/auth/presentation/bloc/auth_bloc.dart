@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutteractixapp/core/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/check_if_otp_enabled_usecase.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/generate_otp_config_use_case.dart';
@@ -85,8 +86,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(AuthAuthenticatedAfterRegistration(
           recoveryCodes: userToken.recoveryCodes, hasVerifiedOtp: false));
-    } catch (e) {
-      emit(AuthFailure(message: e.toString()));
+    } catch (error) {
+      emit(AuthUnauthenticated(
+          error: error is Exception ? error : UnknownDomainError()));
     }
   }
 
@@ -100,8 +102,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthOtpVerify(
           otpAuthUrl: generatedOtpConfig.otpAuthUrl,
           otpBase32: generatedOtpConfig.otpBase32));
-    } catch (e) {
-      emit(AuthFailure(message: e.toString()));
+    } catch (error) {
+      emit(AuthUnauthenticated(
+          error: error is Exception ? error : UnknownDomainError()));
     }
   }
 
@@ -113,11 +116,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await verifyOtpUseCase.call(event.code);
 
       emit(AuthAuthenticatedAfterRegistration(hasVerifiedOtp: true));
-    } catch (e) {
+    } catch (error) {
       emit(AuthOtpVerify(
-          message: e.toString(),
           otpAuthUrl: event.otpAuthUrl,
-          otpBase32: event.otpBase32));
+          otpBase32: event.otpBase32,
+          error: error is Exception ? error : UnknownDomainError()));
     }
   }
 
@@ -145,8 +148,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthOtpValidate(userId: userId));
         },
       );
-    } catch (e) {
-      emit(AuthFailure(message: e.toString()));
+    } catch (error) {
+      emit(AuthUnauthenticated(
+          error: error is Exception ? error : UnknownDomainError()));
     }
   }
 
@@ -164,8 +168,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
-    } catch (e) {
-      emit(AuthOtpValidate(message: e.toString(), userId: event.userId));
+    } catch (error) {
+      emit(AuthOtpValidate(
+          error: error is Exception ? error : UnknownDomainError(),
+          userId: event.userId));
     }
   }
 
@@ -209,11 +215,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               passwordForgotten: currentState.passwordForgotten));
         }
       }
-    } catch (e) {
+    } catch (error) {
       emit(AuthRecoveringAccountUsernameStep(
           username: event.username,
           passwordForgotten: event.passwordForgotten,
-          message: e.toString()));
+          error: error is Exception ? error : UnknownDomainError()));
     }
   }
 
@@ -236,8 +242,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
-    } catch (e) {
-      emit(AuthUnauthenticated(message: e.toString()));
+    } catch (error) {
+      emit(AuthUnauthenticated(
+          error: error is Exception ? error : UnknownDomainError()));
     }
   }
 
@@ -259,8 +266,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
-    } catch (e) {
-      emit(AuthUnauthenticated(message: e.toString()));
+    } catch (error) {
+      emit(AuthUnauthenticated(
+          error: error is Exception ? error : UnknownDomainError()));
     }
   }
 
@@ -280,8 +288,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
-    } catch (e) {
-      emit(AuthUnauthenticated(message: e.toString()));
+    } catch (error) {
+      emit(AuthUnauthenticated(
+          error: error is Exception ? error : UnknownDomainError()));
     }
   }
 }

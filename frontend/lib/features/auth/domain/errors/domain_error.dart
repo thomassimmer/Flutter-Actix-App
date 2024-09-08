@@ -1,62 +1,25 @@
-// domain/errors/domain_error.dart
 import 'package:flutteractixapp/core/errors/domain_error.dart';
 
-class UnauthorizedDomainError extends DomainError {
-  UnauthorizedDomainError([String message = 'You are not authenticated'])
-      : super();
+class UnauthorizedDomainError extends DomainError {}
 
-  @override
-  List<Object?> get props => [message];
-}
+class RefreshTokenExpiredDomainError extends DomainError {}
 
-class InvalidRegisterDomainError extends DomainError {
-  InvalidRegisterDomainError([String message = 'The register data is invalid.'])
-      : super();
+class InvalidUsernameOrCodeOrRecoveryCodeDomainError extends DomainError {}
 
-  @override
-  List<Object?> get props => [message];
-}
+class TwoFactorAuthenticationNotEnabledDomainError extends DomainError {}
 
-class InvalidLoginDomainError extends DomainError {
-  InvalidLoginDomainError([String message = 'The login data is invalid.'])
-      : super();
+class InvalidUsernameOrRecoveryCodeDomainError extends DomainError {}
 
-  @override
-  List<Object?> get props => [message];
-}
+class InvalidUsernameOrPasswordOrRecoveryCodeDomainError extends DomainError {}
 
-class InvalidOtpGenerationDomainError extends DomainError {
-  InvalidOtpGenerationDomainError(
-      [String message = 'The otp generation data is invalid.'])
-      : super();
+class UserNotFoundDomainError extends DomainError {}
 
-  @override
-  List<Object?> get props => [message];
-}
+class InvalidOneTimePasswordDomainError extends DomainError {}
 
-class InvalidOtpVerificationDomainError extends DomainError {
-  InvalidOtpVerificationDomainError(
-      [String message = 'The otp verification data is invalid.'])
-      : super();
+class InvalidUsernameOrPasswordDomainError extends DomainError {}
 
-  @override
-  List<Object?> get props => [message];
-}
+class PasswordMustBeChangedDomainError extends DomainError {}
 
-class InvalidOtpValidationDomainError extends DomainError {
-  InvalidOtpValidationDomainError(
-      [String message = 'The otp validation data is invalid.'])
-      : super();
+class UserAlreadyExistingDomainError extends DomainError {}
 
-  @override
-  List<Object?> get props => [message];
-}
-
-class InvalidOtpDisablingDomainError extends DomainError {
-  InvalidOtpDisablingDomainError(
-      [String message = 'The otp disabling data is invalid.'])
-      : super();
-
-  @override
-  List<Object?> get props => [message];
-}
+class PasswordNotExpiredDomainError extends DomainError {}
