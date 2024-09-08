@@ -13,6 +13,6 @@ pub struct UserToken {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
-    pub exp: u64,
+    pub exp: i64,
     pub jti: String,
 }

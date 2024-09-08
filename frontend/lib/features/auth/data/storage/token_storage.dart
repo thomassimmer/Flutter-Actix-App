@@ -4,10 +4,11 @@ class TokenStorage {
   final _storage = FlutterSecureStorage();
 
   Future<void> saveTokens(
-      String accessToken, String refreshToken, int expiresIn) async {
+    String accessToken,
+    String refreshToken,
+  ) async {
     await _storage.write(key: 'accessToken', value: accessToken);
     await _storage.write(key: 'refreshToken', value: refreshToken);
-    await _storage.write(key: 'expiresIn', value: expiresIn.toString());
   }
 
   Future<String?> getAccessToken() async {
@@ -21,6 +22,5 @@ class TokenStorage {
   Future<void> deleteTokens() async {
     await _storage.delete(key: 'accessToken');
     await _storage.delete(key: 'refreshToken');
-    await _storage.delete(key: 'expiresIn');
   }
 }

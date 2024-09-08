@@ -75,7 +75,7 @@ where
         Box::pin(async move {
             match retrieve_claims_for_token(req.request().clone(), secret.to_string()) {
                 Ok(claims) => {
-                    if now() > DateTime::<Utc>::from_timestamp(claims.exp as i64, 0).unwrap() {
+                    if now() > DateTime::<Utc>::from_timestamp(claims.exp, 0).unwrap() {
                         return Ok(req.into_response(
                             HttpResponse::Unauthorized()
                                 .json(GenericResponse {
@@ -146,16 +146,14 @@ where
                     let res = service.call(req).await?;
                     Ok(res.map_into_left_body())
                 }
-                Err(_) => {
-                    return Ok(req.into_response(
-                        HttpResponse::Unauthorized()
-                            .json(GenericResponse {
-                                status: "fail".to_string(),
-                                message: "Invalid access token".to_string(),
-                            })
-                            .map_into_right_body(),
-                    ));
-                }
+                Err(_) => Ok(req.into_response(
+                    HttpResponse::Unauthorized()
+                        .json(GenericResponse {
+                            status: "fail".to_string(),
+                            message: "Invalid access token".to_string(),
+                        })
+                        .map_into_right_body(),
+                )),
             }
         })
     }

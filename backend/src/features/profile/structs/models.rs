@@ -67,8 +67,8 @@ impl FromRequest for User {
 
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
         match req.extensions().get::<User>() {
-            Some(user) => return ok(user.clone()),
-            None => return err(actix_web::error::ErrorBadRequest("ups...")),
-        };
+            Some(user) => ok(user.clone()),
+            None => err(actix_web::error::ErrorBadRequest("ups...")),
+        }
     }
 }

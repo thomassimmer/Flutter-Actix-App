@@ -81,7 +81,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await TokenStorage().saveTokens(
         userToken.accessToken,
         userToken.refreshToken,
-        userToken.expiresIn,
       );
 
       emit(AuthAuthenticatedAfterRegistration(
@@ -136,7 +135,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           await TokenStorage().saveTokens(
             userToken.accessToken,
             userToken.refreshToken,
-            userToken.expiresIn,
           );
 
           emit(AuthAuthenticatedAfterLogin(
@@ -163,7 +161,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await TokenStorage().saveTokens(
         userToken.accessToken,
         userToken.refreshToken,
-        userToken.expiresIn,
       );
 
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
@@ -236,7 +233,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await TokenStorage().saveTokens(
         userToken.accessToken,
         userToken.refreshToken,
-        userToken.expiresIn,
       );
 
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
@@ -260,7 +256,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await TokenStorage().saveTokens(
         userToken.accessToken,
         userToken.refreshToken,
-        userToken.expiresIn,
       );
 
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
@@ -282,7 +277,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await TokenStorage().saveTokens(
         userToken.accessToken,
         userToken.refreshToken,
-        userToken.expiresIn,
       );
 
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));

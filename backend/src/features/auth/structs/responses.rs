@@ -6,7 +6,6 @@ pub struct UserSignupResponse {
     pub recovery_codes: Vec<String>,
     pub access_token: String,
     pub refresh_token: String,
-    pub expires_in: u64,
 }
 
 #[derive(Serialize, Debug, Deserialize)]
@@ -20,14 +19,12 @@ pub struct UserLoginResponse {
     pub status: String,
     pub access_token: String,
     pub refresh_token: String,
-    pub expires_in: u64,
 }
 
 #[derive(Serialize, Debug, Deserialize)]
 pub struct RefreshTokenResponse {
     pub status: String,
     pub access_token: String,
-    pub expires_in: u64,
 }
 
 #[derive(Serialize, Deserialize)]
