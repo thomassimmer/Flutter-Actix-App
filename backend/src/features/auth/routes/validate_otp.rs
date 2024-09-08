@@ -1,4 +1,4 @@
-use crate::core::structs::responses::GenericResponse;
+use crate::core::{constants::errors::AppError, structs::responses::GenericResponse};
 use crate::features::auth::helpers::token::generate_tokens;
 use crate::features::auth::structs::requests::ValidateOtpRequest;
 use crate::features::auth::structs::responses::UserLoginResponse;
@@ -8,7 +8,6 @@ use actix_web::{post, web, HttpResponse, Responder};
 
 use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
-use uuid::Uuid;
 
 #[post("/validate")]
 async fn validate(
@@ -19,15 +18,13 @@ async fn validate(
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Failed to get a transaction".to_string(),
-            })
+            return HttpResponse::InternalServerError()
+                .json(AppError::DatabaseConnection.to_response())
         }
     };
 
     let body = body.into_inner();
-    let user_id = Uuid::parse_str(&body.user_id).unwrap();
+    let user_id = body.user_id;
 
     // Check if user already exists
     let existing_user = sqlx::query_as!(
@@ -48,26 +45,19 @@ async fn validate(
                 user
             } else {
                 return HttpResponse::NotFound().json(GenericResponse {
-                    status: "fail".to_string(),
-                    message: format!("No user with id: {} found", body.user_id),
+                    code: "USER_NOT_FOUND".to_string(),
+                    message: format!("No user with id {} found", body.user_id),
                 });
             }
         }
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Database query error".to_string(),
-            })
+            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
         }
     };
 
     if !user.otp_verified {
-        let json_error = GenericResponse {
-            status: "fail".to_string(),
-            message: "2FA not enabled".to_string(),
-        };
-
-        return HttpResponse::Forbidden().json(json_error);
+        return HttpResponse::Forbidden()
+            .json(AppError::TwoFactorAuthenticationNotEnabled.to_response());
     }
 
     let otp_base32 = user.otp_base32.to_owned().unwrap();
@@ -84,32 +74,25 @@ async fn validate(
     let is_valid = totp.check_current(&body.code).unwrap();
 
     if !is_valid {
-        return HttpResponse::Forbidden().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Token is invalid or user doesn't exist".to_string(),
-        });
+        return HttpResponse::Unauthorized().json(AppError::InvalidOneTimePassword.to_response());
     }
 
     let (access_token, refresh_token) =
         match generate_tokens(secret.as_bytes(), user.id, &mut transaction).await {
             Ok((access_token, refresh_token)) => (access_token, refresh_token),
             Err(_) => {
-                return HttpResponse::InternalServerError().json(GenericResponse {
-                    status: "error".to_string(),
-                    message: "Failed to generate and save token".to_string(),
-                });
+                return HttpResponse::InternalServerError()
+                    .json(AppError::TokenGeneration.to_response());
             }
         };
 
     if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
+        return HttpResponse::InternalServerError()
+            .json(AppError::DatabaseTransaction.to_response());
     }
 
     HttpResponse::Ok().json(UserLoginResponse {
-        status: "success".to_string(),
+        code: "USER_LOGGED_IN_AFTER_OTP_VALIDATION".to_string(),
         access_token,
         refresh_token,
     })

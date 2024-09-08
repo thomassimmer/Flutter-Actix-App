@@ -30,6 +30,8 @@ pub async fn user_logs_in(
     let body = test::read_body(response).await;
     let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "USER_LOGGED_IN_WITHOUT_OTP");
+
     (response.access_token, response.refresh_token)
 }
 
@@ -55,13 +57,12 @@ async fn user_cannot_login_with_wrong_password() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(403, response.status().as_u16());
+    assert_eq!(401, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
-    assert_eq!(response.message, "Invalid username or password");
+    assert_eq!(response.code, "INVALID_USERNAME_OR_PASSWORD");
 }
 
 #[tokio::test]
@@ -79,13 +80,12 @@ async fn user_cannot_login_with_wrong_username() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(403, response.status().as_u16());
+    assert_eq!(401, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
-    assert_eq!(response.message, "Invalid username or password");
+    assert_eq!(response.code, "INVALID_USERNAME_OR_PASSWORD");
 }
 
 #[tokio::test]

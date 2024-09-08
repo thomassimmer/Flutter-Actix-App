@@ -4,12 +4,12 @@ use super::models::UserData;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserResponse {
-    pub status: String,
+    pub code: String,
     pub user: UserData,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct IsOtpEnabledResponse {
-    pub status: String,
+    pub code: String,
     pub otp_enabled: bool,
 }

@@ -33,6 +33,8 @@ pub async fn user_recovers_account_using_password(
     let body = test::read_body(response).await;
     let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "USER_LOGGED_IN_AFTER_ACCOUNT_RECOVERY");
+
     (response.access_token, response.refresh_token)
 }
 
@@ -96,8 +98,7 @@ async fn user_cannot_recover_account_using_password_without_2fa_enabled() {
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
-    assert_eq!(response.message, "2FA not enabled");
+    assert_eq!(response.code, "TWO_FACTOR_AUTHENTICATION_NOT_ENABLED");
 }
 
 #[tokio::test]
@@ -119,15 +120,14 @@ async fn user_cannot_recover_account_using_password_with_wrong_code() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(403, response.status().as_u16());
+    assert_eq!(401, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
     assert_eq!(
-        response.message,
-        "Invalid username or password or recovery code"
+        response.code,
+        "INVALID_USERNAME_OR_PASSWORD_OR_RECOVERY_CODE"
     );
 }
 
@@ -150,15 +150,14 @@ async fn user_cannot_recover_account_using_password_with_wrong_username() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(403, response.status().as_u16());
+    assert_eq!(401, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
     assert_eq!(
-        response.message,
-        "Invalid username or password or recovery code"
+        response.code,
+        "INVALID_USERNAME_OR_PASSWORD_OR_RECOVERY_CODE"
     );
 }
 
@@ -181,15 +180,14 @@ async fn user_cannot_recover_account_using_password_with_wrong_password() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(403, response.status().as_u16());
+    assert_eq!(401, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
     assert_eq!(
-        response.message,
-        "Invalid username or password or recovery code"
+        response.code,
+        "INVALID_USERNAME_OR_PASSWORD_OR_RECOVERY_CODE"
     );
 }
 
@@ -221,14 +219,13 @@ async fn user_cannot_recover_account_using_password_using_code_twice() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(403, response.status().as_u16());
+    assert_eq!(401, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
     assert_eq!(
-        response.message,
-        "Invalid username or password or recovery code"
+        response.code,
+        "INVALID_USERNAME_OR_PASSWORD_OR_RECOVERY_CODE"
     );
 }

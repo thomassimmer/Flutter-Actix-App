@@ -1,3 +1,4 @@
+use crate::core::constants::errors::AppError;
 use crate::core::structs::responses::GenericResponse;
 use crate::features::auth::helpers::password::password_is_valid;
 use crate::features::auth::helpers::token::generate_tokens;
@@ -18,10 +19,8 @@ pub async fn log_user_in(
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Failed to get a transaction".to_string(),
-            })
+            return HttpResponse::InternalServerError()
+                .json(AppError::DatabaseConnection.to_response())
         }
     };
 
@@ -46,37 +45,30 @@ pub async fn log_user_in(
             if let Some(user) = existing_user {
                 user
             } else {
-                return HttpResponse::Forbidden().json(GenericResponse {
-                    status: "fail".to_string(),
-                    message: "Invalid username or password".to_string(),
-                });
+                return HttpResponse::Unauthorized()
+                    .json(AppError::InvalidUsernameOrPassword.to_response());
             }
         }
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Database query error".to_string(),
-            })
+            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
         }
     };
 
-    if user.password_is_expired {
-        return HttpResponse::BadRequest().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Failed to connect. Password must be changed.".to_string(),
-        });
+    if !password_is_valid(&user, &body.password) {
+        return HttpResponse::Unauthorized()
+            .json(AppError::InvalidUsernameOrPassword.to_response());
     }
 
-    if !password_is_valid(&user, &body.password) {
+    if user.password_is_expired {
         return HttpResponse::Forbidden().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Invalid username or password".to_string(),
+            code: "PASSWORD_MUST_BE_CHANGED".to_string(),
+            message: "Password must be changed".to_string(),
         });
     }
 
     if user.otp_verified {
         return HttpResponse::Ok().json(UserLoginWhenOtpEnabledResponse {
-            status: "success".to_string(),
+            code: "USER_LOGS_IN_WITH_OTP_ENABLED".to_string(),
             user_id: user.id.to_string(),
         });
     }
@@ -85,22 +77,18 @@ pub async fn log_user_in(
         match generate_tokens(secret.as_bytes(), user.id, &mut transaction).await {
             Ok((access_token, refresh_token)) => (access_token, refresh_token),
             Err(_) => {
-                return HttpResponse::InternalServerError().json(GenericResponse {
-                    status: "error".to_string(),
-                    message: "Failed to generate and save token".to_string(),
-                });
+                return HttpResponse::InternalServerError()
+                    .json(AppError::TokenGeneration.to_response());
             }
         };
 
     if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
+        return HttpResponse::InternalServerError()
+            .json(AppError::DatabaseTransaction.to_response());
     }
 
     HttpResponse::Ok().json(UserLoginResponse {
-        status: "success".to_string(),
+        code: "USER_LOGGED_IN_WITHOUT_OTP".to_string(),
         access_token,
         refresh_token,
     })

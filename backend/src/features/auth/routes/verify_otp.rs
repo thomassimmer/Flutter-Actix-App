@@ -1,4 +1,4 @@
-use crate::core::structs::responses::GenericResponse;
+use crate::core::constants::errors::AppError;
 
 use crate::features::auth::structs::requests::VerifyOtpRequest;
 use crate::features::auth::structs::responses::VerifyOtpResponse;
@@ -18,10 +18,8 @@ pub async fn verify(
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Failed to get a transaction".to_string(),
-            })
+            return HttpResponse::InternalServerError()
+                .json(AppError::DatabaseConnection.to_response())
         }
     };
 
@@ -38,12 +36,7 @@ pub async fn verify(
     let is_valid = totp.check_current(&body.code).unwrap();
 
     if !is_valid {
-        let json_error = GenericResponse {
-            status: "fail".to_string(),
-            message: "Token is invalid or user doesn't exist".to_string(),
-        };
-
-        return HttpResponse::Forbidden().json(json_error);
+        return HttpResponse::Unauthorized().json(AppError::InvalidOneTimePassword.to_response());
     }
 
     request_user.otp_verified = true;
@@ -61,20 +54,15 @@ pub async fn verify(
     .await;
 
     if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
+        return HttpResponse::InternalServerError()
+            .json(AppError::DatabaseTransaction.to_response());
     }
 
     match updated_user_result {
         Ok(_) => HttpResponse::Ok().json(VerifyOtpResponse {
-            status: "success".to_string(),
+            code: "OTP_VERIFIED".to_string(),
             otp_verified: true,
         }),
-        Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to update user".to_string(),
-        }),
+        Err(_) => HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response()),
     }
 }

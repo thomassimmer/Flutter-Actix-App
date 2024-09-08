@@ -1,5 +1,5 @@
 use crate::{
-    core::structs::responses::GenericResponse,
+    core::constants::errors::AppError,
     features::{
         auth::{
             helpers::{password::password_is_valid, token::generate_tokens},
@@ -21,10 +21,8 @@ pub async fn recover_account_using_password(
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Failed to get a transaction".to_string(),
-            })
+            return HttpResponse::InternalServerError()
+                .json(AppError::DatabaseConnection.to_response())
         }
     };
 
@@ -35,10 +33,10 @@ pub async fn recover_account_using_password(
     let existing_user = sqlx::query_as!(
         User,
         r#"
-            SELECT *
-            FROM users
-            WHERE username = $1
-            "#,
+        SELECT *
+        FROM users
+        WHERE username = $1
+        "#,
         username_lower,
     )
     .fetch_optional(&mut *transaction)
@@ -49,36 +47,25 @@ pub async fn recover_account_using_password(
             if let Some(user) = existing_user {
                 user
             } else {
-                return HttpResponse::Forbidden().json(GenericResponse {
-                    status: "fail".to_string(),
-                    message: "Invalid username or password or recovery code".to_string(),
-                });
+                return HttpResponse::Unauthorized()
+                    .json(AppError::InvalidUsernameOrPasswordOrRecoveryCode.to_response());
             }
         }
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Database query error".to_string(),
-            })
+            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
         }
     };
 
     // 2FA should be enabled to pass here
     if !user.otp_verified {
-        let json_error = GenericResponse {
-            status: "fail".to_string(),
-            message: "2FA not enabled".to_string(),
-        };
-
-        return HttpResponse::Forbidden().json(json_error);
+        return HttpResponse::Forbidden()
+            .json(AppError::TwoFactorAuthenticationNotEnabled.to_response());
     }
 
     // Check password
     if !password_is_valid(&user, &body.password) {
-        return HttpResponse::Forbidden().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Invalid username or password or recovery code".to_string(),
-        });
+        return HttpResponse::Unauthorized()
+            .json(AppError::InvalidUsernameOrPasswordOrRecoveryCode.to_response());
     }
 
     // Check recovery code
@@ -88,10 +75,7 @@ pub async fn recover_account_using_password(
         let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(recovery_code) {
             parsed_hash
         } else {
-            return HttpResponse::BadRequest().json(GenericResponse {
-                status: "fail".to_string(),
-                message: "Failed to retrieve hashed password".to_string(),
-            });
+            return HttpResponse::InternalServerError().json(AppError::PasswordHash.to_response());
         };
 
         let argon2 = Argon2::default();
@@ -123,10 +107,8 @@ pub async fn recover_account_using_password(
             .await;
 
             if updated_user_result.is_err() {
-                return HttpResponse::InternalServerError().json(GenericResponse {
-                    status: "error".to_string(),
-                    message: "Failed to update user".to_string(),
-                });
+                return HttpResponse::InternalServerError()
+                    .json(AppError::UserUpdate.to_response());
             }
 
             break;
@@ -134,10 +116,8 @@ pub async fn recover_account_using_password(
     }
 
     if !is_valid {
-        return HttpResponse::Forbidden().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Invalid username or password or recovery code".to_string(),
-        });
+        return HttpResponse::Unauthorized()
+            .json(AppError::InvalidUsernameOrPasswordOrRecoveryCode.to_response());
     }
 
     // Delete any other existing tokens for that user
@@ -151,20 +131,15 @@ pub async fn recover_account_using_password(
     .await;
 
     if delete_result.is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to delete user tokens into the database".to_string(),
-        });
+        return HttpResponse::InternalServerError().json(AppError::UserTokenDeletion.to_response());
     }
 
     let (access_token, refresh_token) =
         match generate_tokens(secret.as_bytes(), user.id, &mut transaction).await {
             Ok((access_token, refresh_token)) => (access_token, refresh_token),
             Err(_) => {
-                return HttpResponse::InternalServerError().json(GenericResponse {
-                    status: "error".to_string(),
-                    message: "Failed to generate and save token".to_string(),
-                });
+                return HttpResponse::InternalServerError()
+                    .json(AppError::TokenGeneration.to_response());
             }
         };
 
@@ -187,21 +162,16 @@ pub async fn recover_account_using_password(
     .await;
 
     if updated_user_result.is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to update user into the database".to_string(),
-        });
+        return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response());
     }
 
     if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
+        return HttpResponse::InternalServerError()
+            .json(AppError::DatabaseTransaction.to_response());
     }
 
     HttpResponse::Ok().json(UserLoginResponse {
-        status: "success".to_string(),
+        code: "USER_LOGGED_IN_AFTER_ACCOUNT_RECOVERY".to_string(),
         access_token,
         refresh_token,
     })

@@ -29,6 +29,8 @@ pub async fn user_recovers_account_without_2fa_enabled(
     let body = test::read_body(response).await;
     let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "USER_LOGGED_IN_AFTER_ACCOUNT_RECOVERY");
+
     (response.access_token, response.refresh_token)
 }
 
@@ -59,17 +61,16 @@ async fn user_cannot_recover_account_without_2fa_enabled_with_wrong_code() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(403, response.status().as_u16());
+    assert_eq!(401, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
-    assert_eq!(response.message, "Invalid username or recovery code");
+    assert_eq!(response.code, "INVALID_USERNAME_OR_RECOVERY_CODE");
 }
 
 #[tokio::test]
-async fn user_cannot_recover_accoun_without_2fa_enabled_with_wrong_username() {
+async fn user_cannot_recover_account_without_2fa_enabled_with_wrong_username() {
     let app = spawn_app().await;
     let (_, _, recovery_codes) = user_signs_up(&app).await;
     let req = test::TestRequest::post()
@@ -82,13 +83,12 @@ async fn user_cannot_recover_accoun_without_2fa_enabled_with_wrong_username() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(403, response.status().as_u16());
+    assert_eq!(401, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
-    assert_eq!(response.message, "Invalid username or recovery code");
+    assert_eq!(response.code, "INVALID_USERNAME_OR_RECOVERY_CODE");
 }
 
 #[tokio::test]
@@ -110,11 +110,37 @@ async fn user_cannot_recover_account_without_2fa_enabled_using_code_twice() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
+    assert_eq!(401, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "INVALID_USERNAME_OR_RECOVERY_CODE");
+}
+
+#[tokio::test]
+async fn user_cannot_login_after_recover_account_using_old_password() {
+    let app = spawn_app().await;
+    let (_, _, recovery_codes) = user_signs_up(&app).await;
+    let (access_token, _) =
+        user_recovers_account_without_2fa_enabled(&app, &recovery_codes[0]).await;
+
+    user_has_access_to_protected_route(&app, &access_token).await;
+
+    let req = test::TestRequest::post()
+        .uri("/api/auth/login")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+        "username": "testusername",
+        "password": "password",
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
     assert_eq!(403, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
-    assert_eq!(response.message, "Invalid username or recovery code");
+    assert_eq!(response.code, "PASSWORD_MUST_BE_CHANGED");
 }

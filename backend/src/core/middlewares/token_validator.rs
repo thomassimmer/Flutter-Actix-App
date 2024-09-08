@@ -1,5 +1,5 @@
+use crate::core::constants::errors::AppError;
 use crate::core::helpers::mock_now::now;
-use crate::core::structs::responses::GenericResponse;
 use crate::features::auth::helpers::token::retrieve_claims_for_token;
 use crate::features::profile::structs::models::User;
 use actix_web::body::EitherBody;
@@ -78,10 +78,7 @@ where
                     if now() > DateTime::<Utc>::from_timestamp(claims.exp, 0).unwrap() {
                         return Ok(req.into_response(
                             HttpResponse::Unauthorized()
-                                .json(GenericResponse {
-                                    status: "error".to_string(),
-                                    message: "Token expired".to_string(),
-                                })
+                                .json(AppError::AccessTokenExpired.to_response())
                                 .map_into_right_body(),
                         ));
                     }
@@ -91,10 +88,7 @@ where
                         Err(_) => {
                             return Ok(req.into_response(
                                 HttpResponse::InternalServerError()
-                                    .json(GenericResponse {
-                                        status: "error".to_string(),
-                                        message: "Failed to get a transaction".to_string(),
-                                    })
+                                    .json(AppError::DatabaseConnection.to_response())
                                     .map_into_right_body(),
                             ));
                         }
@@ -120,11 +114,8 @@ where
                                 user
                             } else {
                                 return Ok(req.into_response(
-                                    HttpResponse::NotFound()
-                                        .json(GenericResponse {
-                                            status: "fail".to_string(),
-                                            message: "No user with this token".to_string(),
-                                        })
+                                    HttpResponse::Unauthorized()
+                                        .json(AppError::InvalidAccessToken.to_response())
                                         .map_into_right_body(),
                                 ));
                             }
@@ -132,10 +123,7 @@ where
                         Err(_) => {
                             return Ok(req.into_response(
                                 HttpResponse::InternalServerError()
-                                    .json(GenericResponse {
-                                        status: "error".to_string(),
-                                        message: "Database query error".to_string(),
-                                    })
+                                    .json(AppError::DatabaseQuery.to_response())
                                     .map_into_right_body(),
                             ));
                         }
@@ -148,10 +136,7 @@ where
                 }
                 Err(_) => Ok(req.into_response(
                     HttpResponse::Unauthorized()
-                        .json(GenericResponse {
-                            status: "fail".to_string(),
-                            message: "Invalid access token".to_string(),
-                        })
+                        .json(AppError::InvalidAccessToken.to_response())
                         .map_into_right_body(),
                 )),
             }

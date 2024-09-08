@@ -5,7 +5,7 @@ use actix_web::{
     http::header::ContentType,
     test, Error,
 };
-use flutteractixapp::core::structs::responses::GenericResponse;
+use flutteractixapp::{core::structs::responses::GenericResponse, features::profile::structs::responses::UserResponse};
 
 use crate::{
     auth::{
@@ -32,6 +32,11 @@ pub async fn user_sets_password(
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: UserResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "PASSWORD_CHANGED");
 }
 
 #[tokio::test]
@@ -61,13 +66,10 @@ pub async fn user_cannot_set_password_if_its_not_expired() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(403, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(
-        response.message,
-        "Password is not expired. You cannot set it here."
-    );
+    assert_eq!(response.code, "PASSWORD_NOT_EXPIRED");
 }

@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 pub struct UserRegisterRequest {
@@ -15,12 +16,6 @@ pub struct UserLoginRequest {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct GenerateOtpRequest {
-    pub username: String,
-    pub user_id: String,
-}
-
-#[derive(Debug, Deserialize)]
 pub struct VerifyOtpRequest {
     pub code: String,
 }
@@ -28,12 +23,7 @@ pub struct VerifyOtpRequest {
 #[derive(Debug, Deserialize)]
 pub struct ValidateOtpRequest {
     pub code: String,
-    pub user_id: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct DisableOTPRequest {
-    pub user_id: String,
+    pub user_id: Uuid,
 }
 
 #[derive(Debug, Deserialize)]
