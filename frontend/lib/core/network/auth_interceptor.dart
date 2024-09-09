@@ -33,7 +33,8 @@ class AuthInterceptor extends InterceptorContract {
       final responseCode = jsonBody['code'] as String?;
 
       if (response.statusCode == 401 &&
-          responseCode == 'ACCESS_TOKEN_EXPIRED') {
+          (responseCode == 'ACCESS_TOKEN_EXPIRED' ||
+              responseCode == 'INVALID_ACCESS_TOKEN')) {
         await authService.refreshToken();
 
         // Retry the request with a new token

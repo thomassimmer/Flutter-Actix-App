@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutteractixapp/core/errors/domain_error.dart';
+import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/disable_otp_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/generate_otp_config_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
 import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/get_profile_usecase.dart';
@@ -58,8 +60,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final profile = await getProfileUsecase.call();
       emit(ProfileAuthenticated(profile: profile));
     } catch (error) {
-      emit(ProfileUnauthenticated(
-          error: error is Exception ? error : UnknownDomainError()));
+      if (error is InvalidRefreshTokenDomainError ||
+          error is RefreshTokenExpiredDomainError ||
+          error is RefreshTokenNotFoundDomainError) {
+        authBloc.add(AuthLogoutRequested());
+      } else {
+        emit(ProfileUnauthenticated(
+            error: error is Exception ? error : UnknownDomainError()));
+      }
     }
   }
 
@@ -78,7 +86,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       emit(ProfileAuthenticated(profile: profile));
     } catch (error) {
-      if (currentState is ProfileAuthenticated) {
+      if (error is InvalidRefreshTokenDomainError ||
+          error is RefreshTokenExpiredDomainError ||
+          error is RefreshTokenNotFoundDomainError) {
+        authBloc.add(AuthLogoutRequested());
+      } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
           error: error is Exception ? error : UnknownDomainError(),
@@ -109,7 +121,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         ));
       }
     } catch (error) {
-      if (currentState is ProfileAuthenticated) {
+      if (error is InvalidRefreshTokenDomainError ||
+          error is RefreshTokenExpiredDomainError ||
+          error is RefreshTokenNotFoundDomainError) {
+        authBloc.add(AuthLogoutRequested());
+      } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
             error: error is Exception ? error : UnknownDomainError()));
@@ -139,7 +155,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         ));
       }
     } catch (error) {
-      if (currentState is ProfileAuthenticated) {
+      if (error is InvalidRefreshTokenDomainError ||
+          error is RefreshTokenExpiredDomainError ||
+          error is RefreshTokenNotFoundDomainError) {
+        authBloc.add(AuthLogoutRequested());
+      } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
             error: error is Exception ? error : UnknownDomainError()));
@@ -167,7 +187,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         ));
       }
     } catch (error) {
-      if (currentState is ProfileAuthenticated) {
+      if (error is InvalidRefreshTokenDomainError ||
+          error is RefreshTokenExpiredDomainError ||
+          error is RefreshTokenNotFoundDomainError) {
+        authBloc.add(AuthLogoutRequested());
+      } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
           error: error is Exception ? error : UnknownDomainError(),
@@ -190,7 +214,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       emit(ProfileAuthenticated(profile: profile));
     } catch (error) {
-      if (currentState is ProfileAuthenticated) {
+      if (error is InvalidRefreshTokenDomainError ||
+          error is RefreshTokenExpiredDomainError ||
+          error is RefreshTokenNotFoundDomainError) {
+        authBloc.add(AuthLogoutRequested());
+      } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
             error: error is Exception ? error : UnknownDomainError()));
@@ -213,7 +241,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       emit(ProfileAuthenticated(profile: profile));
     } catch (error) {
-      if (currentState is ProfileAuthenticated) {
+      if (error is InvalidRefreshTokenDomainError ||
+          error is RefreshTokenExpiredDomainError ||
+          error is RefreshTokenNotFoundDomainError) {
+        authBloc.add(AuthLogoutRequested());
+      } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
             error: error is Exception ? error : UnknownDomainError()));
