@@ -3,7 +3,7 @@ import 'package:flutteractixapp/features/auth/domain/entities/otp_generation.dar
 import 'package:flutteractixapp/features/auth/domain/entities/user_token.dart';
 
 abstract class AuthRepository {
-  Future<UserToken> register(
+  Future<UserToken> signup(
       {required String username,
       required String password,
       required String locale,

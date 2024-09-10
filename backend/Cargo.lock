@@ -892,6 +892,7 @@ dependencies = [
  "jsonwebtoken",
  "lazy_static",
  "rand",
+ "regex",
  "reqwest",
  "secrecy",
  "serde",

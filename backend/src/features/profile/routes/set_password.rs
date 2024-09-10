@@ -5,8 +5,11 @@ use sqlx::PgPool;
 
 use crate::{
     core::{constants::errors::AppError, structs::responses::GenericResponse},
-    features::profile::structs::{
-        models::User, requests::SetUserPasswordRequest, responses::UserResponse,
+    features::{
+        auth::helpers::password::{password_is_long_enough, password_is_strong_enough},
+        profile::structs::{
+            models::User, requests::SetUserPasswordRequest, responses::UserResponse,
+        },
     },
 };
 
@@ -29,6 +32,22 @@ pub async fn set_password(
             code: "PASSWORD_NOT_EXPIRED".to_string(),
             message: "Password is not expired. You cannot set it here.".to_string(),
         });
+    }
+
+    // Validate new password
+    if !password_is_long_enough(&body.new_password) {
+        let error_response = GenericResponse {
+            code: "PASSWORD_TOO_SHORT".to_string(),
+            message: "This password is too short.".to_string(),
+        };
+        return HttpResponse::Unauthorized().json(error_response);
+    }
+    if !password_is_strong_enough(&body.new_password) {
+        let error_response = GenericResponse {
+            code: "PASSWORD_TOO_WEAK".to_string(),
+            message: "This password is too weak.".to_string(),
+        };
+        return HttpResponse::Unauthorized().json(error_response);
     }
 
     // Hash the new password

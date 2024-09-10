@@ -4,9 +4,11 @@ use rand::rngs::OsRng;
 use sqlx::PgPool;
 
 use crate::{
-    core::constants::errors::AppError,
+    core::{constants::errors::AppError, structs::responses::GenericResponse},
     features::{
-        auth::helpers::password::password_is_valid,
+        auth::helpers::password::{
+            password_is_long_enough, password_is_strong_enough, password_is_valid,
+        },
         profile::structs::{
             models::User, requests::UpdateUserPasswordRequest, responses::UserResponse,
         },
@@ -31,6 +33,22 @@ pub async fn update_password(
     if !password_is_valid(&request_user, &body.current_password) {
         return HttpResponse::Unauthorized()
             .json(AppError::InvalidUsernameOrPassword.to_response());
+    }
+
+    // Validate new password
+    if !password_is_long_enough(&body.new_password) {
+        let error_response = GenericResponse {
+            code: "PASSWORD_TOO_SHORT".to_string(),
+            message: "This password is too short.".to_string(),
+        };
+        return HttpResponse::Unauthorized().json(error_response);
+    }
+    if !password_is_strong_enough(&body.new_password) {
+        let error_response = GenericResponse {
+            code: "PASSWORD_TOO_WEAK".to_string(),
+            message: "This password is too weak.".to_string(),
+        };
+        return HttpResponse::Unauthorized().json(error_response);
     }
 
     // Hash the new password

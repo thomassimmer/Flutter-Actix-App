@@ -7,6 +7,7 @@ import 'package:flutteractixapp/features/auth/data/models/otp_model.dart';
 import 'package:flutteractixapp/features/auth/data/models/otp_request_model.dart';
 import 'package:flutteractixapp/features/auth/data/models/user_token_model.dart';
 import 'package:flutteractixapp/features/auth/data/models/user_token_request_model.dart';
+import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:http_interceptor/http_interceptor.dart';
 
 class AuthRemoteDataSource {
@@ -15,9 +16,9 @@ class AuthRemoteDataSource {
 
   AuthRemoteDataSource({required this.apiClient, required this.baseUrl});
 
-  Future<UserTokenModel> register(
+  Future<UserTokenModel> signup(
       RegisterUserRequestModel registerUserRequestModel) async {
-    final url = Uri.parse('$baseUrl/auth/register');
+    final url = Uri.parse('$baseUrl/auth/signup');
     final response = await apiClient.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -32,6 +33,15 @@ class AuthRemoteDataSource {
         return UserTokenModel.fromJson(jsonBody);
       } catch (e) {
         throw ParsingError();
+      }
+    }
+
+    if (response.statusCode == 401) {
+      if (responseCode == 'PASSWORD_TOO_SHORT') {
+        throw PasswordTooShortError();
+      }
+      if (responseCode == 'PASSWORD_TOO_WEAK') {
+        throw PasswordNotComplexEnoughError();
       }
     }
 

@@ -1,6 +1,5 @@
-use argon2::{Argon2, PasswordHash, PasswordVerifier};
-
 use crate::features::profile::structs::models::User;
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 
 pub fn password_is_valid(user: &User, password: &str) -> bool {
     let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&user.password) {
@@ -16,4 +15,19 @@ pub fn password_is_valid(user: &User, password: &str) -> bool {
         .is_ok();
 
     is_valid
+}
+
+pub fn password_is_long_enough(input: &str) -> bool {
+    input.len() > 8
+}
+
+pub fn password_is_strong_enough(input: &str) -> bool {
+    let has_letter = input.chars().any(|c| c.is_ascii_alphabetic());
+    let has_digit = input.chars().any(|c| c.is_ascii_digit());
+    let has_special = input.chars().any(|c| "@$!%*?&_".contains(c));
+    let valid_characters = input
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || "@$!%*?&_".contains(c));
+
+    has_letter && has_digit && has_special && valid_characters
 }

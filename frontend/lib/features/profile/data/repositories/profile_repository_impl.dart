@@ -128,6 +128,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
       throw RefreshTokenExpiredDomainError();
+    } on PasswordTooShortError {
+      logger.e('PasswordTooShortError occured.');
+      throw PasswordTooShortError();
+    } on PasswordNotComplexEnoughError {
+      logger.e('PasswordNotComplexEnoughError occured.');
+      throw PasswordNotComplexEnoughError();
     } on InternalServerError {
       logger.e('InternalServerError occured.');
       throw InternalServerDomainError();
@@ -171,6 +177,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
       throw RefreshTokenExpiredDomainError();
+    } on PasswordTooShortError {
+      logger.e('PasswordTooShortError occured.');
+      throw PasswordTooShortError();
+    } on PasswordNotComplexEnoughError {
+      logger.e('PasswordNotComplexEnoughError occured.');
+      throw PasswordNotComplexEnoughError();
     } on InternalServerError {
       logger.e('InternalServerError occured.');
       throw InternalServerDomainError();

@@ -131,11 +131,11 @@ pub async fn user_signs_up(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
 ) -> (String, String) {
     let req = test::TestRequest::post()
-        .uri("/api/auth/register")
+        .uri("/api/auth/signup")
         .insert_header(ContentType::json())
         .set_json(&serde_json::json!({
         "username": "testusername",
-        "password": "password",
+        "password": "password1_",
         "locale": "en",
         "theme": "dark",
         }))

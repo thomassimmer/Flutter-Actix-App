@@ -22,13 +22,13 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<UserToken> register(
+  Future<UserToken> signup(
       {required String username,
       required String password,
       required String locale,
       required String theme}) async {
     try {
-      final userTokenModel = await remoteDataSource.register(
+      final userTokenModel = await remoteDataSource.signup(
           RegisterUserRequestModel(
               username: username,
               password: password,
@@ -45,6 +45,12 @@ class AuthRepositoryImpl implements AuthRepository {
     } on UserAlreadyExistingError {
       logger.e('UserAlreadyExistingError occured');
       throw UserAlreadyExistingDomainError();
+    } on PasswordTooShortError {
+      logger.e('PasswordTooShortError occured.');
+      throw PasswordTooShortError();
+    } on PasswordNotComplexEnoughError {
+      logger.e('PasswordNotComplexEnoughError occured.');
+      throw PasswordNotComplexEnoughError();
     } on InternalServerError {
       logger.e('InternalServerError occured.');
       throw InternalServerDomainError();
