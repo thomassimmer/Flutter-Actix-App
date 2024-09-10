@@ -44,6 +44,8 @@ class RecoverAccountScreen extends StatelessWidget {
                         },
                         child: BlocBuilder<AuthBloc, AuthState>(
                           builder: (context, state) {
+                            final errorMapper = ErrorMapper(context);
+
                             if (state
                                 is AuthRecoveringAccountWithOtpEnabledAndUsingPassword) {
                               return _buildRecoveryCodeAndPasswordView(
@@ -64,8 +66,8 @@ class RecoverAccountScreen extends StatelessWidget {
                               );
                             } else {
                               return Text(state.error != null
-                                  ? ErrorMapper.mapFailureToMessage(
-                                      context, state.error!)
+                                  ? errorMapper
+                                      .mapFailureToMessage(state.error!)
                                   : AppLocalizations.of(context)!.noContent);
                             }
                           },

@@ -79,7 +79,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> _onProfileUpdateRequest(
       ProfileUpdateRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
-    emit(ProfileLoading());
+    emit(ProfileLoading(profile: state.profile));
 
     try {
       final profile = await postProfileUsecase.call(event.profile);
@@ -105,7 +105,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> _onOtpGenerationRequested(
       ProfileOtpGenerationRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
-    emit(ProfileLoading());
+    emit(ProfileLoading(profile: state.profile));
 
     try {
       final generatedOtpConfig = await generateOtpConfigUseCase.call();
@@ -139,7 +139,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> _onOtpDisablingRequested(
       ProfileOtpDisablingRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
-    emit(ProfileLoading());
+    emit(ProfileLoading(profile: state.profile));
 
     try {
       await disableOtpUseCase.call();
@@ -173,7 +173,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> _onOtpVerificationRequested(
       ProfileOtpVerificationRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
-    emit(ProfileLoading());
+    emit(ProfileLoading(profile: state.profile));
 
     try {
       await verifyOtpUseCase.call(event.code);
@@ -206,7 +206,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> _onSetPasswordRequested(
       ProfileSetPasswordRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
-    emit(ProfileLoading());
+    emit(ProfileLoading(profile: state.profile));
 
     try {
       final profile =
@@ -232,7 +232,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> _onUpdatePasswordRequested(
       ProfileUpdatePasswordRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
-    emit(ProfileLoading());
+    emit(ProfileLoading(profile: state.profile));
 
     try {
       final profile = await updatePasswordUseCase.call(

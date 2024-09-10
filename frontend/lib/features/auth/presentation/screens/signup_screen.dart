@@ -39,6 +39,8 @@ class SignupScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(30.0),
                   child: BlocListener<AuthBloc, AuthState>(
                       listener: (context, state) {
+                    final errorMapper = ErrorMapper(context);
+
                     if (state is AuthAuthenticatedAfterRegistration) {
                       if (state.recoveryCodes != null) {
                         context.go('/recovery-codes');
@@ -48,11 +50,9 @@ class SignupScreen extends StatelessWidget {
                     }
                     if (state is AuthUnauthenticated) {
                       if (state.error != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(ErrorMapper.mapFailureToMessage(
-                                  context, state.error!))),
-                        );
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(errorMapper
+                                .mapFailureToMessage(state.error!))));
                       }
                     }
                   }, child: BlocBuilder<AuthBloc, AuthState>(

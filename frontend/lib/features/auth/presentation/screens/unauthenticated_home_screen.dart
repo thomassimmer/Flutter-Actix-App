@@ -20,15 +20,15 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: BlocListener<AuthBloc, AuthState>(
                 listener: (context, state) {
+                  final errorMapper = ErrorMapper(context);
+
                   if (state is AuthAuthenticatedAfterLogin) {
                     context.go('/home');
                   } else if (state is AuthUnauthenticated) {
                     if (state.error != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text(ErrorMapper.mapFailureToMessage(
-                                context, state.error!))),
-                      );
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(
+                              errorMapper.mapFailureToMessage(state.error!))));
                     }
                   }
                 },

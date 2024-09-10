@@ -23,3 +23,7 @@ class PasswordMustBeChangedError extends DataError {}
 class UserAlreadyExistingError extends DataError {}
 
 class PasswordNotExpiredError extends DataError {}
+
+class InvalidRefreshTokenError extends DataError {}
+
+class RefreshTokenNotFoundError extends DataError {}

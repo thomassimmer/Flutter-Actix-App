@@ -7,7 +7,7 @@ import 'package:flutteractixapp/features/profile/presentation/bloc/profile_state
 import 'package:flutteractixapp/features/profile/presentation/screen/language_selection_screen.dart';
 import 'package:flutteractixapp/features/profile/presentation/screen/password_screen.dart';
 import 'package:flutteractixapp/features/profile/presentation/screen/theme_selection_screen.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/two_factor_authentication_screen%20copy.dart';
+import 'package:flutteractixapp/features/profile/presentation/screen/two_factor_authentication_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
