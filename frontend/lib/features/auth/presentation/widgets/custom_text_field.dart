@@ -7,15 +7,18 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final bool obscureText;
   final int? maxLength;
+  final String? errorText;
+  final void Function(String)? onChanged;
 
-  CustomTextField({
-    required this.controller,
-    required this.label,
-    this.keyboardType = TextInputType.text,
-    this.validator,
-    this.obscureText = false,
-    this.maxLength,
-  });
+  CustomTextField(
+      {required this.controller,
+      required this.label,
+      this.keyboardType = TextInputType.text,
+      this.validator,
+      this.obscureText = false,
+      this.maxLength,
+      this.errorText,
+      this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +29,13 @@ class CustomTextField extends StatelessWidget {
         keyboardType: keyboardType,
         obscureText: obscureText,
         maxLength: maxLength,
+        onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
+          errorMaxLines: 5,
           floatingLabelStyle: TextStyle(
-            color: Colors.blue.shade200, // Set the floating label color to white
+            color:
+                Colors.blue.shade200, // Set the floating label color to white
           ),
           filled: true,
           fillColor: Colors.white,
@@ -49,6 +55,20 @@ class CustomTextField extends StatelessWidget {
               width: 2.0,
             ),
           ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: BorderSide(
+              color: Colors.red.shade200,
+              width: 2.0,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: BorderSide(
+              color: Colors.red.shade900,
+            ),
+          ),
+          errorText: errorText,
         ),
         validator: validator,
       ),

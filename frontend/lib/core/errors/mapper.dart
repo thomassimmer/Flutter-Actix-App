@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
+import 'package:flutteractixapp/features/auth/presentation/cubit/login_models.dart';
 
 class ErrorMapper {
   final BuildContext context;
@@ -46,6 +47,10 @@ class ErrorMapper {
         return localizations.userAlreadyExistingError;
       case PasswordNotExpiredDomainError:
         return localizations.passwordNotExpiredError;
+      case PasswordTooShortError:
+      return localizations.passwordTooShortError;
+      case PasswordNotComplexEnough:
+      return localizations.passwordNotComplexEnough;
       default:
         return localizations.defaultError;
     }

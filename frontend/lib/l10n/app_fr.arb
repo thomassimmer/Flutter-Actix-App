@@ -77,5 +77,7 @@
   "forbiddenError": "Vous n'êtes pas autorisé à effectuer cette action.",
   "passwordMustBeChangedError": "Votre mot de passe doit être changé pour pouvoir vous connecter.",
   "userAlreadyExistingError": "Un utilisateur avec ce nom d'utilisateur existe déjà. Veuillez en choisir un autre.",
-  "passwordNotExpiredError": "Votre mot de passe n'est pas expiré. Vous ne pouvez pas le définir ainsi."
+  "passwordNotExpiredError": "Votre mot de passe n'est pas expiré. Vous ne pouvez pas le définir ainsi.",
+  "passwordNotComplexEnough": "Votre mot de passe doit contenir au moins une lettre, un chiffre et un caractère spécial.",
+  "passwordTooShortError": "Votre mot de passe doit contenir plus de 8 caractères."
 }
