@@ -32,7 +32,7 @@ class CustomTextField extends StatelessWidget {
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
-          errorMaxLines: 5,
+          errorMaxLines: 10,
           floatingLabelStyle: TextStyle(
             color:
                 Colors.blue.shade200, // Set the floating label color to white

@@ -31,3 +31,7 @@ class RefreshTokenNotFoundDomainError extends DomainError {}
 class PasswordTooShortError extends DomainError {}
 
 class PasswordNotComplexEnoughError extends DomainError {}
+
+class UsernameWrongSizeError extends DomainError {}
+
+class UsernameNotRespectingRulesError extends DomainError {}

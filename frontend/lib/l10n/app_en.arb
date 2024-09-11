@@ -95,5 +95,7 @@
   "userAlreadyExistingError": "A user with this username already exists. Please choose another one.",
   "passwordNotExpiredError": "Your password is not expired. You cannot set it like this.",
   "passwordNotComplexEnough": "Your password must contain at least a letter, a digit and a special symbol.",
-  "passwordTooShortError": "Your password must contain at least 8 characters."
+  "passwordTooShortError": "Your password must contain at least 8 characters.",
+  "usernameWrongSizeError": "The length of your username must be between 3 and 20 characters.",
+  "usernameNotRespectingRulesError": "Your username must respect these rules:\n - start and end with a letter or a digit\n - special characters allowed are . _ -\n - no consecutive special characters"
 }

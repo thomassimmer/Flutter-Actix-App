@@ -50,6 +50,10 @@ class ErrorMapper {
         return localizations.passwordTooShortError;
       case PasswordNotComplexEnoughError:
         return localizations.passwordNotComplexEnough;
+      case UsernameNotRespectingRulesError:
+        return localizations.usernameNotRespectingRulesError;
+      case UsernameWrongSizeError:
+        return localizations.usernameWrongSizeError;
       default:
         return localizations.defaultError;
     }

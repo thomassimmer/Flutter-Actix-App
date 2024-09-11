@@ -83,6 +83,13 @@ class SignupScreen extends StatelessWidget {
     final Brightness brightness = MediaQuery.of(context).platformBrightness;
     final String themeData = brightness == Brightness.dark ? "dark" : "light";
 
+    final displayUsernameError = context.select(
+      (LoginCubit cubit) => cubit.state.username.displayError,
+    );
+    final displayUsernameErrorMessage = displayUsernameError is Exception
+        ? ErrorMapper(context).mapFailureToMessage(displayUsernameError)
+        : null;
+
     final displayPasswordError = context.select(
       (LoginCubit cubit) => cubit.state.password.displayError,
     );
@@ -99,8 +106,11 @@ class SignupScreen extends StatelessWidget {
         SizedBox(height: 16),
         CustomTextField(
           controller: _usernameController,
+          onChanged: (username) =>
+              context.read<LoginCubit>().usernameChanged(username),
           label: AppLocalizations.of(context)!.username,
           obscureText: false,
+          errorText: displayUsernameErrorMessage,
         ),
         SizedBox(height: 16),
         CustomTextField(

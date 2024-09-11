@@ -7,11 +7,11 @@ class LoginCubit extends Cubit<LoginState> {
   LoginCubit() : super(const LoginState());
 
   void usernameChanged(String value) {
-    final email = Username.dirty(value);
+    final username = Username.dirty(value);
     emit(
       state.copyWith(
-        username: email,
-        isValid: Formz.validate([email, state.password]),
+        username: username,
+        isValid: Formz.validate([username, state.password]),
       ),
     );
   }
