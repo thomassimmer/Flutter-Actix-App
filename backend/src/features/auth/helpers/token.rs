@@ -117,7 +117,7 @@ pub fn retrieve_claims_for_token(req: HttpRequest, secret: String) -> Result<Cla
 
             match token_data {
                 Ok(token_data) => Ok(token_data.claims),
-                Err(e) => Err(AuthError::TokenDecodingError(e)),
+                Err(e) => Err(AuthError::TokenDecodingError(e)), // TODO
             }
         } else {
             Err(AuthError::InvalidAuthHeader)

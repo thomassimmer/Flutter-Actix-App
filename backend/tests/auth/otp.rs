@@ -157,7 +157,7 @@ async fn registered_user_can_disable_otp() {
 }
 
 #[tokio::test]
-async fn wrong_token_user_can_generate_otp() {
+async fn user_cannot_generate_otp_with_wrong_token() {
     let app = spawn_app().await;
 
     let req = test::TestRequest::get()

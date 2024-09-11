@@ -74,7 +74,7 @@ async fn user_can_recover_account_using_password() {
 }
 
 #[tokio::test]
-async fn user_cannot_recover_account_using_password_without_2fa_enabled() {
+async fn user_cannot_recover_using_password_without_2fa() {
     let app = spawn_app().await;
     user_signs_up(&app).await;
 

@@ -36,7 +36,7 @@ pub async fn user_has_access_to_protected_route(
 }
 
 #[tokio::test]
-pub async fn user_update_its_profile() {
+pub async fn user_can_update_profile() {
     let app = spawn_app().await;
     let (access_token, _, _) = user_signs_up(&app).await;
 

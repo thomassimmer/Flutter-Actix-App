@@ -57,7 +57,7 @@ async fn registered_user_can_access_profile_information() {
 }
 
 #[tokio::test]
-async fn wrong_token_cannot_access_profile_information() {
+async fn user_with_invalid_token_cannot_access_profile_information() {
     let app = spawn_app().await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
@@ -86,10 +86,8 @@ async fn wrong_token_cannot_access_profile_information() {
 }
 
 #[tokio::test]
-async fn no_token_cannot_access_profile_information() {
+async fn unauthenticated_user_cannot_access_profile_information() {
     let app = spawn_app().await;
-
-    // No token would not work
     let req = test::TestRequest::get().uri("/api/users/me").to_request();
     let response = test::call_service(&app, req).await;
 
@@ -97,7 +95,7 @@ async fn no_token_cannot_access_profile_information() {
 }
 
 #[tokio::test]
-async fn user_cannot_create_account_with_already_existing_username() {
+async fn user_cannot_signup_with_existing_username() {
     let app = spawn_app().await;
     user_signs_up(&app).await;
 
@@ -122,7 +120,7 @@ async fn user_cannot_create_account_with_already_existing_username() {
 }
 
 #[tokio::test]
-async fn user_cannot_create_account_with_too_short_password() {
+async fn user_cannot_signup_with_short_password() {
     let app = spawn_app().await;
 
     let req = test::TestRequest::post()
@@ -143,4 +141,76 @@ async fn user_cannot_create_account_with_too_short_password() {
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "PASSWORD_TOO_SHORT");
+}
+
+#[tokio::test]
+async fn user_cannot_signup_with_short_username() {
+    let app = spawn_app().await;
+
+    let req = test::TestRequest::post()
+        .uri("/api/auth/signup")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+        "username": "te",
+        "password": "password1_",
+        "locale": "en",
+        "theme": "dark",
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(401, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "USERNAME_WRONG_SIZE");
+}
+
+#[tokio::test]
+async fn user_cannot_signup_with_long_username() {
+    let app = spawn_app().await;
+
+    let req = test::TestRequest::post()
+        .uri("/api/auth/signup")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+        "username": "testusernametestusernametestusername",
+        "password": "password1_",
+        "locale": "en",
+        "theme": "dark",
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(401, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "USERNAME_WRONG_SIZE");
+}
+
+#[tokio::test]
+async fn user_cannot_signup_with_username_not_respecting_rules() {
+    let app = spawn_app().await;
+
+    let req = test::TestRequest::post()
+        .uri("/api/auth/signup")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+        "username": "__x__",
+        "password": "password1_",
+        "locale": "en",
+        "theme": "dark",
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(401, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "USERNAME_NOT_RESPECTING_RULES");
 }

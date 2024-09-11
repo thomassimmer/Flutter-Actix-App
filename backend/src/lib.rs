@@ -30,6 +30,7 @@ pub mod features {
             pub mod errors;
             pub mod password;
             pub mod token;
+            pub mod username;
         }
 
         pub mod routes {

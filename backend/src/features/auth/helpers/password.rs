@@ -1,4 +1,4 @@
-use crate::features::profile::structs::models::User;
+use crate::{core::constants::errors::AppError, features::profile::structs::models::User};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 
 pub fn password_is_valid(user: &User, password: &str) -> bool {
@@ -30,4 +30,16 @@ pub fn password_is_strong_enough(input: &str) -> bool {
         .all(|c| c.is_ascii_alphanumeric() || "@$!%*?&_".contains(c));
 
     has_letter && has_digit && has_special && valid_characters
+}
+
+pub fn is_password_valid(input: &str) -> Option<AppError> {
+    if !password_is_long_enough(input) {
+        return Some(AppError::PasswordTooShort);
+    }
+
+    if !password_is_strong_enough(input) {
+        return Some(AppError::PasswordTooWeak);
+    }
+
+    None
 }
