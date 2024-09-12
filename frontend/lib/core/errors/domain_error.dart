@@ -1,11 +1,41 @@
-abstract class DomainError implements Exception {}
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class UnknownDomainError extends DomainError {}
+abstract class DomainError implements Exception {
+  String display(BuildContext context);
+}
 
-class InternalServerDomainError extends DomainError {}
+class UnknownDomainError extends DomainError {
+  String display(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    return localizations.unknownError;
+  }
+}
 
-class InvalidRequestDomainError extends DomainError {}
+class InternalServerDomainError extends DomainError {
+  String display(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    return localizations.internalServerError;
+  }
+}
 
-class InvalidResponseDomainError extends DomainError {}
+class InvalidRequestDomainError extends DomainError {
+  String display(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    return localizations.invalidRequestError;
+  }
+}
 
-class ForbiddenDomainError extends DomainError {}
+class InvalidResponseDomainError extends DomainError {
+  String display(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    return localizations.invalidResponseError;
+  }
+}
+
+class ForbiddenDomainError extends DomainError {
+  String display(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    return localizations.forbiddenError;
+  }
+}

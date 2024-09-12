@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/core/errors/mapper.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
@@ -44,8 +43,6 @@ class RecoverAccountScreen extends StatelessWidget {
                         },
                         child: BlocBuilder<AuthBloc, AuthState>(
                           builder: (context, state) {
-                            final errorMapper = ErrorMapper(context);
-
                             if (state
                                 is AuthRecoveringAccountWithOtpEnabledAndUsingPassword) {
                               return _buildRecoveryCodeAndPasswordView(
@@ -66,8 +63,7 @@ class RecoverAccountScreen extends StatelessWidget {
                               );
                             } else {
                               return Text(state.error != null
-                                  ? errorMapper
-                                      .mapFailureToMessage(state.error!)
+                                  ? state.error!.display(context)
                                   : AppLocalizations.of(context)!.noContent);
                             }
                           },

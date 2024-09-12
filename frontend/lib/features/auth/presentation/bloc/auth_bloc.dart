@@ -89,7 +89,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           recoveryCodes: userToken.recoveryCodes, hasVerifiedOtp: false));
     } catch (error) {
       emit(AuthUnauthenticated(
-          error: error is Exception ? error : UnknownDomainError()));
+          error: error is DomainError ? error : UnknownDomainError()));
     }
   }
 
@@ -110,7 +110,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         add(AuthLogoutRequested());
       } else {
         emit(AuthUnauthenticated(
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       }
     }
   }
@@ -132,7 +132,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthOtpVerify(
             otpAuthUrl: event.otpAuthUrl,
             otpBase32: event.otpBase32,
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       }
     }
   }
@@ -163,7 +163,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (error) {
       emit(AuthUnauthenticated(
-          error: error is Exception ? error : UnknownDomainError()));
+          error: error is DomainError ? error : UnknownDomainError()));
     }
   }
 
@@ -183,7 +183,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
     } catch (error) {
       emit(AuthOtpValidate(
-          error: error is Exception ? error : UnknownDomainError(),
+          error: error is DomainError ? error : UnknownDomainError(),
           userId: event.userId));
     }
   }
@@ -232,7 +232,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthRecoveringAccountUsernameStep(
           username: event.username,
           passwordForgotten: event.passwordForgotten,
-          error: error is Exception ? error : UnknownDomainError()));
+          error: error is DomainError ? error : UnknownDomainError()));
     }
   }
 
@@ -257,7 +257,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
     } catch (error) {
       emit(AuthUnauthenticated(
-          error: error is Exception ? error : UnknownDomainError()));
+          error: error is DomainError ? error : UnknownDomainError()));
     }
   }
 
@@ -281,7 +281,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
     } catch (error) {
       emit(AuthUnauthenticated(
-          error: error is Exception ? error : UnknownDomainError()));
+          error: error is DomainError ? error : UnknownDomainError()));
     }
   }
 
@@ -303,7 +303,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
     } catch (error) {
       emit(AuthUnauthenticated(
-          error: error is Exception ? error : UnknownDomainError()));
+          error: error is DomainError ? error : UnknownDomainError()));
     }
   }
 }
