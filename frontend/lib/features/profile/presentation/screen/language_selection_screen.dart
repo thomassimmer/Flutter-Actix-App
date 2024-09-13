@@ -5,6 +5,7 @@ import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_events.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
+import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 
 class LocaleSelectionScreen extends StatelessWidget {
   @override
@@ -16,8 +17,10 @@ class LocaleSelectionScreen extends StatelessWidget {
         body: BlocListener<ProfileBloc, ProfileState>(
           listener: (context, state) {
             if (state.error != null) {
+              final errorMessage =
+                  getProfileErrorMessage(context, state.error!);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.error!.display(context))),
+                SnackBar(content: Text(errorMessage)),
               );
             }
           },
