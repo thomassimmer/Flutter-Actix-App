@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart';
+import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/domain/repositories/auth_repository.dart';
 
 class DisableOtpUseCase {
@@ -6,7 +8,7 @@ class DisableOtpUseCase {
   DisableOtpUseCase(this.authRepository);
 
   /// Disable OTP authentication for the user.
-  Future<void> call() async {
-    await authRepository.disableOtp();
+  Future<Either<DomainError, bool>> call() async {
+    return await authRepository.disableOtp();
   }
 }

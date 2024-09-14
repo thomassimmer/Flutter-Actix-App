@@ -75,11 +75,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthSignupRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    try {
-      // We use the device locale by default on signup
-      final userToken = await signupUseCase.call(
-          event.username, event.password, Platform.localeName, event.theme);
+    // We use the device locale by default on signup
+    final result = await signupUseCase.call(
+        event.username, event.password, Platform.localeName, event.theme);
 
+    result.fold(
+        (error) =>
+            emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
+        (userToken) async {
       // Store tokens securely after successful login
       await TokenStorage().saveTokens(
         userToken.accessToken,
@@ -88,30 +91,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(AuthAuthenticatedAfterRegistration(
           recoveryCodes: userToken.recoveryCodes, hasVerifiedOtp: false));
-    } on DomainError catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey)));
-    } catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage('')));
-    }
+    });
   }
 
   void _onOtpGenerationRequested(
       AuthOtpGenerationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    try {
-      final generatedOtpConfig = await generateOtpConfigUseCase.call();
+    final result = await generateOtpConfigUseCase.call();
 
-      emit(AuthOtpVerify(
-          otpAuthUrl: generatedOtpConfig.otpAuthUrl,
-          otpBase32: generatedOtpConfig.otpBase32));
-    } on ShouldLogoutError catch (error) {
-      add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
-    } on DomainError catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey)));
-    } catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage('')));
-    }
+    result.fold((error) {
+      if (error is ShouldLogoutError) {
+        add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+      } else {
+        emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey)));
+      }
+    },
+        (generatedOtpConfig) => {
+              emit(AuthOtpVerify(
+                  otpAuthUrl: generatedOtpConfig.otpAuthUrl,
+                  otpBase32: generatedOtpConfig.otpBase32))
+            });
   }
 
   void _onOtpVerificationRequested(
@@ -143,10 +143,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthLoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    try {
-      final userTokenOrUserId =
-          await loginUseCase.call(event.username, event.password);
+    final result = await loginUseCase.call(event.username, event.password);
 
+    result.fold(
+        (error) =>
+            emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
+        (userTokenOrUserId) async {
       await userTokenOrUserId.fold(
         (userToken) async {
           // Store tokens securely after successful login
@@ -163,20 +165,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthOtpValidate(userId: userId));
         },
       );
-    } on DomainError catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey)));
-    } catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage('')));
-    }
+    });
   }
 
   void _onOtpValidationRequested(
       AuthOtpValidationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    try {
-      final userToken = await validateOtpUsecase.call(event.userId, event.code);
+    final result = await validateOtpUsecase.call(event.userId, event.code);
 
+    result.fold(
+        (error) => emit(AuthOtpValidate(
+            message: ErrorMessage(error.messageKey),
+            userId: event.userId)), (userToken) async {
       // Store tokens securely after successful login
       await TokenStorage().saveTokens(
         userToken.accessToken,
@@ -185,12 +186,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(AuthAuthenticatedAfterLogin(
           hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
-    } on DomainError catch (error) {
-      emit(AuthOtpValidate(
-          message: ErrorMessage(error.messageKey), userId: event.userId));
-    } catch (error) {
-      emit(AuthOtpValidate(message: ErrorMessage(''), userId: event.userId));
-    }
+    });
   }
 
   void _onLogoutRequested(
@@ -217,9 +213,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final currentState = state;
     emit(AuthLoading());
 
-    try {
-      final isOtpEnabled = await checkIfOtpEnabledUsecase.call(event.username);
+    final result = await checkIfOtpEnabledUsecase.call(event.username);
 
+    result.fold(
+        (error) => emit(AuthRecoveringAccountUsernameStep(
+            username: event.username,
+            passwordForgotten: event.passwordForgotten,
+            message: ErrorMessage(error.messageKey))), (isOtpEnabled) async {
       if (currentState is AuthRecoveringAccountUsernameStep) {
         if (isOtpEnabled) {
           if (currentState.passwordForgotten) {
@@ -237,17 +237,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               passwordForgotten: currentState.passwordForgotten));
         }
       }
-    } on DomainError catch (error) {
-      emit(AuthRecoveringAccountUsernameStep(
-          username: event.username,
-          passwordForgotten: event.passwordForgotten,
-          message: ErrorMessage(error.messageKey)));
-    } catch (error) {
-      emit(AuthRecoveringAccountUsernameStep(
-          username: event.username,
-          passwordForgotten: event.passwordForgotten,
-          message: ErrorMessage('')));
-    }
+    });
   }
 
   void _onAccountRecoveryWithOtpEnabledAndPasswordRequested(
@@ -255,13 +245,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    try {
-      final userToken =
-          await recoverAccountWithRecoveryCodeAndPasswordUseCase.call(
-              username: event.username,
-              password: event.password,
-              recoveryCode: event.recoveryCode);
+    final result = await recoverAccountWithRecoveryCodeAndPasswordUseCase.call(
+        username: event.username,
+        password: event.password,
+        recoveryCode: event.recoveryCode);
 
+    result.fold(
+        (error) =>
+            emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
+        (userToken) async {
       // Store tokens securely after successful login
       await TokenStorage().saveTokens(
         userToken.accessToken,
@@ -270,11 +262,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(AuthAuthenticatedAfterLogin(
           hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
-    } on DomainError catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey)));
-    } catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage('')));
-    }
+    });
   }
 
   void _onAccountRecoveryWithOtpEnabledAndOtpRequested(
@@ -282,12 +270,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    try {
-      final userToken = await recoverAccountWithRecoveryCodeAndOtpUseCase.call(
-          username: event.username,
-          code: event.code,
-          recoveryCode: event.recoveryCode);
+    final result = await recoverAccountWithRecoveryCodeAndOtpUseCase.call(
+        username: event.username,
+        code: event.code,
+        recoveryCode: event.recoveryCode);
 
+    result.fold(
+        (error) =>
+            emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
+        (userToken) async {
       // Store tokens securely after successful login
       await TokenStorage().saveTokens(
         userToken.accessToken,
@@ -296,11 +287,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(AuthAuthenticatedAfterLogin(
           hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
-    } on DomainError catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey)));
-    } catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage('')));
-    }
+    });
   }
 
   void _onAccountRecoveryWithOtpDisabledRequested(
@@ -308,10 +295,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    try {
-      final userToken = await recoverAccountWithRecoveryCodeUseCase.call(
-          username: event.username, recoveryCode: event.recoveryCode);
+    final result = await recoverAccountWithRecoveryCodeUseCase.call(
+        username: event.username, recoveryCode: event.recoveryCode);
 
+    result.fold(
+        (error) =>
+            emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
+        (userToken) async {
       // Store tokens securely after successful login
       await TokenStorage().saveTokens(
         userToken.accessToken,
@@ -320,10 +310,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(AuthAuthenticatedAfterLogin(
           hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
-    } on DomainError catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey)));
-    } catch (error) {
-      emit(AuthUnauthenticated(message: ErrorMessage('')));
-    }
+    });
   }
 }

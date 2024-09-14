@@ -104,9 +104,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     final currentState = state;
     emit(ProfileLoading(profile: state.profile));
 
-    try {
-      final generatedOtpConfig = await generateOtpConfigUseCase.call();
+    final result = await generateOtpConfigUseCase.call();
 
+    result.fold((error) {
+      if (error is ShouldLogoutError) {
+        authBloc
+            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+      } else {
+        if (currentState is ProfileAuthenticated) {
+          emit(ProfileAuthenticated(
+            profile: currentState.profile,
+            message: ErrorMessage(error.messageKey),
+          ));
+        } else {
+          emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
+        }
+      }
+    }, (generatedOtpConfig) {
       if (currentState is ProfileAuthenticated) {
         User profile = currentState.profile;
         profile.otpAuthUrl = generatedOtpConfig.otpAuthUrl;
@@ -117,28 +131,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           profile: profile,
         ));
       }
-    } on ShouldLogoutError catch (error) {
-      authBloc
-          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
-    } on DomainError catch (error) {
-      if (currentState is ProfileAuthenticated) {
-        emit(ProfileAuthenticated(
-          profile: currentState.profile,
-          message: ErrorMessage(error.messageKey),
-        ));
-      } else {
-        emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
-      }
-    } catch (error) {
-      if (currentState is ProfileAuthenticated) {
-        emit(ProfileAuthenticated(
-          profile: currentState.profile,
-          message: ErrorMessage(''),
-        ));
-      } else {
-        emit(ProfileUnauthenticated(message: ErrorMessage('')));
-      }
-    }
+    });
   }
 
   Future<void> _disableTwoFactorAuthentication(

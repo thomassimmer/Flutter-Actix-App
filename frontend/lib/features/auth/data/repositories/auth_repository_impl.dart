@@ -22,7 +22,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<UserToken> signup(
+  Future<Either<DomainError, UserToken>> signup(
       {required String username,
       required String password,
       required String locale,
@@ -35,39 +35,39 @@ class AuthRepositoryImpl implements AuthRepository {
               locale: locale,
               theme: theme));
 
-      return UserToken(
+      return Right(UserToken(
           accessToken: userTokenModel.accessToken,
           refreshToken: userTokenModel.refreshToken,
-          recoveryCodes: userTokenModel.recoveryCodes);
+          recoveryCodes: userTokenModel.recoveryCodes));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UserAlreadyExistingError {
       logger.e('UserAlreadyExistingError occured');
-      throw UserAlreadyExistingDomainError();
+      return Left(UserAlreadyExistingDomainError());
     } on PasswordTooShortError {
       logger.e('PasswordTooShortError occured.');
-      throw PasswordTooShortError();
+      return Left(PasswordTooShortError());
     } on PasswordNotComplexEnoughError {
       logger.e('PasswordNotComplexEnoughError occured.');
-      throw PasswordNotComplexEnoughError();
+      return Left(PasswordNotComplexEnoughError());
     } on UsernameWrongSizeError {
       logger.e('UsernameWrongSizeError occured.');
-      throw UsernameWrongSizeError();
+      return Left(UsernameWrongSizeError());
     } on UsernameNotRespectingRulesError {
       logger.e('UsernameNotRespectingRulesError occured.');
-      throw UsernameNotRespectingRulesError();
+      return Left(UsernameNotRespectingRulesError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<Either<UserToken, String>> login({
+  Future<Either<DomainError, Either<UserToken, String>>> login({
     required String username,
     required String password,
   }) async {
@@ -76,105 +76,105 @@ class AuthRepositoryImpl implements AuthRepository {
           .login(LoginUserRequestModel(username: username, password: password));
 
       return result.fold(
-          (userTokenModel) => Left(UserToken(
+          (userTokenModel) => Right(Left(UserToken(
                 accessToken: userTokenModel.accessToken,
                 refreshToken: userTokenModel.refreshToken,
-              )),
-          (string) => Right(string));
+              ))),
+          (string) => Right(Right(string)));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on InvalidUsernameOrPasswordError {
       logger.e('InvalidUsernameOrPasswordError occured.');
-      throw InvalidUsernameOrPasswordDomainError();
+      return Left(InvalidUsernameOrPasswordDomainError());
     } on ForbiddenError {
       logger.e('ForbiddenError occured.');
-      throw ForbiddenDomainError();
+      return Left(ForbiddenDomainError());
     } on PasswordMustBeChangedError {
       logger.e('PasswordMustBeChangedError occured.');
-      throw PasswordMustBeChangedDomainError();
+      return Left(PasswordMustBeChangedDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<GeneratedOtpConfig> generateOtpConfig() async {
+  Future<Either<DomainError, GeneratedOtpConfig>> generateOtpConfig() async {
     try {
       final generatedOtpConfigModel =
           await remoteDataSource.generateOtpConfig();
 
-      return GeneratedOtpConfig(
+      return Right(GeneratedOtpConfig(
           otpBase32: generatedOtpConfigModel.otpBase32,
-          otpAuthUrl: generatedOtpConfigModel.otpAuthUrl);
+          otpAuthUrl: generatedOtpConfigModel.otpAuthUrl));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InvalidRefreshTokenError {
       logger.e('InvalidRefreshTokenError occured.');
-      throw InvalidRefreshTokenDomainError();
+      return Left(InvalidRefreshTokenDomainError());
     } on RefreshTokenNotFoundError {
       logger.e('RefreshTokenNotFoundError occured.');
-      throw RefreshTokenNotFoundDomainError();
+      return Left(RefreshTokenNotFoundDomainError());
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
-      throw RefreshTokenExpiredDomainError();
+      return Left(RefreshTokenExpiredDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<bool> verifyOtp({
+  Future<Either<DomainError, bool>> verifyOtp({
     required String code,
   }) async {
     try {
       final result =
           await remoteDataSource.verifyOtp(VerifyOtpRequestModel(code: code));
-      return result;
+      return Right(result);
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InvalidRefreshTokenError {
       logger.e('InvalidRefreshTokenError occured.');
-      throw InvalidRefreshTokenDomainError();
+      return Left(InvalidRefreshTokenDomainError());
     } on RefreshTokenNotFoundError {
       logger.e('RefreshTokenNotFoundError occured.');
-      throw RefreshTokenNotFoundDomainError();
+      return Left(RefreshTokenNotFoundDomainError());
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
-      throw RefreshTokenExpiredDomainError();
+      return Left(RefreshTokenExpiredDomainError());
     } on InvalidOneTimePasswordError {
       logger.e('InvalidOneTimePasswordError occured.');
-      throw InvalidOneTimePasswordDomainError();
+      return Left(InvalidOneTimePasswordDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<UserToken> validateOtp({
+  Future<Either<DomainError, UserToken>> validateOtp({
     required String userId,
     required String code,
   }) async {
@@ -182,80 +182,82 @@ class AuthRepositoryImpl implements AuthRepository {
       final userTokenModel = await remoteDataSource
           .validateOtp(ValidateOtpRequestModel(userId: userId, code: code));
 
-      return UserToken(
+      return Right(UserToken(
         accessToken: userTokenModel.accessToken,
         refreshToken: userTokenModel.refreshToken,
-      );
+      ));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } on InvalidOneTimePasswordError {
       logger.e('InvalidOneTimePasswordError occured.');
-      throw InvalidOneTimePasswordDomainError();
+      return Left(InvalidOneTimePasswordDomainError());
     } on UserNotFoundError {
       logger.e('UserNotFoundError occured.');
-      throw UserNotFoundDomainError();
+      return Left(UserNotFoundDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<bool> disableOtp() async {
+  Future<Either<DomainError, bool>> disableOtp() async {
     try {
       final result = await remoteDataSource.disableOtp();
-      return result;
+      return Right(result);
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InvalidRefreshTokenError {
       logger.e('InvalidRefreshTokenError occured.');
-      throw InvalidRefreshTokenDomainError();
+      return Left(InvalidRefreshTokenDomainError());
     } on RefreshTokenNotFoundError {
       logger.e('RefreshTokenNotFoundError occured.');
-      throw RefreshTokenNotFoundDomainError();
+      return Left(RefreshTokenNotFoundDomainError());
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
-      throw RefreshTokenExpiredDomainError();
+      return Left(RefreshTokenExpiredDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<bool> checkIfOtpEnabled({required String username}) async {
+  Future<Either<DomainError, bool>> checkIfOtpEnabled(
+      {required String username}) async {
     try {
       final result = await remoteDataSource
           .checkIfOtpEnabled(CheckIfOtpEnabledRequestModel(username: username));
-      return result;
+      return Right(result);
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<UserToken> recoverAccountWithRecoveryCodeAndPassword({
+  Future<Either<DomainError, UserToken>>
+      recoverAccountWithRecoveryCodeAndPassword({
     required String username,
     required String password,
     required String recoveryCode,
@@ -268,33 +270,33 @@ class AuthRepositoryImpl implements AuthRepository {
                   username: username,
                   recoveryCode: recoveryCode));
 
-      return UserToken(
+      return Right(UserToken(
         accessToken: userTokenModel.accessToken,
         refreshToken: userTokenModel.refreshToken,
-      );
+      ));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } on InvalidUsernameOrPasswordOrRecoveryCodeError {
       logger.e('InvalidUsernameOrPasswordOrRecoveryCodeError occured.');
-      throw InvalidUsernameOrPasswordOrRecoveryCodeDomainError;
+      return Left(InvalidUsernameOrPasswordOrRecoveryCodeDomainError());
     } on TwoFactorAuthenticationNotEnabledError {
       logger.e('TwoFactorAuthenticationNotEnabledError occured.');
-      throw TwoFactorAuthenticationNotEnabledDomainError;
+      return Left(TwoFactorAuthenticationNotEnabledDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<UserToken> recoverAccountWithRecoveryCodeAndOtp({
+  Future<Either<DomainError, UserToken>> recoverAccountWithRecoveryCodeAndOtp({
     required String username,
     required String code,
     required String recoveryCode,
@@ -305,33 +307,33 @@ class AuthRepositoryImpl implements AuthRepository {
               RecoverAccountWithRecoveryCodeAndOtpRequestModel(
                   code: code, username: username, recoveryCode: recoveryCode));
 
-      return UserToken(
+      return Right(UserToken(
         accessToken: userTokenModel.accessToken,
         refreshToken: userTokenModel.refreshToken,
-      );
+      ));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } on InvalidUsernameOrCodeOrRecoveryCodeError {
       logger.e('InvalidUsernameOrCodeOrRecoveryCodeError occured.');
-      throw InvalidUsernameOrCodeOrRecoveryCodeDomainError;
+      return Left(InvalidUsernameOrCodeOrRecoveryCodeDomainError());
     } on TwoFactorAuthenticationNotEnabledError {
       logger.e('TwoFactorAuthenticationNotEnabledError occured.');
-      throw TwoFactorAuthenticationNotEnabledDomainError;
+      return Left(TwoFactorAuthenticationNotEnabledDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<UserToken> recoverAccountWithRecoveryCode({
+  Future<Either<DomainError, UserToken>> recoverAccountWithRecoveryCode({
     required String username,
     required String recoveryCode,
   }) async {
@@ -341,25 +343,25 @@ class AuthRepositoryImpl implements AuthRepository {
               RecoverAccountWithRecoveryCodeRequestModel(
                   username: username, recoveryCode: recoveryCode));
 
-      return UserToken(
+      return Right(UserToken(
         accessToken: userTokenModel.accessToken,
         refreshToken: userTokenModel.refreshToken,
-      );
+      ));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } on InvalidUsernameOrRecoveryCodeError {
       logger.e('InvalidUsernameOrRecoveryCodeError occured.');
-      throw InvalidUsernameOrRecoveryCodeDomainError;
+      return Left(InvalidUsernameOrRecoveryCodeDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 }
