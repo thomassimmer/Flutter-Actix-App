@@ -3,7 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutteractixapp/core/errors/data_error.dart';
+import 'package:flutteractixapp/core/messages/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/profile/data/models/user_model.dart';

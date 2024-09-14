@@ -6,7 +6,6 @@ import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_f
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_events.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
-import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class TwoFactorAuthenticationScreen extends StatelessWidget {
@@ -20,16 +19,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
       ),
       body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: BlocListener<ProfileBloc, ProfileState>(
-              listener: (context, state) {
-            if (state.error != null) {
-              final errorMessage =
-                  getProfileErrorMessage(context, state.error!);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(errorMessage)),
-              );
-            }
-          }, child: BlocBuilder<ProfileBloc, ProfileState>(
+          child: BlocBuilder<ProfileBloc, ProfileState>(
             builder: (context, state) {
               if (state is ProfileAuthenticated) {
                 if (state.profile.otpVerified) {
@@ -47,7 +37,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                         AppLocalizations.of(context)!.failedToLoadProfile));
               }
             },
-          ))),
+          )),
     );
   }
 

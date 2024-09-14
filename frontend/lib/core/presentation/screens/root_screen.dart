@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/themes/app_theme.dart';
+import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/core/widgets/icon_with_warning.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
@@ -10,7 +11,6 @@ import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
-import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 import 'package:go_router/go_router.dart';
 
 class RootScreen extends StatelessWidget {
@@ -55,25 +55,14 @@ class RootScreen extends StatelessWidget {
     return MultiBlocListener(
         listeners: [
           BlocListener<AuthBloc, AuthState>(listener: (context, state) {
+            GlobalSnackBar.show(context, state.message);
+
             if (state is AuthUnauthenticated) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text(AppLocalizations.of(context)!.successfullyLogout)),
-              );
               context.go('/');
             }
           }),
           BlocListener<ProfileBloc, ProfileState>(listener: (context, state) {
-            if (state is ProfileUnauthenticated) {
-              if (state.error != null) {
-                final errorMessage =
-                    getProfileErrorMessage(context, state.error!);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(errorMessage)),
-                );
-              }
-            }
+            GlobalSnackBar.show(context, state.message);
           }),
         ],
         child:

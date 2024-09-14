@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/core/errors/domain_error.dart';
+import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
+import 'package:flutteractixapp/core/messages/message.dart';
+import 'package:flutteractixapp/core/messages/message_mapper.dart';
 import 'package:flutteractixapp/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_events.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
-import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 
 class PasswordScreen extends StatelessWidget {
   final TextEditingController _currentPasswordController =
@@ -23,16 +24,7 @@ class PasswordScreen extends StatelessWidget {
       ),
       body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: BlocListener<ProfileBloc, ProfileState>(
-              listener: (context, state) {
-            if (state.error != null) {
-              final errorMessage =
-                  getProfileErrorMessage(context, state.error!);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(errorMessage)),
-              );
-            }
-          }, child: BlocBuilder<ProfileBloc, ProfileState>(
+          child: BlocBuilder<ProfileBloc, ProfileState>(
             builder: (context, state) {
               if (state is ProfileAuthenticated) {
                 if (state.profile.passwordIsExpired) {
@@ -48,7 +40,7 @@ class PasswordScreen extends StatelessWidget {
                         AppLocalizations.of(context)!.failedToLoadProfile));
               }
             },
-          ))),
+          )),
     );
   }
 
@@ -58,7 +50,8 @@ class PasswordScreen extends StatelessWidget {
       (LoginCubit cubit) => cubit.state.password.displayError,
     );
     final displayPasswordErrorMessage = displayPasswordError is DomainError
-        ? getProfileErrorMessage(context, displayPasswordError)
+        ? getTranslatedMessage(
+            context, ErrorMessage(displayPasswordError.messageKey))
         : null;
 
     return SingleChildScrollView(
@@ -117,7 +110,8 @@ class PasswordScreen extends StatelessWidget {
       (LoginCubit cubit) => cubit.state.password.displayError,
     );
     final displayPasswordErrorMessage = displayPasswordError is DomainError
-        ? getProfileErrorMessage(context, displayPasswordError)
+        ? getTranslatedMessage(
+            context, ErrorMessage(displayPasswordError.messageKey))
         : null;
 
     return SingleChildScrollView(

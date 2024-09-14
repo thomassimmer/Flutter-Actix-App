@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:flutteractixapp/core/errors/domain_error.dart';
+import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
+import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/disable_otp_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/generate_otp_config_use_case.dart';
@@ -66,7 +67,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         authBloc.add(AuthLogoutRequested());
       } else {
         emit(ProfileUnauthenticated(
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       }
     }
   }
@@ -84,7 +87,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     try {
       final profile = await postProfileUsecase.call(event.profile);
 
-      emit(ProfileAuthenticated(profile: profile));
+      emit(ProfileAuthenticated(
+          profile: profile,
+          message: SuccessMessage('profileUpdateSuccessfully')));
     } catch (error) {
       if (error is InvalidRefreshTokenDomainError ||
           error is RefreshTokenExpiredDomainError ||
@@ -93,11 +98,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
-          error: error is DomainError ? error : UnknownDomainError(),
+          message: ErrorMessage(error is DomainError
+              ? error.messageKey
+              : UnknownDomainError().messageKey),
         ));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       }
     }
   }
@@ -128,10 +137,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       }
     }
   }
@@ -162,10 +175,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       }
     }
   }
@@ -194,11 +211,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
-          error: error is DomainError ? error : UnknownDomainError(),
+          message: ErrorMessage(error is DomainError
+              ? error.messageKey
+              : UnknownDomainError().messageKey),
         ));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       }
     }
   }
@@ -212,7 +233,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final profile =
           await setPasswordUseCase.call(newPassword: event.newPassword);
 
-      emit(ProfileAuthenticated(profile: profile));
+      emit(ProfileAuthenticated(
+          profile: profile,
+          message: SuccessMessage('passwordUpdateSuccessfully')));
     } catch (error) {
       if (error is InvalidRefreshTokenDomainError ||
           error is RefreshTokenExpiredDomainError ||
@@ -221,10 +244,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       }
     }
   }
@@ -239,7 +266,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           currentPassword: event.currentPassword,
           newPassword: event.newPassword);
 
-      emit(ProfileAuthenticated(profile: profile));
+      emit(ProfileAuthenticated(
+          profile: profile,
+          message: SuccessMessage('passwordUpdateSuccessfully')));
     } catch (error) {
       if (error is InvalidRefreshTokenDomainError ||
           error is RefreshTokenExpiredDomainError ||
@@ -248,10 +277,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       }
     }
   }
