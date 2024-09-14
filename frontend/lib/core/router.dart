@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutteractixapp/core/presentation/screens/root_screen.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/recover_account_screen.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/recovery_codes_screen.dart';

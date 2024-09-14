@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
 
 class HabitsScreen extends StatelessWidget {
   @override

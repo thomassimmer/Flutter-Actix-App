@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:dartz/dartz.dart';
 import 'package:flutteractixapp/core/messages/errors/data_error.dart';
 import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
@@ -19,44 +20,44 @@ class ProfileRepositoryImpl implements ProfileRepository {
   ProfileRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<User> getProfileInformation() async {
+  Future<Either<DomainError, User>> getProfileInformation() async {
     try {
       final userModel = await remoteDataSource.getProfileInformation();
 
-      return User(
+      return Right(User(
           username: userModel.username,
           locale: userModel.locale,
           theme: userModel.theme,
           otpBase32: userModel.otpBase32,
           otpAuthUrl: userModel.otpAuthUrl,
           otpVerified: userModel.otpVerified,
-          passwordIsExpired: userModel.passwordIsExpired);
+          passwordIsExpired: userModel.passwordIsExpired));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InvalidRefreshTokenError {
       logger.e('InvalidRefreshTokenError occured.');
-      throw InvalidRefreshTokenDomainError();
+      return Left(InvalidRefreshTokenDomainError());
     } on RefreshTokenNotFoundError {
       logger.e('RefreshTokenNotFoundError occured.');
-      throw RefreshTokenNotFoundDomainError();
+      return Left(RefreshTokenNotFoundDomainError());
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
-      throw RefreshTokenExpiredDomainError();
+      return Left(RefreshTokenExpiredDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<User> postProfileInformation(User profile) async {
+  Future<Either<DomainError, User>> postProfileInformation(User profile) async {
     try {
       final userModel = await remoteDataSource.postProfileInformation(
           UpdateUserRequestModel(
@@ -64,131 +65,131 @@ class ProfileRepositoryImpl implements ProfileRepository {
               locale: profile.locale,
               theme: profile.theme));
 
-      return User(
+      return Right(User(
           username: userModel.username,
           locale: userModel.locale,
           theme: userModel.theme,
           otpBase32: userModel.otpBase32,
           otpAuthUrl: userModel.otpAuthUrl,
           otpVerified: userModel.otpVerified,
-          passwordIsExpired: userModel.passwordIsExpired);
+          passwordIsExpired: userModel.passwordIsExpired));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InvalidRefreshTokenError {
       logger.e('InvalidRefreshTokenError occured.');
-      throw InvalidRefreshTokenDomainError();
+      return Left(InvalidRefreshTokenDomainError());
     } on RefreshTokenNotFoundError {
       logger.e('RefreshTokenNotFoundError occured.');
-      throw RefreshTokenNotFoundDomainError();
+      return Left(RefreshTokenNotFoundDomainError());
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
-      throw RefreshTokenExpiredDomainError();
+      return Left(RefreshTokenExpiredDomainError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<User> setPassword(String newPassword) async {
+  Future<Either<DomainError, User>> setPassword(String newPassword) async {
     try {
       final userModel = await remoteDataSource
           .setPassword(SetPasswordRequestModel(newPassword: newPassword));
 
-      return User(
+      return Right(User(
           username: userModel.username,
           locale: userModel.locale,
           theme: userModel.theme,
           otpBase32: userModel.otpBase32,
           otpAuthUrl: userModel.otpAuthUrl,
           otpVerified: userModel.otpVerified,
-          passwordIsExpired: userModel.passwordIsExpired);
+          passwordIsExpired: userModel.passwordIsExpired));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on PasswordNotExpiredError {
       logger.e('PasswordNotExpiredError occured.');
-      throw PasswordNotExpiredDomainError();
+      return Left(PasswordNotExpiredDomainError());
     } on RefreshTokenNotFoundError {
       logger.e('RefreshTokenNotFoundError occured.');
-      throw RefreshTokenNotFoundDomainError();
+      return Left(RefreshTokenNotFoundDomainError());
     } on InvalidRefreshTokenError {
       logger.e('InvalidRefreshTokenError occured.');
-      throw InvalidRefreshTokenDomainError();
+      return Left(InvalidRefreshTokenDomainError());
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
-      throw RefreshTokenExpiredDomainError();
+      return Left(RefreshTokenExpiredDomainError());
     } on PasswordTooShortError {
       logger.e('PasswordTooShortError occured.');
-      throw PasswordTooShortError();
+      return Left(PasswordTooShortError());
     } on PasswordNotComplexEnoughError {
       logger.e('PasswordNotComplexEnoughError occured.');
-      throw PasswordNotComplexEnoughError();
+      return Left(PasswordNotComplexEnoughError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 
   @override
-  Future<User> updatePassword(
+  Future<Either<DomainError, User>> updatePassword(
       String currentPassword, String newPassword) async {
     try {
       final userModel = await remoteDataSource.updatePassword(
           UpdatePasswordRequestModel(
               currentPassword: currentPassword, newPassword: newPassword));
 
-      return User(
+      return Right(User(
           username: userModel.username,
           locale: userModel.locale,
           theme: userModel.theme,
           otpBase32: userModel.otpBase32,
           otpAuthUrl: userModel.otpAuthUrl,
           otpVerified: userModel.otpVerified,
-          passwordIsExpired: userModel.passwordIsExpired);
+          passwordIsExpired: userModel.passwordIsExpired));
     } on ParsingError {
       logger.e('ParsingError occurred.');
-      throw InvalidResponseDomainError();
+      return Left(InvalidResponseDomainError());
     } on InvalidUsernameOrPasswordError {
       logger.e('InvalidUsernameOrPasswordError occured.');
-      throw InvalidUsernameOrPasswordDomainError();
+      return Left(InvalidUsernameOrPasswordDomainError());
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
-      throw UnauthorizedDomainError();
+      return Left(UnauthorizedDomainError());
     } on InvalidRefreshTokenError {
       logger.e('InvalidRefreshTokenError occured.');
-      throw InvalidRefreshTokenDomainError();
+      return Left(InvalidRefreshTokenDomainError());
     } on RefreshTokenNotFoundError {
       logger.e('RefreshTokenNotFoundError occured.');
-      throw RefreshTokenNotFoundDomainError();
+      return Left(RefreshTokenNotFoundDomainError());
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
-      throw RefreshTokenExpiredDomainError();
+      return Left(RefreshTokenExpiredDomainError());
     } on PasswordTooShortError {
       logger.e('PasswordTooShortError occured.');
-      throw PasswordTooShortError();
+      return Left(PasswordTooShortError());
     } on PasswordNotComplexEnoughError {
       logger.e('PasswordNotComplexEnoughError occured.');
-      throw PasswordNotComplexEnoughError();
+      return Left(PasswordNotComplexEnoughError());
     } on InternalServerError {
       logger.e('InternalServerError occured.');
-      throw InternalServerDomainError();
+      return Left(InternalServerDomainError());
     } catch (e) {
       logger.e('Data error occurred: ${e.toString()}');
-      throw UnknownDomainError();
+      return Left(UnknownDomainError());
     }
   }
 }
