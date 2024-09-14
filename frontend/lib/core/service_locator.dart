@@ -1,5 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutteractixapp/core/network/auth_interceptor.dart';
+import 'package:flutteractixapp/core/network/expired_token_retry_policy.dart';
 import 'package:flutteractixapp/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:flutteractixapp/features/auth/data/services/auth_service.dart';
 import 'package:flutteractixapp/features/auth/data/sources/remote_data_sources.dart';
@@ -34,12 +35,10 @@ void setup_service_locator() {
 
   final apiClient = InterceptedClient.build(
     interceptors: [
-      AuthInterceptor(
-          baseUrl: baseUrl,
-          authService: authService,
-          tokenStorage: tokenStorage)
+      AuthInterceptor(baseUrl: baseUrl, tokenStorage: tokenStorage)
     ],
     requestTimeout: Duration(seconds: 15),
+    retryPolicy: ExpiredTokenRetryPolicy(authService: authService),
   );
 
   // Remote Data Sources

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutteractixapp/core/messages/message.dart';
 
 abstract class AuthEvent extends Equatable {
   const AuthEvent();
@@ -9,7 +10,14 @@ abstract class AuthEvent extends Equatable {
 
 class AuthInitRequested extends AuthEvent {}
 
-class AuthLogoutRequested extends AuthEvent {}
+class AuthLogoutRequested extends AuthEvent {
+  final Message? message;
+
+  const AuthLogoutRequested({this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
 
 class AuthSignupRequested extends AuthEvent {
   final String username;
@@ -115,5 +123,3 @@ class AuthAccountRecoveryWithOtpEnabledAndOtpRequested extends AuthEvent {
   @override
   List<Object?> get props => [username, code, recoveryCode];
 }
-
-class AuthRecoveryCodeCopied extends AuthEvent {}

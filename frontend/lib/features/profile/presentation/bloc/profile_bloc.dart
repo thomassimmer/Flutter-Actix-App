@@ -60,17 +60,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     try {
       final profile = await getProfileUsecase.call();
       emit(ProfileAuthenticated(profile: profile));
+    } on ShouldLogoutError catch (error) {
+      authBloc
+          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+    } on DomainError catch (error) {
+      emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
     } catch (error) {
-      if (error is InvalidRefreshTokenDomainError ||
-          error is RefreshTokenExpiredDomainError ||
-          error is RefreshTokenNotFoundDomainError) {
-        authBloc.add(AuthLogoutRequested());
-      } else {
-        emit(ProfileUnauthenticated(
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
-      }
+      emit(ProfileUnauthenticated(message: ErrorMessage('')));
     }
   }
 
@@ -90,23 +86,26 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(ProfileAuthenticated(
           profile: profile,
           message: SuccessMessage('profileUpdateSuccessfully')));
-    } catch (error) {
-      if (error is InvalidRefreshTokenDomainError ||
-          error is RefreshTokenExpiredDomainError ||
-          error is RefreshTokenNotFoundDomainError) {
-        authBloc.add(AuthLogoutRequested());
-      } else if (currentState is ProfileAuthenticated) {
+    } on ShouldLogoutError catch (error) {
+      authBloc
+          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+    } on DomainError catch (error) {
+      if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
-          message: ErrorMessage(error is DomainError
-              ? error.messageKey
-              : UnknownDomainError().messageKey),
+          message: ErrorMessage(error.messageKey),
         ));
       } else {
-        emit(ProfileUnauthenticated(
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
+        emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
+      }
+    } catch (error) {
+      if (currentState is ProfileAuthenticated) {
+        emit(ProfileAuthenticated(
+          profile: currentState.profile,
+          message: ErrorMessage(''),
+        ));
+      } else {
+        emit(ProfileUnauthenticated(message: ErrorMessage('')));
       }
     }
   }
@@ -129,22 +128,26 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           profile: profile,
         ));
       }
-    } catch (error) {
-      if (error is InvalidRefreshTokenDomainError ||
-          error is RefreshTokenExpiredDomainError ||
-          error is RefreshTokenNotFoundDomainError) {
-        authBloc.add(AuthLogoutRequested());
-      } else if (currentState is ProfileAuthenticated) {
+    } on ShouldLogoutError catch (error) {
+      authBloc
+          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+    } on DomainError catch (error) {
+      if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
-            profile: currentState.profile,
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
+          profile: currentState.profile,
+          message: ErrorMessage(error.messageKey),
+        ));
       } else {
-        emit(ProfileUnauthenticated(
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
+        emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
+      }
+    } catch (error) {
+      if (currentState is ProfileAuthenticated) {
+        emit(ProfileAuthenticated(
+          profile: currentState.profile,
+          message: ErrorMessage(''),
+        ));
+      } else {
+        emit(ProfileUnauthenticated(message: ErrorMessage('')));
       }
     }
   }
@@ -167,22 +170,26 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           profile: profile,
         ));
       }
-    } catch (error) {
-      if (error is InvalidRefreshTokenDomainError ||
-          error is RefreshTokenExpiredDomainError ||
-          error is RefreshTokenNotFoundDomainError) {
-        authBloc.add(AuthLogoutRequested());
-      } else if (currentState is ProfileAuthenticated) {
+    } on ShouldLogoutError catch (error) {
+      authBloc
+          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+    } on DomainError catch (error) {
+      if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
-            profile: currentState.profile,
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
+          profile: currentState.profile,
+          message: ErrorMessage(error.messageKey),
+        ));
       } else {
-        emit(ProfileUnauthenticated(
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
+        emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
+      }
+    } catch (error) {
+      if (currentState is ProfileAuthenticated) {
+        emit(ProfileAuthenticated(
+          profile: currentState.profile,
+          message: ErrorMessage(''),
+        ));
+      } else {
+        emit(ProfileUnauthenticated(message: ErrorMessage('')));
       }
     }
   }
@@ -203,23 +210,26 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           profile: profile,
         ));
       }
-    } catch (error) {
-      if (error is InvalidRefreshTokenDomainError ||
-          error is RefreshTokenExpiredDomainError ||
-          error is RefreshTokenNotFoundDomainError) {
-        authBloc.add(AuthLogoutRequested());
-      } else if (currentState is ProfileAuthenticated) {
+    } on ShouldLogoutError catch (error) {
+      authBloc
+          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+    } on DomainError catch (error) {
+      if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
-          message: ErrorMessage(error is DomainError
-              ? error.messageKey
-              : UnknownDomainError().messageKey),
+          message: ErrorMessage(error.messageKey),
         ));
       } else {
-        emit(ProfileUnauthenticated(
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
+        emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
+      }
+    } catch (error) {
+      if (currentState is ProfileAuthenticated) {
+        emit(ProfileAuthenticated(
+          profile: currentState.profile,
+          message: ErrorMessage(''),
+        ));
+      } else {
+        emit(ProfileUnauthenticated(message: ErrorMessage('')));
       }
     }
   }
@@ -236,22 +246,26 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(ProfileAuthenticated(
           profile: profile,
           message: SuccessMessage('passwordUpdateSuccessfully')));
-    } catch (error) {
-      if (error is InvalidRefreshTokenDomainError ||
-          error is RefreshTokenExpiredDomainError ||
-          error is RefreshTokenNotFoundDomainError) {
-        authBloc.add(AuthLogoutRequested());
-      } else if (currentState is ProfileAuthenticated) {
+    } on ShouldLogoutError catch (error) {
+      authBloc
+          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+    } on DomainError catch (error) {
+      if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
-            profile: currentState.profile,
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
+          profile: currentState.profile,
+          message: ErrorMessage(error.messageKey),
+        ));
       } else {
-        emit(ProfileUnauthenticated(
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
+        emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
+      }
+    } catch (error) {
+      if (currentState is ProfileAuthenticated) {
+        emit(ProfileAuthenticated(
+          profile: currentState.profile,
+          message: ErrorMessage(''),
+        ));
+      } else {
+        emit(ProfileUnauthenticated(message: ErrorMessage('')));
       }
     }
   }
@@ -269,22 +283,26 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(ProfileAuthenticated(
           profile: profile,
           message: SuccessMessage('passwordUpdateSuccessfully')));
-    } catch (error) {
-      if (error is InvalidRefreshTokenDomainError ||
-          error is RefreshTokenExpiredDomainError ||
-          error is RefreshTokenNotFoundDomainError) {
-        authBloc.add(AuthLogoutRequested());
-      } else if (currentState is ProfileAuthenticated) {
+    } on ShouldLogoutError catch (error) {
+      authBloc
+          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+    } on DomainError catch (error) {
+      if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
-            profile: currentState.profile,
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
+          profile: currentState.profile,
+          message: ErrorMessage(error.messageKey),
+        ));
       } else {
-        emit(ProfileUnauthenticated(
-            message: ErrorMessage(error is DomainError
-                ? error.messageKey
-                : UnknownDomainError().messageKey)));
+        emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
+      }
+    } catch (error) {
+      if (currentState is ProfileAuthenticated) {
+        emit(ProfileAuthenticated(
+          profile: currentState.profile,
+          message: ErrorMessage(''),
+        ));
+      } else {
+        emit(ProfileUnauthenticated(message: ErrorMessage('')));
       }
     }
   }
