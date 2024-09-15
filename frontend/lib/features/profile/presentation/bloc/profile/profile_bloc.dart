@@ -37,9 +37,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   ProfileBloc({required this.authBloc}) : super(ProfileLoading()) {
     authBlocSubscription = authBloc.stream.listen((authState) {
-      if (authState is AuthAuthenticated) {
+      if (authState is AuthAuthenticatedState) {
         add(ProfileInitializeEvent());
-      } else if (authState is AuthUnauthenticated) {
+      } else if (authState is AuthUnauthenticatedState) {
         add(ProfileLogoutEvent());
       }
     });
@@ -63,8 +63,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
-        authBloc
-            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+        authBloc.add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
       } else {
         emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
       }
@@ -89,8 +88,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
-        authBloc
-            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+        authBloc.add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
@@ -116,8 +114,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
-        authBloc
-            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+        authBloc.add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
@@ -141,8 +138,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
-        authBloc
-            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+        authBloc.add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
@@ -172,8 +168,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
-        authBloc
-            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+        authBloc.add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
@@ -202,8 +197,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
-        authBloc
-            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+        authBloc.add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
@@ -230,8 +224,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
-        authBloc
-            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+        authBloc.add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
@@ -254,8 +247,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
-        authBloc
-            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+        authBloc.add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,

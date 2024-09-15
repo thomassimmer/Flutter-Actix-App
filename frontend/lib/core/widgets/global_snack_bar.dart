@@ -28,6 +28,7 @@ class GlobalSnackBar {
       SnackBar(
         content: Text(messageTranslated),
         backgroundColor: backgroundColor,
+        duration: Duration(seconds: 3),
         showCloseIcon: true,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(

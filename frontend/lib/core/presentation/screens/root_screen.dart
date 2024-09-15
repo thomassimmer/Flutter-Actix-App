@@ -57,7 +57,7 @@ class RootScreen extends StatelessWidget {
           BlocListener<AuthBloc, AuthState>(listener: (context, state) {
             GlobalSnackBar.show(context, state.message);
 
-            if (state is AuthUnauthenticated) {
+            if (state is AuthUnauthenticatedState) {
               context.go('/');
             }
           }),
@@ -85,8 +85,7 @@ class RootScreen extends StatelessWidget {
                   Button(
                     text: AppLocalizations.of(context)!.logout,
                     onPressed: () {
-                      BlocProvider.of<AuthBloc>(context)
-                          .add(AuthLogoutRequested());
+                      BlocProvider.of<AuthBloc>(context).add(AuthLogoutEvent());
                     },
                     isPrimary: true,
                     size: ButtonSize.small,

@@ -54,7 +54,7 @@ class FlutterActixApp extends StatelessWidget {
     final profileSetPasswordFormBloc = ProfileSetPasswordFormBloc();
     final profileUpdatePasswordFormBloc = ProfileUpdatePasswordFormBloc();
 
-    authBloc.add(AuthInitRequested());
+    authBloc.add(AuthInitializeEvent());
 
     return [
       BlocProvider<AuthSignupFormBloc>(

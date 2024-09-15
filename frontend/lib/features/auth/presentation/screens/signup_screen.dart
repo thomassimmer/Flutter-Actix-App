@@ -46,7 +46,7 @@ class SignupScreen extends StatelessWidget {
                       listener: (context, state) {
                     GlobalSnackBar.show(context, state.message);
 
-                    if (state is AuthAuthenticatedAfterRegistration) {
+                    if (state is AuthAuthenticatedAfterRegistrationState) {
                       if (state.recoveryCodes != null) {
                         context.go('/recovery-codes');
                       } else {
@@ -55,7 +55,7 @@ class SignupScreen extends StatelessWidget {
                     }
                   }, child: BlocBuilder<AuthBloc, AuthState>(
                           builder: (context, state) {
-                    if (state is AuthLoading) {
+                    if (state is AuthLoadingState) {
                       return _buildLoadingScreen(context, state);
                     } else {
                       return _buildSignUpScreen(context, state);
@@ -129,7 +129,7 @@ class SignupScreen extends StatelessWidget {
           text: AppLocalizations.of(context)!.signUp,
           onPressed: () {
             BlocProvider.of<AuthBloc>(context).add(
-              AuthSignupRequested(
+              AuthSignupEvent(
                   username: _usernameController.text,
                   password: _passwordController.text,
                   theme: themeData),

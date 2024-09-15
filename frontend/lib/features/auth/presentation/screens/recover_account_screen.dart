@@ -38,27 +38,27 @@ class RecoverAccountScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(30.0),
                       child: BlocListener<AuthBloc, AuthState>(
                         listener: (context, state) {
-                          if (state is AuthAuthenticated) {
+                          if (state is AuthAuthenticatedState) {
                             context.go('/#/profil');
                           }
                         },
                         child: BlocBuilder<AuthBloc, AuthState>(
                           builder: (context, state) {
                             if (state
-                                is AuthRecoveringAccountWithOtpEnabledAndUsingPassword) {
+                                is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndPasswordState) {
                               return _buildRecoveryCodeAndPasswordView(
                                   context, state);
                             } else if (state
-                                is AuthRecoveringAccountWithOtpEnabledAndUsingOtp) {
+                                is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState) {
                               return _buildRecoveryCodeAndOtpView(
                                   context, state);
                             } else if (state
-                                is AuthRecoveringAccountWithOtpDisabled) {
+                                is AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState) {
                               return _buildRecoveryCodeView(context, state);
                             } else if (state
-                                is AuthRecoveringAccountUsernameStep) {
+                                is AuthRecoverAccountUsernameStepState) {
                               return _buildUsernameStepView(context, state);
-                            } else if (state is AuthLoading) {
+                            } else if (state is AuthLoadingState) {
                               return CircularProgressIndicator(
                                 color: Colors.black,
                               );
@@ -88,7 +88,7 @@ class RecoverAccountScreen extends StatelessWidget {
   }
 
   Widget _buildUsernameStepView(
-      BuildContext context, AuthRecoveringAccountUsernameStep state) {
+      BuildContext context, AuthRecoverAccountUsernameStepState state) {
     // Reuse the username that the user wrote on the login screen
     final TextEditingController _usernameController =
         TextEditingController(text: state.username);
@@ -111,7 +111,7 @@ class RecoverAccountScreen extends StatelessWidget {
         text: AppLocalizations.of(context)!.next,
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
-            AuthDoesAccountHaveOtpEnabledRequested(
+            AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent(
                 username: _usernameController.text,
                 passwordForgotten: state.passwordForgotten),
           );
@@ -123,7 +123,7 @@ class RecoverAccountScreen extends StatelessWidget {
   }
 
   Widget _buildRecoveryCodeAndPasswordView(
-      BuildContext context, AuthRecoveringAccountUsernameStep state) {
+      BuildContext context, AuthRecoverAccountUsernameStepState state) {
     final TextEditingController _passwordController = TextEditingController();
     final TextEditingController _recoveryCodeController =
         TextEditingController();
@@ -154,7 +154,7 @@ class RecoverAccountScreen extends StatelessWidget {
         text: AppLocalizations.of(context)!.next,
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
-            AuthAccountRecoveryWithOtpEnabledAndPasswordRequested(
+            AuthRecoverAccountWithTwoFactorAuthenticationAndPasswordEvent(
                 username: state.username,
                 password: _passwordController.text,
                 recoveryCode: _recoveryCodeController.text),
@@ -167,7 +167,7 @@ class RecoverAccountScreen extends StatelessWidget {
   }
 
   Widget _buildRecoveryCodeView(
-      BuildContext context, AuthRecoveringAccountUsernameStep state) {
+      BuildContext context, AuthRecoverAccountUsernameStepState state) {
     final TextEditingController _recoveryCodeController =
         TextEditingController();
 
@@ -189,7 +189,7 @@ class RecoverAccountScreen extends StatelessWidget {
         text: AppLocalizations.of(context)!.next,
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
-            AuthAccountRecoveryWithOtpDisabledRequested(
+            AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
                 username: state.username,
                 recoveryCode: _recoveryCodeController.text),
           );
@@ -201,7 +201,7 @@ class RecoverAccountScreen extends StatelessWidget {
   }
 
   Widget _buildRecoveryCodeAndOtpView(
-      BuildContext context, AuthRecoveringAccountUsernameStep state) {
+      BuildContext context, AuthRecoverAccountUsernameStepState state) {
     final TextEditingController _recoveryCodeController =
         TextEditingController();
     final TextEditingController _otpController = TextEditingController();
@@ -232,7 +232,7 @@ class RecoverAccountScreen extends StatelessWidget {
         text: AppLocalizations.of(context)!.next,
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
-            AuthAccountRecoveryWithOtpDisabledRequested(
+            AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
                 username: state.username,
                 recoveryCode: _recoveryCodeController.text),
           );
