@@ -89,7 +89,7 @@ class PasswordScreen extends StatelessWidget {
                               text: AppLocalizations.of(context)!.verify,
                               onPressed: () {
                                 BlocProvider.of<ProfileBloc>(context).add(
-                                  ProfileSetPasswordRequested(
+                                  ProfileSetPasswordEvent(
                                     newPassword: _newPasswordController.text,
                                   ),
                                 );
@@ -156,7 +156,7 @@ class PasswordScreen extends StatelessWidget {
                               text: AppLocalizations.of(context)!.save,
                               onPressed: () {
                                 BlocProvider.of<ProfileBloc>(context).add(
-                                  ProfileUpdatePasswordRequested(
+                                  ProfileUpdatePasswordEvent(
                                     currentPassword:
                                         _currentPasswordController.text,
                                     newPassword: _newPasswordController.text,

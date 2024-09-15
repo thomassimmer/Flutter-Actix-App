@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
@@ -43,11 +42,8 @@ class LocaleSelectionScreen extends StatelessWidget {
           value: locale['code']!,
           groupValue: state.profile.locale,
           onChanged: (String? value) {
-            User profile = state.profile;
-            profile.locale = value!;
-
             BlocProvider.of<ProfileBloc>(context)
-                .add(ProfileUpdateRequested(profile: profile));
+                .add(ProfileUpdateLocaleEvent(locale: value!));
           },
         ),
       );

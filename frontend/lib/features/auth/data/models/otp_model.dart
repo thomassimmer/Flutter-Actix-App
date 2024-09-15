@@ -9,7 +9,7 @@ class OtpGenerationModel extends Equatable {
     required this.otpAuthUrl,
   });
 
-  // Factory constructor to create a UserModel from JSON data
+  // Factory constructor to create a OtpGenerationModel from JSON data
   factory OtpGenerationModel.fromJson(Map<String, dynamic> json) {
     return OtpGenerationModel(
       otpBase32: json['otp_base32'] as String,

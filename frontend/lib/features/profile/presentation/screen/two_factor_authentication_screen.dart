@@ -60,7 +60,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                         text: AppLocalizations.of(context)!.generateNewQrCode,
                         onPressed: () {
                           BlocProvider.of<ProfileBloc>(context).add(
-                            ProfileOtpGenerationRequested(),
+                            ProfileGenerateTwoFactorAuthenticationConfigEvent(),
                           );
                         },
                         isPrimary: true,
@@ -71,7 +71,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                         text: AppLocalizations.of(context)!.disableTwoFA,
                         onPressed: () {
                           BlocProvider.of<ProfileBloc>(context).add(
-                            ProfileOtpDisablingRequested(),
+                            ProfileDisableTwoFactorAuthenticationEvent(),
                           );
                         },
                         isPrimary: true,
@@ -127,7 +127,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                               text: AppLocalizations.of(context)!.verify,
                               onPressed: () {
                                 BlocProvider.of<ProfileBloc>(context).add(
-                                  ProfileOtpVerificationRequested(
+                                  ProfileVerifyOneTimePasswordEvent(
                                     code: _otpController.text,
                                   ),
                                 );
@@ -146,7 +146,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                                       .regenerateQrCode,
                                   onPressed: () {
                                     BlocProvider.of<ProfileBloc>(context).add(
-                                      ProfileOtpGenerationRequested(),
+                                      ProfileGenerateTwoFactorAuthenticationConfigEvent(),
                                     );
                                   },
                                   isPrimary: true,
@@ -157,7 +157,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                                   text: AppLocalizations.of(context)!.cancel,
                                   onPressed: () {
                                     BlocProvider.of<ProfileBloc>(context).add(
-                                      ProfileOtpDisablingRequested(),
+                                      ProfileDisableTwoFactorAuthenticationEvent(),
                                     );
                                   },
                                   isPrimary: true,
@@ -186,7 +186,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                     text: AppLocalizations.of(context)!.enable,
                     onPressed: () {
                       BlocProvider.of<ProfileBloc>(context).add(
-                        ProfileOtpGenerationRequested(),
+                        ProfileGenerateTwoFactorAuthenticationConfigEvent(),
                       );
                     },
                     isPrimary: true,

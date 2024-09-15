@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
-import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
+import 'package:flutteractixapp/features/profile/domain/entities/profile.dart';
 
 abstract class ProfileState extends Equatable {
   final Message? message;
-  final User? profile;
+  final Profile? profile;
 
   const ProfileState({this.message, this.profile});
 
@@ -29,7 +29,7 @@ class ProfileUnauthenticated extends ProfileState {
 }
 
 class ProfileAuthenticated extends ProfileState {
-  final User profile;
+  final Profile profile;
 
   const ProfileAuthenticated({required this.profile, super.message});
 

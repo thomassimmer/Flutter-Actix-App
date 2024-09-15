@@ -1,4 +1,4 @@
-class User {
+class Profile {
   String username;
   String locale;
   String theme;
@@ -7,7 +7,7 @@ class User {
   bool otpVerified;
   bool passwordIsExpired;
 
-  User(
+  Profile(
       {required this.username,
       required this.locale,
       required this.theme,

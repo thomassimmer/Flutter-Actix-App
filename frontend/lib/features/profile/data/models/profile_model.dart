@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class UserModel extends Equatable {
+class ProfileModel extends Equatable {
   final String username;
   final String locale;
   final String theme;
@@ -9,7 +9,7 @@ class UserModel extends Equatable {
   final bool otpVerified;
   final bool passwordIsExpired;
 
-  const UserModel(
+  const ProfileModel(
       {required this.username,
       required this.locale,
       required this.theme,
@@ -18,9 +18,9 @@ class UserModel extends Equatable {
       required this.otpVerified,
       required this.passwordIsExpired});
 
-  // Factory constructor to create a UserModel from JSON data
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
+  // Factory constructor to create a ProfileModel from JSON data
+  factory ProfileModel.fromJson(Map<String, dynamic> json) {
+    return ProfileModel(
         username: json['username'] as String,
         locale: json['locale'] as String,
         theme: json['theme'] as String,
