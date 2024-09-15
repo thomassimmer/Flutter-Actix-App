@@ -1,30 +1,26 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutteractixapp/features/auth/presentation/cubit/login_models.dart';
+import 'package:flutteractixapp/core/validators/password.dart';
 
-final class LoginState extends Equatable {
-  const LoginState({
-    this.username = const Username.pure(),
+final class SetPasswordFormState extends Equatable {
+  const SetPasswordFormState({
     this.password = const Password.pure(),
-    this.isValid = false,
+    this.isValid = true,
     this.errorMessage,
   });
 
-  final Username username;
   final Password password;
   final bool isValid;
   final String? errorMessage;
 
   @override
-  List<Object?> get props => [username, password, isValid, errorMessage];
+  List<Object?> get props => [password, isValid, errorMessage];
 
-  LoginState copyWith({
-    Username? username,
+  SetPasswordFormState copyWith({
     Password? password,
     bool? isValid,
     String? errorMessage,
   }) {
-    return LoginState(
-      username: username ?? this.username,
+    return SetPasswordFormState(
       password: password ?? this.password,
       isValid: isValid ?? this.isValid,
       errorMessage: errorMessage ?? this.errorMessage,

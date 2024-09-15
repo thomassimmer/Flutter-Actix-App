@@ -8,7 +8,8 @@ import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
-import 'package:flutteractixapp/features/auth/presentation/cubit/login_cubit.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_login/auth_login_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_login/auth_login_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
@@ -82,7 +83,8 @@ class SignupScreen extends StatelessWidget {
     final String themeData = brightness == Brightness.dark ? "dark" : "light";
 
     final displayUsernameError = context.select(
-      (LoginCubit cubit) => cubit.state.username.displayError,
+      (AuthSignupFormBloc authSignupFormBloc) =>
+          authSignupFormBloc.state.username.displayError,
     );
     final displayUsernameErrorMessage = displayUsernameError is DomainError
         ? getTranslatedMessage(
@@ -90,7 +92,8 @@ class SignupScreen extends StatelessWidget {
         : null;
 
     final displayPasswordError = context.select(
-      (LoginCubit cubit) => cubit.state.password.displayError,
+      (AuthSignupFormBloc authSignupFormBloc) =>
+          authSignupFormBloc.state.password.displayError,
     );
     final displayPasswordErrorMessage = displayPasswordError is DomainError
         ? getTranslatedMessage(
@@ -106,8 +109,8 @@ class SignupScreen extends StatelessWidget {
         SizedBox(height: 16),
         CustomTextField(
           controller: _usernameController,
-          onChanged: (username) =>
-              context.read<LoginCubit>().usernameChanged(username),
+          onChanged: (username) => BlocProvider.of<AuthSignupFormBloc>(context)
+              .add(SignupFormUsernameChangedEvent(username)),
           label: AppLocalizations.of(context)!.username,
           obscureText: false,
           errorText: displayUsernameErrorMessage,
@@ -115,8 +118,8 @@ class SignupScreen extends StatelessWidget {
         SizedBox(height: 16),
         CustomTextField(
           controller: _passwordController,
-          onChanged: (password) =>
-              context.read<LoginCubit>().passwordChanged(password),
+          onChanged: (password) => BlocProvider.of<AuthSignupFormBloc>(context)
+              .add(SignupFormPasswordChangedEvent(password)),
           obscureText: true,
           label: AppLocalizations.of(context)!.password,
           errorText: displayPasswordErrorMessage,

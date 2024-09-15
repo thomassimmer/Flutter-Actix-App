@@ -100,7 +100,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     },
         (profile) => emit(ProfileAuthenticated(
             profile: profile,
-            message: SuccessMessage('profileUpdateSuccessfully'))));
+            message: SuccessMessage('profileUpdateSuccessful'))));
   }
 
   Future<void> _updateLocale(
@@ -127,7 +127,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     },
         (profile) => emit(ProfileAuthenticated(
             profile: profile,
-            message: SuccessMessage('profileUpdateSuccessfully'))));
+            message: SuccessMessage('profileUpdateSuccessful'))));
   }
 
   Future<void> _generateTwoFactorAuthenticationConfig(
@@ -241,7 +241,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     },
         (profile) => emit(ProfileAuthenticated(
             profile: profile,
-            message: SuccessMessage('passwordUpdateSuccessfully'))));
+            message: SuccessMessage('passwordUpdateSuccessful'))));
   }
 
   Future<void> _updatePassword(
@@ -265,6 +265,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     },
         (profile) => emit(ProfileAuthenticated(
             profile: profile,
-            message: SuccessMessage('passwordUpdateSuccessfully'))));
+            message: SuccessMessage('passwordUpdateSuccessful'))));
   }
 }

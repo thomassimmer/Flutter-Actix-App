@@ -60,14 +60,14 @@ String getTranslatedMessage(BuildContext context, Message message) {
     }
   } else if (message is SuccessMessage) {
     switch (message.messageKey) {
-      case 'loginSuccessfull':
-        return localizations.loginSuccessfull;
-      case 'logoutSuccessfull':
-        return localizations.logoutSuccessfull;
-      case 'passwordUpdateSuccessfull':
-        return localizations.passwordUpdateSuccessfull;
-      case 'profileUpdateSuccessfully':
-        return localizations.profileUpdateSuccessfully;
+      case 'loginSuccessful':
+        return localizations.loginSuccessful;
+      case 'logoutSuccessful':
+        return localizations.logoutSuccessful;
+      case 'passwordUpdateSuccessful':
+        return localizations.passwordUpdateSuccessful;
+      case 'profileUpdateSuccessful':
+        return localizations.profileUpdateSuccessful;
       default:
         return localizations.defaultError;
     }

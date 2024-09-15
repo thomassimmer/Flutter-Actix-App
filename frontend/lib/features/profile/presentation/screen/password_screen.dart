@@ -4,12 +4,15 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/core/messages/message_mapper.dart';
-import 'package:flutteractixapp/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/set_password/set_password_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/set_password/set_password_events.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/update_password/update_password_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/update_password/update_password_events.dart';
 
 class PasswordScreen extends StatelessWidget {
   final TextEditingController _currentPasswordController =
@@ -47,7 +50,7 @@ class PasswordScreen extends StatelessWidget {
   Widget _buildSetPasswordView(
       BuildContext context, ProfileAuthenticated state) {
     final displayPasswordError = context.select(
-      (LoginCubit cubit) => cubit.state.password.displayError,
+      (ProfileSetPasswordFormBloc bloc) => bloc.state.password.displayError,
     );
     final displayPasswordErrorMessage = displayPasswordError is DomainError
         ? getTranslatedMessage(
@@ -77,9 +80,11 @@ class PasswordScreen extends StatelessWidget {
                           child: Column(children: [
                             CustomTextField(
                               controller: _newPasswordController,
-                              onChanged: (password) => context
-                                  .read<LoginCubit>()
-                                  .passwordChanged(password),
+                              onChanged: (password) =>
+                                  BlocProvider.of<ProfileSetPasswordFormBloc>(
+                                          context)
+                                      .add(SetPasswordFormPasswordChangedEvent(
+                                          password)),
                               obscureText: true,
                               label: AppLocalizations.of(context)!.newPassword,
                               errorText: displayPasswordErrorMessage,
@@ -107,7 +112,7 @@ class PasswordScreen extends StatelessWidget {
   Widget _buildUpdatePasswordView(
       BuildContext context, ProfileAuthenticated state) {
     final displayPasswordError = context.select(
-      (LoginCubit cubit) => cubit.state.password.displayError,
+      (ProfileUpdatePasswordFormBloc bloc) => bloc.state.password.displayError,
     );
     final displayPasswordErrorMessage = displayPasswordError is DomainError
         ? getTranslatedMessage(
@@ -144,9 +149,10 @@ class PasswordScreen extends StatelessWidget {
                             SizedBox(height: 24),
                             CustomTextField(
                               controller: _newPasswordController,
-                              onChanged: (password) => context
-                                  .read<LoginCubit>()
-                                  .passwordChanged(password),
+                              onChanged: (password) => BlocProvider.of<
+                                      ProfileUpdatePasswordFormBloc>(context)
+                                  .add(UpdatePasswordFormPasswordChangedEvent(
+                                      password)),
                               obscureText: true,
                               label: AppLocalizations.of(context)!.newPassword,
                               errorText: displayPasswordErrorMessage,
