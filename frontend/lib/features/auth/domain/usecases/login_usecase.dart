@@ -14,14 +14,14 @@ class LoginUseCase {
     final result =
         await authRepository.login(username: username, password: password);
 
-    result.fold((_) => {}, (userTokenOrUserId) {
-      userTokenOrUserId.fold((userToken) async {
+    await result.fold((_) async {}, (userTokenOrUserId) async {
+      await userTokenOrUserId.fold((userToken) async {
         // Store tokens securely after successful login
         await TokenStorage().saveTokens(
           userToken.accessToken,
           userToken.refreshToken,
         );
-      }, (r) => {});
+      }, (r) async {});
     });
 
     return result;

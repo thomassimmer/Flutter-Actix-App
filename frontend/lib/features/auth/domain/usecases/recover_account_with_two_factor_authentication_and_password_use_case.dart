@@ -18,7 +18,7 @@ class RecoverAccountWithTwoFactorAuthenticationAndPasswordUseCase {
         .recoverAccountWithTwoFactorAuthenticationAndPassword(
             username: username, recoveryCode: recoveryCode, password: password);
 
-    result.fold((_) => {}, (userToken) async {
+    await result.fold((_) async {}, (userToken) async {
       // Store tokens securely after successful login
       await TokenStorage().saveTokens(
         userToken.accessToken,

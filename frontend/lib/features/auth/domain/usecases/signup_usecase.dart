@@ -14,7 +14,7 @@ class SignupUseCase {
     final result = await authRepository.signup(
         username: username, password: password, locale: locale, theme: theme);
 
-    result.fold((_) => {}, (userToken) async {
+    await result.fold((_) async {}, (userToken) async {
       // Store tokens securely after successful login
       await TokenStorage().saveTokens(
         userToken.accessToken,
