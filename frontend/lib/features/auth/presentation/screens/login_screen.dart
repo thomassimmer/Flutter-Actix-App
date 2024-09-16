@@ -8,66 +8,100 @@ import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:flutteractixapp/features/auth/presentation/widgets/successful_login_animation.dart';
 import 'package:go_router/go_router.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
 
+  bool _isAuthenticated = false;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Stack(fit: StackFit.expand, children: [
-      Background(),
-      Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 100,
-              width: 100,
-              child: Placeholder(),
-            ),
-            SizedBox(height: 40),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(width: 1.0, color: Colors.blue.shade200),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(30.0),
-                child: BlocListener<AuthBloc, AuthState>(listener:
-                    (context, state) {
-                  GlobalSnackBar.show(context, state.message);
+    final authMessage = context.select((AuthBloc bloc) => bloc.state.message);
 
-                  if (state is AuthAuthenticatedState) {
-                    context.go('/home');
-                  }
-                }, child:
-                    BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-                  if (state is AuthLoadingState) {
-                    return _buildLoadingScreen(context, state);
-                  } else if (state is AuthValidateOneTimePasswordState) {
-                    return _buildOneTimePasswordVerificationScreen(
-                        context, state);
-                  } else {
-                    return _buildLoginViewScreen(context, state);
-                  }
-                })),
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Background(),
+          if (!_isAuthenticated)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Placeholder for logo or anything
+                  SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: Placeholder(),
+                  ),
+                  SizedBox(height: 40),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border:
+                          Border.all(width: 1.0, color: Colors.blue.shade200),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(30.0),
+                      child: BlocListener<AuthBloc, AuthState>(
+                        listener: (context, state) {
+                          if (state is AuthAuthenticatedState) {
+                            setState(() {
+                              _isAuthenticated = true;
+                            });
+                          } else {
+                            GlobalSnackBar.show(context, state.message);
+                          }
+                        },
+                        child: BlocBuilder<AuthBloc, AuthState>(
+                          builder: (context, state) {
+                            if (state is AuthLoadingState) {
+                              return _buildLoadingScreen(context, state);
+                            } else if (state
+                                is AuthValidateOneTimePasswordState) {
+                              return _buildOneTimePasswordVerificationScreen(
+                                  context, state);
+                            } else {
+                              return _buildLoginViewScreen(context, state);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Button(
+                    text: AppLocalizations.of(context)!.comeBack,
+                    onPressed: () {
+                      context.go('/');
+                    },
+                    isPrimary: false,
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 16),
-            Button(
-              text: AppLocalizations.of(context)!.comeBack,
-              onPressed: () {
-                context.go('/');
-              },
-              isPrimary: false,
-            ),
-          ]),
-    ]));
+          SuccessfulLoginAnimation(
+            isVisible: _isAuthenticated,
+            onAnimationComplete: () {
+              GlobalSnackBar.show(context, authMessage);
+              context.go('/home');
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildLoadingScreen(BuildContext context, AuthState state) {

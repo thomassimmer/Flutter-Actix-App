@@ -13,64 +13,81 @@ import 'package:flutteractixapp/features/auth/presentation/bloc/auth_login/auth_
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:flutteractixapp/features/auth/presentation/widgets/successful_login_animation.dart';
 import 'package:go_router/go_router.dart';
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
+  @override
+  _SignupScreenState createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  bool _isAuthenticated = false;
+
   @override
   Widget build(BuildContext context) {
+    final authMessage = context.select((AuthBloc bloc) => bloc.state.message);
+
     return Scaffold(
         body: Stack(fit: StackFit.expand, children: [
       Background(),
-      Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 100,
-              width: 100,
-              child: Placeholder(),
-            ),
-            SizedBox(height: 40),
-            Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(width: 1.0, color: Colors.blue.shade200),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(30.0),
-                  child: BlocListener<AuthBloc, AuthState>(
-                      listener: (context, state) {
-                    GlobalSnackBar.show(context, state.message);
-
-                    if (state is AuthAuthenticatedAfterRegistrationState) {
-                      if (state.recoveryCodes != null) {
-                        context.go('/recovery-codes');
+      if (!_isAuthenticated)
+        Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 100,
+                width: 100,
+                child: Placeholder(),
+              ),
+              SizedBox(height: 40),
+              Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(width: 1.0, color: Colors.blue.shade200),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(30.0),
+                    child: BlocListener<AuthBloc, AuthState>(
+                        listener: (context, state) {
+                      if (state is AuthAuthenticatedState) {
+                        setState(() {
+                          _isAuthenticated = true;
+                        });
                       } else {
-                        context.go('/home');
+                        GlobalSnackBar.show(context, state.message);
                       }
-                    }
-                  }, child: BlocBuilder<AuthBloc, AuthState>(
-                          builder: (context, state) {
-                    if (state is AuthLoadingState) {
-                      return _buildLoadingScreen(context, state);
-                    } else {
-                      return _buildSignUpScreen(context, state);
-                    }
-                  })),
-                )),
-            SizedBox(height: 16),
-            Button(
-              onPressed: () {
-                context.go('/');
-              },
-              text: AppLocalizations.of(context)!.comeBack,
-              isPrimary: false,
-            ),
-          ])
+                    }, child: BlocBuilder<AuthBloc, AuthState>(
+                            builder: (context, state) {
+                      if (state is AuthLoadingState) {
+                        return _buildLoadingScreen(context, state);
+                      } else {
+                        return _buildSignUpScreen(context, state);
+                      }
+                    })),
+                  )),
+              SizedBox(height: 16),
+              Button(
+                onPressed: () {
+                  context.go('/');
+                },
+                text: AppLocalizations.of(context)!.comeBack,
+                isPrimary: false,
+              ),
+            ]),
+      SuccessfulLoginAnimation(
+        isVisible: _isAuthenticated,
+        onAnimationComplete: () {
+          GlobalSnackBar.show(context, authMessage);
+          context.go('/recovery-codes');
+        },
+      ),
     ]));
   }
 
