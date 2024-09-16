@@ -55,11 +55,11 @@ class AuthVerifyOneTimePasswordEvent extends AuthEvent {
       {required this.otpBase32, required this.otpAuthUrl, required this.code});
 }
 
-class AuthValidationOneTimePasswordEvent extends AuthEvent {
+class AuthValidateOneTimePasswordEvent extends AuthEvent {
   final String userId;
   final String code;
 
-  const AuthValidationOneTimePasswordEvent(
+  const AuthValidateOneTimePasswordEvent(
       {required this.userId, required this.code});
 
   @override

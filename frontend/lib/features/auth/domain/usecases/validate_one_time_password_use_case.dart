@@ -4,15 +4,16 @@ import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 import 'package:flutteractixapp/features/auth/domain/entities/user_token.dart';
 import 'package:flutteractixapp/features/auth/domain/repositories/auth_repository.dart';
 
-class ValidateOtpUsecase {
+class ValidateOneTimePasswordUseCase {
   final AuthRepository authRepository;
 
-  ValidateOtpUsecase(this.authRepository);
+  ValidateOneTimePasswordUseCase(this.authRepository);
 
   /// Validates the OTP provided by the user. It's for login.
   Future<Either<DomainError, UserToken>> call(
       String userId, String code) async {
-    final result = await authRepository.validateOtp(userId: userId, code: code);
+    final result = await authRepository.validateOneTimePassword(
+        userId: userId, code: code);
 
     result.fold((_) => {}, (userToken) async {
       // Store tokens securely after successful login

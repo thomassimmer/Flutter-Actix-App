@@ -4,18 +4,19 @@ import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 import 'package:flutteractixapp/features/auth/domain/entities/user_token.dart';
 import 'package:flutteractixapp/features/auth/domain/repositories/auth_repository.dart';
 
-class RecoverAccountWithRecoveryCodeAndPasswordUseCase {
+class RecoverAccountWithoutTwoFactorAuthenticationEnabledUseCase {
   final AuthRepository authRepository;
 
-  RecoverAccountWithRecoveryCodeAndPasswordUseCase(this.authRepository);
+  RecoverAccountWithoutTwoFactorAuthenticationEnabledUseCase(
+      this.authRepository);
 
   Future<Either<DomainError, UserToken>> call(
-      {required String username,
-      required String recoveryCode,
-      required String password}) async {
-    final result =
-        await authRepository.recoverAccountWithRecoveryCodeAndPassword(
-            username: username, recoveryCode: recoveryCode, password: password);
+      {required String username, required String recoveryCode}) async {
+    final result = await authRepository
+        .recoverAccountWithoutTwoFactorAuthenticationEnabled(
+      username: username,
+      recoveryCode: recoveryCode,
+    );
 
     result.fold((_) => {}, (userToken) async {
       // Store tokens securely after successful login

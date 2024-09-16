@@ -15,34 +15,38 @@ abstract class AuthRepository {
     required String password,
   });
 
-  Future<Either<DomainError, GeneratedOtpConfig>> generateOtpConfig();
+  Future<Either<DomainError, TwoFactorAuthenticationConfig>>
+      generateTwoFactorAuthenticationConfig();
 
-  Future<Either<DomainError, bool>> verifyOtp({
+  Future<Either<DomainError, bool>> verifyOneTimePassword({
     required String code,
   });
 
-  Future<Either<DomainError, UserToken>> validateOtp({
+  Future<Either<DomainError, UserToken>> validateOneTimePassword({
     required String userId,
     required String code,
   });
 
-  Future<Either<DomainError, bool>> disableOtp();
+  Future<Either<DomainError, bool>> disableTwoFactorAuthentication();
 
-  Future<Either<DomainError, bool>> checkIfOtpEnabled(
-      {required String username});
+  Future<Either<DomainError, bool>>
+      checkIfAccountHasTwoFactorAuthenticationEnabled(
+          {required String username});
 
   Future<Either<DomainError, UserToken>>
-      recoverAccountWithRecoveryCodeAndPassword(
+      recoverAccountWithTwoFactorAuthenticationAndPassword(
           {required String username,
           required String password,
           required String recoveryCode});
 
-  Future<Either<DomainError, UserToken>> recoverAccountWithRecoveryCodeAndOtp(
-      {required String username,
-      required String recoveryCode,
-      required String code});
+  Future<Either<DomainError, UserToken>>
+      recoverAccountWithTwoFactorAuthenticationAndOneTimePassword(
+          {required String username,
+          required String recoveryCode,
+          required String code});
 
-  Future<Either<DomainError, UserToken>> recoverAccountWithRecoveryCode({
+  Future<Either<DomainError, UserToken>>
+      recoverAccountWithoutTwoFactorAuthenticationEnabled({
     required String username,
     required String recoveryCode,
   });

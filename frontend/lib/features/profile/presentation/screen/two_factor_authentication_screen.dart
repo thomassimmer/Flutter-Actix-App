@@ -23,11 +23,11 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
             builder: (context, state) {
               if (state is ProfileAuthenticated) {
                 if (state.profile.otpVerified) {
-                  return _buildOtpRegenerateOrDisableView(context, state);
+                  return _buildTwoFactorAuthenticationRegenerateConfigOrDisableView(context, state);
                 } else if (state.profile.otpAuthUrl != null) {
-                  return _buildOtpVerificationView(context, state);
+                  return _buildOneTimePasswordVerificationView(context, state);
                 } else {
-                  return _buildOtpSetupView(context, state);
+                  return _buildTwoFactorAuthenticationSetupView(context, state);
                 }
               } else if (state is ProfileLoading) {
                 return Center(child: CircularProgressIndicator());
@@ -41,7 +41,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOtpRegenerateOrDisableView(
+  Widget _buildTwoFactorAuthenticationRegenerateConfigOrDisableView(
       BuildContext context, ProfileAuthenticated state) {
     return Column(
       children: [
@@ -84,7 +84,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOtpVerificationView(
+  Widget _buildOneTimePasswordVerificationView(
       BuildContext context, ProfileAuthenticated state) {
     return SingleChildScrollView(
         child: Column(
@@ -171,7 +171,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
     ));
   }
 
-  Widget _buildOtpSetupView(BuildContext context, ProfileAuthenticated state) {
+  Widget _buildTwoFactorAuthenticationSetupView(BuildContext context, ProfileAuthenticated state) {
     return Column(
       children: [
         Center(

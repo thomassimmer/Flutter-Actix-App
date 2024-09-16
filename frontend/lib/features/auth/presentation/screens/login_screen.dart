@@ -50,7 +50,8 @@ class LoginScreen extends StatelessWidget {
                   if (state is AuthLoadingState) {
                     return _buildLoadingScreen(context, state);
                   } else if (state is AuthValidateOneTimePasswordState) {
-                    return _buildOtpVerificationScreen(context, state);
+                    return _buildOneTimePasswordVerificationScreen(
+                        context, state);
                   } else {
                     return _buildLoginViewScreen(context, state);
                   }
@@ -73,7 +74,7 @@ class LoginScreen extends StatelessWidget {
     return Column(children: [CircularProgressIndicator(color: Colors.black)]);
   }
 
-  Widget _buildOtpVerificationScreen(
+  Widget _buildOneTimePasswordVerificationScreen(
       BuildContext context, AuthValidateOneTimePasswordState state) {
     return Column(children: [
       Text(
@@ -87,7 +88,7 @@ class LoginScreen extends StatelessWidget {
       ),
       SizedBox(height: 40),
       Text(
-        AppLocalizations.of(context)!.enterOtp,
+        AppLocalizations.of(context)!.enterOneTimePassword,
         style: TextStyle(color: Colors.white),
       ),
       SizedBox(height: 40),
@@ -101,7 +102,7 @@ class LoginScreen extends StatelessWidget {
         text: AppLocalizations.of(context)!.logIn,
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
-            AuthValidationOneTimePasswordEvent(
+            AuthValidateOneTimePasswordEvent(
               userId: state.userId,
               code: _codeController.text,
             ),
@@ -153,7 +154,6 @@ class LoginScreen extends StatelessWidget {
         },
         isPrimary: true,
       ),
-      // SizedBox(height: 16),
       TextButton(
         onPressed: () {
           context.go('/signup');
