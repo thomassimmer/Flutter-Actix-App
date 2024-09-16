@@ -18,7 +18,7 @@ pub fn password_is_valid(user: &User, password: &str) -> bool {
 }
 
 pub fn password_is_long_enough(input: &str) -> bool {
-    input.len() > 8
+    input.len() >= 8
 }
 
 pub fn password_is_strong_enough(input: &str) -> bool {
