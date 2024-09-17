@@ -33,15 +33,7 @@ class CustomTextField extends StatelessWidget {
         decoration: InputDecoration(
           labelText: label,
           errorMaxLines: 10,
-          floatingLabelStyle: TextStyle(
-            color:
-                Colors.blue.shade200, // Set the floating label color to white
-          ),
           filled: true,
-          fillColor: Colors.white,
-          contentPadding:
-              EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-          counterText: '',
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
             borderSide: BorderSide(

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/message_mapper.dart';
+import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/successful_login_animation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -43,7 +43,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
                 SizedBox(height: 40),
                 Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       border:
                           Border.all(width: 1.0, color: Colors.blue.shade200),
                       borderRadius: BorderRadius.circular(8.0),
@@ -121,11 +121,12 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
     return Column(children: [
       Text(
         AppLocalizations.of(context)!.recoverAccount,
-        style: TextStyle(color: Colors.grey, fontSize: 20),
+        style: TextStyle(fontSize: 20),
       ),
       SizedBox(height: 16),
-      Text(AppLocalizations.of(context)!.enterUsername,
-          style: TextStyle(color: Colors.grey)),
+      Text(
+        AppLocalizations.of(context)!.enterUsername,
+      ),
       SizedBox(height: 16),
       CustomTextField(
         controller: _usernameController,
@@ -156,19 +157,21 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
     return Column(children: [
       Text(
         AppLocalizations.of(context)!.recoverAccount,
-        style: TextStyle(color: Colors.grey, fontSize: 20),
+        style: TextStyle(fontSize: 20),
       ),
       SizedBox(height: 16),
-      Text(AppLocalizations.of(context)!.enterPassword,
-          style: TextStyle(color: Colors.grey)),
+      Text(
+        AppLocalizations.of(context)!.enterPassword,
+      ),
       SizedBox(height: 16),
       CustomTextField(
         controller: _passwordController,
         label: AppLocalizations.of(context)!.password,
       ),
       SizedBox(height: 16),
-      Text(AppLocalizations.of(context)!.enterRecoveryCode,
-          style: TextStyle(color: Colors.grey)),
+      Text(
+        AppLocalizations.of(context)!.enterRecoveryCode,
+      ),
       SizedBox(height: 16),
       CustomTextField(
         controller: _recoveryCodeController,
@@ -199,11 +202,12 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
     return Column(children: [
       Text(
         AppLocalizations.of(context)!.recoverAccount,
-        style: TextStyle(color: Colors.grey, fontSize: 20),
+        style: TextStyle(fontSize: 20),
       ),
       SizedBox(height: 16),
-      Text(AppLocalizations.of(context)!.enterRecoveryCode,
-          style: TextStyle(color: Colors.grey)),
+      Text(
+        AppLocalizations.of(context)!.enterRecoveryCode,
+      ),
       SizedBox(height: 16),
       CustomTextField(
         controller: _recoveryCodeController,
@@ -234,19 +238,21 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
     return Column(children: [
       Text(
         AppLocalizations.of(context)!.recoverAccount,
-        style: TextStyle(color: Colors.grey, fontSize: 20),
+        style: TextStyle(fontSize: 20),
       ),
       SizedBox(height: 16),
-      Text(AppLocalizations.of(context)!.enterRecoveryCode,
-          style: TextStyle(color: Colors.grey)),
+      Text(
+        AppLocalizations.of(context)!.enterRecoveryCode,
+      ),
       SizedBox(height: 16),
       CustomTextField(
         controller: _recoveryCodeController,
         label: AppLocalizations.of(context)!.recoveryCode,
       ),
       SizedBox(height: 16),
-      Text(AppLocalizations.of(context)!.enterValidationCode,
-          style: TextStyle(color: Colors.grey)),
+      Text(
+        AppLocalizations.of(context)!.enterValidationCode,
+      ),
       SizedBox(height: 16),
       CustomTextField(
         controller: _otpController,

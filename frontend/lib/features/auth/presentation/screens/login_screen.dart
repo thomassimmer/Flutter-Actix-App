@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
+import 'package:flutteractixapp/core/widgets/text_button.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/successful_login_animation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -48,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen>
                   SizedBox(height: 40),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       border:
                           Border.all(width: 1.0, color: Colors.blue.shade200),
                       borderRadius: BorderRadius.circular(8.0),
@@ -113,17 +114,16 @@ class _LoginScreenState extends State<LoginScreen>
     return Column(children: [
       Text(
         AppLocalizations.of(context)!.logIn,
-        style: TextStyle(color: Colors.grey, fontSize: 20),
+        style: TextStyle(fontSize: 20),
       ),
       SizedBox(height: 16),
       Text(
         AppLocalizations.of(context)!.twoFA,
-        style: TextStyle(color: Colors.white, fontSize: 18),
+        style: TextStyle(fontSize: 18),
       ),
       SizedBox(height: 40),
       Text(
         AppLocalizations.of(context)!.enterOneTimePassword,
-        style: TextStyle(color: Colors.white),
       ),
       SizedBox(height: 40),
       CustomTextField(
@@ -151,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen>
     return Column(children: [
       Text(
         AppLocalizations.of(context)!.logIn,
-        style: TextStyle(color: Colors.grey, fontSize: 20),
+        style: TextStyle(fontSize: 20),
       ),
       SizedBox(height: 16),
       CustomTextField(
@@ -164,16 +164,14 @@ class _LoginScreenState extends State<LoginScreen>
         label: AppLocalizations.of(context)!.password,
         obscureText: true,
       ),
-      TextButton(
+      CustomTextButton(
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
               AuthRecoverAccountForUsernameEvent(
                   username: _usernameController.text, passwordForgotten: true));
           context.go('/recover-account');
         },
-        child: Text(
-          AppLocalizations.of(context)!.passwordForgotten,
-        ),
+        text: AppLocalizations.of(context)!.passwordForgotten,
       ),
       SizedBox(height: 24),
       Button(
@@ -188,13 +186,11 @@ class _LoginScreenState extends State<LoginScreen>
         },
         isPrimary: true,
       ),
-      TextButton(
+      CustomTextButton(
         onPressed: () {
           context.go('/signup');
         },
-        child: Text(
-          AppLocalizations.of(context)!.noAccountCreateOne,
-        ),
+        text: AppLocalizations.of(context)!.noAccountCreateOne,
       ),
     ]);
   }

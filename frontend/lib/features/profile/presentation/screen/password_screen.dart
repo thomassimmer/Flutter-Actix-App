@@ -4,8 +4,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/core/messages/message_mapper.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
@@ -70,7 +70,7 @@ class PasswordScreen extends StatelessWidget {
                   SizedBox(height: 16),
                   Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         border:
                             Border.all(width: 1.0, color: Colors.blue.shade200),
                         borderRadius: BorderRadius.circular(8.0),
@@ -132,7 +132,7 @@ class PasswordScreen extends StatelessWidget {
                   SizedBox(height: 16),
                   Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         border:
                             Border.all(width: 1.0, color: Colors.blue.shade200),
                         borderRadius: BorderRadius.circular(8.0),

@@ -5,7 +5,7 @@ import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
+import 'package:flutteractixapp/core/widgets/button.dart';
 import 'package:go_router/go_router.dart';
 
 class UnauthenticatedHomeScreen extends StatelessWidget {

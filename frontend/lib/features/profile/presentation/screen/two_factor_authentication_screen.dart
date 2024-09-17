@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
@@ -23,7 +23,8 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
             builder: (context, state) {
               if (state is ProfileAuthenticated) {
                 if (state.profile.otpVerified) {
-                  return _buildTwoFactorAuthenticationRegenerateConfigOrDisableView(context, state);
+                  return _buildTwoFactorAuthenticationRegenerateConfigOrDisableView(
+                      context, state);
                 } else if (state.profile.otpAuthUrl != null) {
                   return _buildOneTimePasswordVerificationView(context, state);
                 } else {
@@ -101,77 +102,83 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                     data: state.profile.otpAuthUrl!,
                     version: QrVersions.auto,
                     size: 200.0,
+                    backgroundColor: Colors.white,
                   ),
                   SizedBox(height: 16),
                   SelectableText(AppLocalizations.of(context)!
                       .twoFASecretKey(state.profile.otpBase32!)),
                   SizedBox(height: 24),
-                  Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border:
-                            Border.all(width: 1.0, color: Colors.blue.shade200),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Padding(
-                          padding: const EdgeInsets.all(30.0),
-                          child: Column(children: [
-                            CustomTextField(
-                              controller: _otpController,
-                              label:
-                                  AppLocalizations.of(context)!.validationCode,
-                              obscureText: true,
-                            ),
-                            SizedBox(height: 24),
-                            Button(
-                              text: AppLocalizations.of(context)!.verify,
-                              onPressed: () {
-                                BlocProvider.of<ProfileBloc>(context).add(
-                                  ProfileVerifyOneTimePasswordEvent(
-                                    code: _otpController.text,
-                                  ),
-                                );
-                              },
-                              isPrimary: true,
-                              size: ButtonSize.small,
-                            ),
-                            SizedBox(
-                              height: 24,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
+                  IntrinsicWidth(
+                      child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            border: Border.all(
+                                width: 1.0, color: Colors.blue.shade200),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Padding(
+                              padding: const EdgeInsets.all(30.0),
+                              child: Column(children: [
+                                CustomTextField(
+                                  controller: _otpController,
+                                  label: AppLocalizations.of(context)!
+                                      .validationCode,
+                                  obscureText: true,
+                                ),
+                                SizedBox(height: 24),
                                 Button(
-                                  text: AppLocalizations.of(context)!
-                                      .regenerateQrCode,
+                                  text: AppLocalizations.of(context)!.verify,
                                   onPressed: () {
                                     BlocProvider.of<ProfileBloc>(context).add(
-                                      ProfileGenerateTwoFactorAuthenticationConfigEvent(),
+                                      ProfileVerifyOneTimePasswordEvent(
+                                        code: _otpController.text,
+                                      ),
                                     );
                                   },
                                   isPrimary: true,
                                   size: ButtonSize.small,
                                 ),
-                                SizedBox(width: 16),
-                                Button(
-                                  text: AppLocalizations.of(context)!.cancel,
-                                  onPressed: () {
-                                    BlocProvider.of<ProfileBloc>(context).add(
-                                      ProfileDisableTwoFactorAuthenticationEvent(),
-                                    );
-                                  },
-                                  isPrimary: true,
-                                  size: ButtonSize.small,
+                                SizedBox(
+                                  height: 24,
                                 ),
-                              ],
-                            )
-                          ])))
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Button(
+                                      text: AppLocalizations.of(context)!
+                                          .regenerateQrCode,
+                                      onPressed: () {
+                                        BlocProvider.of<ProfileBloc>(context)
+                                            .add(
+                                          ProfileGenerateTwoFactorAuthenticationConfigEvent(),
+                                        );
+                                      },
+                                      isPrimary: true,
+                                      size: ButtonSize.small,
+                                    ),
+                                    SizedBox(width: 16),
+                                    Button(
+                                      text:
+                                          AppLocalizations.of(context)!.cancel,
+                                      onPressed: () {
+                                        BlocProvider.of<ProfileBloc>(context)
+                                            .add(
+                                          ProfileDisableTwoFactorAuthenticationEvent(),
+                                        );
+                                      },
+                                      isPrimary: true,
+                                      size: ButtonSize.small,
+                                    ),
+                                  ],
+                                )
+                              ]))))
                 ])))
       ],
     ));
   }
 
-  Widget _buildTwoFactorAuthenticationSetupView(BuildContext context, ProfileAuthenticated state) {
+  Widget _buildTwoFactorAuthenticationSetupView(
+      BuildContext context, ProfileAuthenticated state) {
     return Column(
       children: [
         Center(
