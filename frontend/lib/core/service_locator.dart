@@ -28,7 +28,7 @@ import 'package:http_interceptor/http_interceptor.dart';
 
 final sl = GetIt.instance;
 
-void setup_service_locator() {
+void setupServiceLocator() {
   final baseUrl = '${dotenv.env['API_BASE_URL']}/api';
   final tokenStorage = TokenStorage();
   final authService = AuthService(baseUrl: baseUrl, tokenStorage: tokenStorage);

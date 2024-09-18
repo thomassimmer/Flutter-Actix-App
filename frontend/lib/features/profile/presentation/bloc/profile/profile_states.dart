@@ -16,22 +16,18 @@ class ProfileLoading extends ProfileState {
   const ProfileLoading(
       {super.profile, // Keep profile here to not switch language / theme when loading something
       super.message});
-
-  @override
-  List<Object?> get props => [profile, message];
 }
 
 class ProfileUnauthenticated extends ProfileState {
   const ProfileUnauthenticated({super.message});
-
-  @override
-  List<Object?> get props => [message];
 }
 
 class ProfileAuthenticated extends ProfileState {
-  final Profile profile;
+  @override
+  Profile get profile => super.profile!; // Use '!' to ensure non-nullability
 
-  const ProfileAuthenticated({required this.profile, super.message});
+  const ProfileAuthenticated({required Profile profile, super.message})
+      : super(profile: profile);
 
   @override
   List<Object?> get props => [profile, message];

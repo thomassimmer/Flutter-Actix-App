@@ -12,11 +12,11 @@ class SuccessfulLoginAnimation extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _SuccessfulLoginAnimationState createState() =>
-      _SuccessfulLoginAnimationState();
+  SuccessfulLoginAnimationState createState() =>
+      SuccessfulLoginAnimationState();
 }
 
-class _SuccessfulLoginAnimationState extends State<SuccessfulLoginAnimation>
+class SuccessfulLoginAnimationState extends State<SuccessfulLoginAnimation>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
