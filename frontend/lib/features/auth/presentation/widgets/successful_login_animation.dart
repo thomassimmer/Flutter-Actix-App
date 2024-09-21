@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutteractixapp/core/themes/app_theme.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 
 class SuccessfulLoginAnimation extends StatefulWidget {
   final bool isVisible;
@@ -98,7 +98,7 @@ class SuccessfulLoginAnimationState extends State<SuccessfulLoginAnimation>
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          AppTheme.lightTheme.primaryColor.withOpacity(0.2),
+                          context.colors.primary.withOpacity(0.2),
                           Colors.transparent
                         ],
                         stops: [0.6, 1.0],
@@ -121,7 +121,7 @@ class SuccessfulLoginAnimationState extends State<SuccessfulLoginAnimation>
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: AppTheme.lightTheme.primaryColor,
+                              color: context.colors.primary,
                               width: _strokeWidthAnimation.value,
                             ),
                           ),

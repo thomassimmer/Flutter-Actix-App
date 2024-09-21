@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
-import 'package:flutteractixapp/core/widgets/text_button.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
@@ -49,7 +48,7 @@ class LoginScreenState extends State<LoginScreen>
                   SizedBox(height: 40),
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
+                      color: context.colors.background,
                       border:
                           Border.all(width: 1.0, color: Colors.blue.shade200),
                       borderRadius: BorderRadius.circular(8.0),
@@ -83,12 +82,11 @@ class LoginScreenState extends State<LoginScreen>
                     ),
                   ),
                   SizedBox(height: 16),
-                  Button(
-                    text: AppLocalizations.of(context)!.comeBack,
+                  ElevatedButton(
+                    child: Text(AppLocalizations.of(context)!.comeBack),
                     onPressed: () {
                       context.go('/');
                     },
-                    isPrimary: false,
                   ),
                 ],
               ),
@@ -132,8 +130,8 @@ class LoginScreenState extends State<LoginScreen>
         obscureText: true,
       ),
       SizedBox(height: 24),
-      Button(
-        text: AppLocalizations.of(context)!.logIn,
+      ElevatedButton(
+        child: Text(AppLocalizations.of(context)!.logIn),
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
             AuthValidateOneTimePasswordEvent(
@@ -142,7 +140,6 @@ class LoginScreenState extends State<LoginScreen>
             ),
           );
         },
-        isPrimary: true,
       ),
     ]);
   }
@@ -164,18 +161,18 @@ class LoginScreenState extends State<LoginScreen>
         label: AppLocalizations.of(context)!.password,
         obscureText: true,
       ),
-      CustomTextButton(
+      TextButton(
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
               AuthRecoverAccountForUsernameEvent(
                   username: _usernameController.text, passwordForgotten: true));
           context.go('/recover-account');
         },
-        text: AppLocalizations.of(context)!.passwordForgotten,
+        child: Text(AppLocalizations.of(context)!.passwordForgotten),
       ),
       SizedBox(height: 24),
-      Button(
-        text: AppLocalizations.of(context)!.logIn,
+      ElevatedButton(
+        child: Text(AppLocalizations.of(context)!.logIn),
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
             AuthLoginEvent(
@@ -184,13 +181,12 @@ class LoginScreenState extends State<LoginScreen>
             ),
           );
         },
-        isPrimary: true,
       ),
-      CustomTextButton(
+      TextButton(
         onPressed: () {
           context.go('/signup');
         },
-        text: AppLocalizations.of(context)!.noAccountCreateOne,
+        child: Text(AppLocalizations.of(context)!.noAccountCreateOne),
       ),
     ]);
   }

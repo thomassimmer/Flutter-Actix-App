@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
@@ -57,27 +57,25 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Button(
-                        text: AppLocalizations.of(context)!.generateNewQrCode,
-                        onPressed: () {
-                          BlocProvider.of<ProfileBloc>(context).add(
-                            ProfileGenerateTwoFactorAuthenticationConfigEvent(),
-                          );
-                        },
-                        isPrimary: true,
-                        size: ButtonSize.small,
-                      ),
+                      ElevatedButton(
+                          child: Text(
+                              AppLocalizations.of(context)!.generateNewQrCode),
+                          onPressed: () {
+                            BlocProvider.of<ProfileBloc>(context).add(
+                              ProfileGenerateTwoFactorAuthenticationConfigEvent(),
+                            );
+                          },
+                          style: context.styles.buttonSmall),
                       SizedBox(width: 16),
-                      Button(
-                        text: AppLocalizations.of(context)!.disableTwoFA,
-                        onPressed: () {
-                          BlocProvider.of<ProfileBloc>(context).add(
-                            ProfileDisableTwoFactorAuthenticationEvent(),
-                          );
-                        },
-                        isPrimary: true,
-                        size: ButtonSize.small,
-                      ),
+                      ElevatedButton(
+                          child:
+                              Text(AppLocalizations.of(context)!.disableTwoFA),
+                          onPressed: () {
+                            BlocProvider.of<ProfileBloc>(context).add(
+                              ProfileDisableTwoFactorAuthenticationEvent(),
+                            );
+                          },
+                          style: context.styles.buttonSmall),
                     ],
                   )
                 ])))
@@ -111,7 +109,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                   IntrinsicWidth(
                       child: Container(
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
+                            color: context.colors.background,
                             border: Border.all(
                                 width: 1.0, color: Colors.blue.shade200),
                             borderRadius: BorderRadius.circular(8.0),
@@ -126,49 +124,46 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                                   obscureText: true,
                                 ),
                                 SizedBox(height: 24),
-                                Button(
-                                  text: AppLocalizations.of(context)!.verify,
-                                  onPressed: () {
-                                    BlocProvider.of<ProfileBloc>(context).add(
-                                      ProfileVerifyOneTimePasswordEvent(
-                                        code: _otpController.text,
-                                      ),
-                                    );
-                                  },
-                                  isPrimary: true,
-                                  size: ButtonSize.small,
-                                ),
+                                ElevatedButton(
+                                    child: Text(
+                                        AppLocalizations.of(context)!.verify),
+                                    onPressed: () {
+                                      BlocProvider.of<ProfileBloc>(context).add(
+                                        ProfileVerifyOneTimePasswordEvent(
+                                          code: _otpController.text,
+                                        ),
+                                      );
+                                    },
+                                    style: context.styles.buttonSmall),
                                 SizedBox(
                                   height: 24,
                                 ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Button(
-                                      text: AppLocalizations.of(context)!
-                                          .regenerateQrCode,
-                                      onPressed: () {
-                                        BlocProvider.of<ProfileBloc>(context)
-                                            .add(
-                                          ProfileGenerateTwoFactorAuthenticationConfigEvent(),
-                                        );
-                                      },
-                                      isPrimary: true,
-                                      size: ButtonSize.small,
-                                    ),
+                                    ElevatedButton(
+                                        child: Text(
+                                            AppLocalizations.of(context)!
+                                                .regenerateQrCode),
+                                        onPressed: () {
+                                          BlocProvider.of<ProfileBloc>(context)
+                                              .add(
+                                            ProfileGenerateTwoFactorAuthenticationConfigEvent(),
+                                          );
+                                        },
+                                        style: context.styles.buttonSmall),
                                     SizedBox(width: 16),
-                                    Button(
-                                      text:
-                                          AppLocalizations.of(context)!.cancel,
-                                      onPressed: () {
-                                        BlocProvider.of<ProfileBloc>(context)
-                                            .add(
-                                          ProfileDisableTwoFactorAuthenticationEvent(),
-                                        );
-                                      },
-                                      isPrimary: true,
-                                      size: ButtonSize.small,
-                                    ),
+                                    ElevatedButton(
+                                        child: Text(
+                                            AppLocalizations.of(context)!
+                                                .cancel),
+                                        onPressed: () {
+                                          BlocProvider.of<ProfileBloc>(context)
+                                              .add(
+                                            ProfileDisableTwoFactorAuthenticationEvent(),
+                                          );
+                                        },
+                                        style: context.styles.buttonSmall),
                                   ],
                                 )
                               ]))))
@@ -189,16 +184,14 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                     AppLocalizations.of(context)!.twoFASetup,
                   ),
                   SizedBox(height: 16),
-                  Button(
-                    text: AppLocalizations.of(context)!.enable,
-                    onPressed: () {
-                      BlocProvider.of<ProfileBloc>(context).add(
-                        ProfileGenerateTwoFactorAuthenticationConfigEvent(),
-                      );
-                    },
-                    isPrimary: true,
-                    size: ButtonSize.small,
-                  ),
+                  ElevatedButton(
+                      child: Text(AppLocalizations.of(context)!.enable),
+                      onPressed: () {
+                        BlocProvider.of<ProfileBloc>(context).add(
+                          ProfileGenerateTwoFactorAuthenticationConfigEvent(),
+                        );
+                      },
+                      style: context.styles.buttonSmall),
                 ])))
       ],
     );
