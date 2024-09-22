@@ -11,21 +11,21 @@ import 'package:go_router/go_router.dart';
 class UnauthenticatedHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Background(),
-          Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: BlocListener<AuthBloc, AuthState>(
-                listener: (context, state) {
-                  GlobalSnackBar.show(context, state.message);
+    return BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          GlobalSnackBar.show(context, state.message);
 
-                  if (state is AuthAuthenticatedAfterLoginState) {
-                    context.goNamed('home');
-                  }
-                },
+          if (state is AuthAuthenticatedState) {
+            context.goNamed('home');
+          }
+        },
+        child: Scaffold(
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              Background(),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child:
                     BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
                   if (state is AuthLoadingState) {
@@ -34,10 +34,10 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
                     return _buildUnauthenticatedHomeScreen(context, state);
                   }
                 }),
-              ))
-        ],
-      ),
-    );
+              )
+            ],
+          ),
+        ));
   }
 
   Widget _buildLoadingScreen(BuildContext context, AuthState state) {

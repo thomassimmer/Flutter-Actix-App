@@ -56,7 +56,7 @@ class SignupScreenState extends State<SignupScreen>
                     padding: const EdgeInsets.all(30.0),
                     child: BlocListener<AuthBloc, AuthState>(
                         listener: (context, state) {
-                      if (state is AuthAuthenticatedState) {
+                      if (state is AuthAuthenticatedAfterRegistrationState) {
                         setState(() {
                           _isAuthenticated = true;
                         });
