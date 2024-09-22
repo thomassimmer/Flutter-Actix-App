@@ -45,3 +45,5 @@ flutter:
   uses-material-design: true
   assets:
     - .env
+    - assets/actix-logo.png
+    - assets/flutter-logo.png
