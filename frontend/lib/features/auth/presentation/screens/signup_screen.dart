@@ -44,14 +44,14 @@ class SignupScreenState extends State<SignupScreen>
               AppLogo(),
               SizedBox(height: 40),
               Container(
-                  decoration: BoxDecoration(
-                    color: context.colors.background,
-                    border: Border.all(width: 1.0, color: Colors.blue.shade200),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Padding(
+                decoration: BoxDecoration(
+                  color: context.colors.background,
+                  border: Border.all(width: 1.0, color: Colors.blue.shade200),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Padding(
                     padding: const EdgeInsets.all(30.0),
-                    child: BlocListener<AuthBloc, AuthState>(
+                    child: BlocConsumer<AuthBloc, AuthState>(
                         listener: (context, state) {
                       if (state is AuthAuthenticatedAfterRegistrationState) {
                         setState(() {
@@ -60,15 +60,14 @@ class SignupScreenState extends State<SignupScreen>
                       } else {
                         GlobalSnackBar.show(context, state.message);
                       }
-                    }, child: BlocBuilder<AuthBloc, AuthState>(
-                            builder: (context, state) {
+                    }, builder: (context, state) {
                       if (state is AuthLoadingState) {
                         return _buildLoadingScreen(context, state);
                       } else {
                         return _buildSignUpScreen(context, state);
                       }
                     })),
-                  )),
+              ),
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {

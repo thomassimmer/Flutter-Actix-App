@@ -46,44 +46,42 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     child: Padding(
-                        padding: const EdgeInsets.all(30.0),
-                        child: BlocListener<AuthBloc, AuthState>(
-                          listener: (context, state) {
-                            if (state is AuthAuthenticatedState) {
-                              setState(() {
-                                _isAuthenticated = true;
-                              });
-                            } else {
-                              GlobalSnackBar.show(context, state.message);
-                            }
-                          },
-                          child: BlocBuilder<AuthBloc, AuthState>(
-                            builder: (context, state) {
-                              if (state
-                                  is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndPasswordState) {
-                                return _buildRecoveryCodeAndPasswordView(
-                                    context, state);
-                              } else if (state
-                                  is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState) {
-                                return _buildRecoveryCodeAndOneTimePasswordView(
-                                    context, state);
-                              } else if (state
-                                  is AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState) {
-                                return _buildRecoveryCodeView(context, state);
-                              } else if (state
-                                  is AuthRecoverAccountUsernameStepState) {
-                                return _buildUsernameStepView(context, state);
-                              } else if (state is AuthLoadingState) {
-                                return CircularProgressIndicator();
-                              } else {
-                                return Text(state.message != null
-                                    ? getTranslatedMessage(
-                                        context, state.message!)
-                                    : AppLocalizations.of(context)!.noContent);
-                              }
-                            },
-                          ),
-                        ))),
+                      padding: const EdgeInsets.all(30.0),
+                      child: BlocConsumer<AuthBloc, AuthState>(
+                        listener: (context, state) {
+                          if (state is AuthAuthenticatedState) {
+                            setState(() {
+                              _isAuthenticated = true;
+                            });
+                          } else {
+                            GlobalSnackBar.show(context, state.message);
+                          }
+                        },
+                        builder: (context, state) {
+                          if (state
+                              is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndPasswordState) {
+                            return _buildRecoveryCodeAndPasswordView(
+                                context, state);
+                          } else if (state
+                              is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState) {
+                            return _buildRecoveryCodeAndOneTimePasswordView(
+                                context, state);
+                          } else if (state
+                              is AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState) {
+                            return _buildRecoveryCodeView(context, state);
+                          } else if (state
+                              is AuthRecoverAccountUsernameStepState) {
+                            return _buildUsernameStepView(context, state);
+                          } else if (state is AuthLoadingState) {
+                            return CircularProgressIndicator();
+                          } else {
+                            return Text(state.message != null
+                                ? getTranslatedMessage(context, state.message!)
+                                : AppLocalizations.of(context)!.noContent);
+                          }
+                        },
+                      ),
+                    )),
                 SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
