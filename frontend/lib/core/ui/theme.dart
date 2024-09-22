@@ -97,7 +97,7 @@ class AppTheme extends ThemeExtension<AppTheme> {
           ),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: styles.buttonLarge.copyWith(
+          style: styles.buttonSmall.copyWith(
             backgroundColor:
                 WidgetStateProperty.resolveWith((Set<WidgetState> states) {
               return states.contains(WidgetState.disabled)

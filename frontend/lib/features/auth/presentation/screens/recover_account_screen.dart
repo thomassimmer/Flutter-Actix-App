@@ -103,7 +103,7 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
             isVisible: _isAuthenticated,
             onAnimationComplete: () {
               GlobalSnackBar.show(context, authMessage);
-              context.go('/#/profile');
+              context.go('/profile/password');
             },
           ),
         ],
