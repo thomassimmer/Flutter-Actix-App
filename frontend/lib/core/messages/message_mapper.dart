@@ -60,21 +60,27 @@ String getTranslatedMessage(BuildContext context, Message message) {
     }
   } else if (message is SuccessMessage) {
     switch (message.messageKey) {
+      // Generic
       case 'loginSuccessful':
         return localizations.loginSuccessful;
       case 'logoutSuccessful':
         return localizations.logoutSuccessful;
+
+      // Profile
       case 'passwordUpdateSuccessful':
         return localizations.passwordUpdateSuccessful;
       case 'profileUpdateSuccessful':
         return localizations.profileUpdateSuccessful;
+
       default:
         return localizations.defaultError;
     }
   } else if (message is InfoMessage) {
     switch (message.messageKey) {
+      // Auth
       case 'recoveryCodesCopied':
         return localizations.recoveryCodesCopied;
+
       default:
         return localizations.defaultError;
     }

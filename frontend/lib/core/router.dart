@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutteractixapp/core/presentation/screens/error_screen.dart';
 import 'package:flutteractixapp/core/presentation/screens/root_screen.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
@@ -19,6 +20,7 @@ import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
   initialLocation: '/',
+  errorBuilder: (context, state) => ErrorScreen(error: state.error),
   routes: [
     GoRoute(
       path: '/',
