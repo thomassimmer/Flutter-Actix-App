@@ -20,7 +20,7 @@ class ErrorScreen extends StatelessWidget {
             title: Row(children: [
               TextButton(
                   onPressed: () {
-                    context.go('/');
+                    context.goNamed('home');
                   },
                   child: Row(children: [
                     Text('Flutter',

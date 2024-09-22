@@ -40,13 +40,13 @@ class RootScreen extends StatelessWidget {
     void onItemTapped(int index) {
       switch (index) {
         case 0:
-          GoRouter.of(context).go('/habits');
+          context.goNamed('habits');
         case 1:
-          GoRouter.of(context).go('/challenges');
+          context.goNamed('challenges');
         case 2:
-          GoRouter.of(context).go('/messages');
+          context.goNamed('messages');
         case 3:
-          GoRouter.of(context).go('/profile');
+          context.goNamed('profile');
       }
     }
 
@@ -56,7 +56,7 @@ class RootScreen extends StatelessWidget {
             GlobalSnackBar.show(context, state.message);
 
             if (state is AuthUnauthenticatedState) {
-              context.go('/');
+              context.goNamed('home');
             }
           }),
           BlocListener<ProfileBloc, ProfileState>(listener: (context, state) {
@@ -73,7 +73,7 @@ class RootScreen extends StatelessWidget {
                 title: Row(children: [
                   TextButton(
                       onPressed: () {
-                        context.go('/');
+                        context.goNamed('home');
                       },
                       child: Row(children: [
                         Text('Flutter',

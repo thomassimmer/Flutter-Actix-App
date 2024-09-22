@@ -92,7 +92,7 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
                 SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    context.go('/');
+                    context.goNamed('home');
                   },
                   child: Text(AppLocalizations.of(context)!.home),
                   style: context.styles.buttonSmall,
@@ -103,7 +103,7 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
             isVisible: _isAuthenticated,
             onAnimationComplete: () {
               GlobalSnackBar.show(context, authMessage);
-              context.go('/profile/password');
+              context.goNamed('password');
             },
           ),
         ],
