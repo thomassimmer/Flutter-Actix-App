@@ -64,6 +64,7 @@
   "profile": "Profile",
   "profileSettings": "Profile Settings",
   "profileUpdateSuccessful": "Profile information saved.",
+  "qrCodeSecretKeyCopied": "QR code secret key copied to clipboard.",
   "recoverAccount": "Recover Account",
   "recoveryCode": "Recovery code",
   "recoveryCodesCopied": "Recovery codes copied to clipboard.",

@@ -12,39 +12,33 @@ class AboutScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.about),
         ),
-        body: Padding(
-            padding: const EdgeInsets.all(16.0),
+        body: Center(
             child: Column(children: [
-              Center(
-                  child: Padding(
-                      padding: const EdgeInsets.all(30.0),
-                      child: Column(children: [
-                        Text(
-                          AppLocalizations.of(context)!.aboutText,
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            if (await canLaunchUrl(githubUrl)) {
-                              await launchUrl(githubUrl,
-                                  mode: LaunchMode.externalApplication,
-                                  webOnlyWindowName: '_blank');
-                            } else {
-                              throw 'Could not launch $githubUrl';
-                            }
-                          },
-                          child: Image.asset(
-                            'assets/github-logo.png',
-                            width: 50,
-                            height: 50,
-                          ),
-                          style: ButtonStyle(
-                              backgroundColor: WidgetStatePropertyAll(
-                                  context.colors.hint.withOpacity(0.1))),
-                        ),
-                      ])))
-            ])));
+          Text(
+            AppLocalizations.of(context)!.aboutText,
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          TextButton(
+            onPressed: () async {
+              if (await canLaunchUrl(githubUrl)) {
+                await launchUrl(githubUrl,
+                    mode: LaunchMode.externalApplication,
+                    webOnlyWindowName: '_blank');
+              } else {
+                throw 'Could not launch $githubUrl';
+              }
+            },
+            style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(
+                    context.colors.hint.withOpacity(0.1))),
+            child: Image.asset(
+              'assets/github-logo.png',
+              width: 50,
+              height: 50,
+            ),
+          ),
+        ])));
   }
 }
