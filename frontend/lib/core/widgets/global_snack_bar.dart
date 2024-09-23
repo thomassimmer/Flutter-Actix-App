@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/core/messages/message_mapper.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 
 class GlobalSnackBar {
-  static Color _getBackgroundColor(Message message) {
+  static Color _getBackgroundColor(BuildContext context, Message message) {
     if (message is SuccessMessage) {
-      return Colors.green;
+      return context.colors.accent;
     } else if (message is InfoMessage) {
-      return Colors.blueAccent;
+      return context.colors.information;
     } else {
-      return Colors.redAccent;
+      return context.colors.error;
     }
   }
 
@@ -22,7 +23,7 @@ class GlobalSnackBar {
     }
 
     final messageTranslated = getTranslatedMessage(context, message);
-    final backgroundColor = _getBackgroundColor(message);
+    final backgroundColor = _getBackgroundColor(context, message);
 
     return (ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -34,6 +35,7 @@ class GlobalSnackBar {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5.0),
         ),
+        closeIconColor: context.colors.text,
       ),
     ));
   }

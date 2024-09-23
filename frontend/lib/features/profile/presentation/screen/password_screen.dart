@@ -71,8 +71,8 @@ class PasswordScreen extends StatelessWidget {
                   Container(
                       decoration: BoxDecoration(
                         color: context.colors.background,
-                        border:
-                            Border.all(width: 1.0, color: Colors.blue.shade200),
+                        border: Border.all(
+                            width: 1.5, color: context.colors.primarySwatch),
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       child: Padding(
@@ -132,8 +132,8 @@ class PasswordScreen extends StatelessWidget {
                   Container(
                       decoration: BoxDecoration(
                         color: context.colors.background,
-                        border:
-                            Border.all(width: 1.0, color: Colors.blue.shade200),
+                        border: Border.all(
+                            width: 1.5, color: context.colors.primarySwatch),
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       child: Padding(
