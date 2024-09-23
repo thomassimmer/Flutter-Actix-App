@@ -1,6 +1,8 @@
 {
   "@@locale": "fr",
   "alreadyAnAccountLogin": "Déjà un compte ? Connectez-vous",
+  "about": "À propos",
+  "aboutText": "Cette application vous est proposée par Thomas Simmer.",
   "cancel": "Annuler",
   "changePassword": "Changer mon mot de passe",
   "challenges": "Défis",

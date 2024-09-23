@@ -33,6 +33,7 @@ dependencies:
   get_it: ^7.7.0
   logger: ^2.4.0
   formz: ^0.7.0
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
@@ -47,3 +48,4 @@ flutter:
     - .env
     - assets/actix-logo.png
     - assets/flutter-logo.png
+    - assets/github-logo.png

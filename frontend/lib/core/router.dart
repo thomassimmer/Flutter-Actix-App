@@ -11,6 +11,7 @@ import 'package:flutteractixapp/features/auth/presentation/screens/unauthenticat
 import 'package:flutteractixapp/features/challenges/presentation/challenges_screen.dart';
 import 'package:flutteractixapp/features/habits/presentation/habits_screen.dart';
 import 'package:flutteractixapp/features/messages/presentation/messages_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screen/about_screen.dart';
 import 'package:flutteractixapp/features/profile/presentation/screen/language_selection_screen.dart';
 import 'package:flutteractixapp/features/profile/presentation/screen/password_screen.dart';
 import 'package:flutteractixapp/features/profile/presentation/screen/profile_screen.dart';
@@ -82,6 +83,11 @@ final router = GoRouter(
               path: 'password',
               name: 'password',
               builder: (context, state) => PasswordScreen(),
+            ),
+            GoRoute(
+              path: 'about',
+              name: 'about',
+              builder: (context, state) => AboutScreen(),
             ),
           ],
         ),

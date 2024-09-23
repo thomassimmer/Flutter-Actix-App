@@ -1,6 +1,8 @@
 {
   "@@locale": "en",
   "alreadyAnAccountLogin": "Already have an account? Sign in",
+  "about": "About",
+  "aboutText": "This application is proposed to you by Thomas Simmer.",
   "cancel": "Cancel",
   "changePassword": "Change Password",
   "challenges": "Challenges",
