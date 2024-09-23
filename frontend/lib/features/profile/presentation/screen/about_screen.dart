@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -27,7 +28,9 @@ class AboutScreen extends StatelessWidget {
                         TextButton(
                           onPressed: () async {
                             if (await canLaunchUrl(githubUrl)) {
-                              await launchUrl(githubUrl);
+                              await launchUrl(githubUrl,
+                                  mode: LaunchMode.externalApplication,
+                                  webOnlyWindowName: '_blank');
                             } else {
                               throw 'Could not launch $githubUrl';
                             }
@@ -37,6 +40,9 @@ class AboutScreen extends StatelessWidget {
                             width: 50,
                             height: 50,
                           ),
+                          style: ButtonStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                                  context.colors.hint.withOpacity(0.1))),
                         ),
                       ])))
             ])));
