@@ -20,40 +20,40 @@ class AppThemeTypography {
     ),
     this.heading = const TextStyle(
       fontSize: 24,
-      // fontWeight: FontWeight.w900,
+      fontWeight: FontWeight.w500,
     ),
     this.headingSmall = const TextStyle(
       fontSize: 20,
-      // fontWeight: FontWeight.w900,
+      fontWeight: FontWeight.w400,
     ),
     this.bodyExtraLarge = const TextStyle(
       fontSize: 20,
-      // fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w600,
     ),
     this.bodyLarge = const TextStyle(
       fontSize: 18,
-      // fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w500,
     ),
     this.body = const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
     this.bodySmall = const TextStyle(
       fontSize: 14,
-      // fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.w400,
     ),
     this.bodyExtraSmall = const TextStyle(
       fontSize: 12,
-      // fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.w400,
     ),
     this.captionLarge = const TextStyle(
       fontSize: 14,
-      // fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w700,
     ),
     this.caption = const TextStyle(
       fontSize: 12,
-      // fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w600,
     ),
     this.captionSmall = const TextStyle(
       fontSize: 10,
-      // fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w600,
     ),
   });
 

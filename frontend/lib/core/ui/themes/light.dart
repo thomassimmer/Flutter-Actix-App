@@ -23,7 +23,7 @@ class LightAppTheme extends AppTheme {
             text: Color(0xFF303943),
             textOnPrimary: Color(0xFFFFFFFF),
             border: Color(0xFFEBEBEB),
-            hint: Color(0x99303943),
+            hint: Color(0x99FFFFFF),
           ),
         );
 }

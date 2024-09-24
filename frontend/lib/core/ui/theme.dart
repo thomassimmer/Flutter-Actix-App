@@ -23,6 +23,7 @@ class AppTheme extends ThemeExtension<AppTheme> {
       : const ColorScheme.dark();
 
   ThemeData get themeData => ThemeData(
+        fontFamily: 'Montserrat',
         useMaterial3: false,
         platform: TargetPlatform.iOS,
         extensions: [this],
@@ -114,9 +115,10 @@ class AppTheme extends ThemeExtension<AppTheme> {
         ),
         inputDecorationTheme: InputDecorationTheme(
           contentPadding:
-              const EdgeInsets.symmetric(vertical: 8, horizontal: 42),
+              const EdgeInsets.symmetric(vertical: 8, horizontal: 22),
           filled: true,
           fillColor: colors.backgroundDark,
+          labelStyle: typographies.bodySmall.copyWith(color: colors.text),
           hintStyle: typographies.bodySmall.copyWith(
             fontWeight: FontWeight.w500,
             color: colors.text.withOpacity(0.4),
@@ -133,9 +135,9 @@ class AppTheme extends ThemeExtension<AppTheme> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           side: BorderSide(color: colors.border),
         ),
-        radioTheme: const RadioThemeData(
-          visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-        ),
+        radioTheme: RadioThemeData(
+            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+            fillColor: WidgetStatePropertyAll(colors.text)),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
           backgroundColor: colors.secondary,
           foregroundColor: colors.textOnPrimary,

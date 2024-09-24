@@ -83,7 +83,7 @@ class PasswordScreen extends StatelessWidget {
             );
             _newPasswordController.text = '';
           },
-          style: context.styles.buttonSmall,
+          style: context.styles.buttonMedium,
           child: Text(AppLocalizations.of(context)!.verify),
         ),
       ]))
@@ -136,7 +136,6 @@ class PasswordScreen extends StatelessWidget {
             _currentPasswordController.text = '';
             _newPasswordController.text = '';
           },
-          style: context.styles.buttonSmall,
           child: Text(AppLocalizations.of(context)!.save),
         ),
       ])),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/message_mapper.dart';
-import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/app_logo.dart';
 import 'package:flutteractixapp/core/widgets/custom_container.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
@@ -90,7 +89,6 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
                               onPressed: () {
                                 context.goNamed('home');
                               },
-                              style: context.styles.buttonSmall,
                               child: Text(AppLocalizations.of(context)!.home),
                             ),
                           ],
@@ -136,7 +134,6 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
                 passwordForgotten: state.passwordForgotten),
           );
         },
-        style: context.styles.buttonSmall,
         child: Text(AppLocalizations.of(context)!.next),
       ),
     ]);
@@ -181,7 +178,6 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
                 recoveryCode: recoveryCodeController.text),
           );
         },
-        style: context.styles.buttonSmall,
         child: Text(AppLocalizations.of(context)!.next),
       ),
     ]);
@@ -215,7 +211,6 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
                 recoveryCode: recoveryCodeController.text),
           );
         },
-        style: context.styles.buttonSmall,
         child: Text(AppLocalizations.of(context)!.next),
       ),
     ]);
@@ -259,7 +254,6 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
                 recoveryCode: recoveryCodeController.text),
           );
         },
-        style: context.styles.buttonSmall,
         child: Text(AppLocalizations.of(context)!.next),
       ),
     ]);

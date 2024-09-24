@@ -7,12 +7,12 @@ class AppLogo extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Image.asset(
-          'assets/flutter-logo.png',
+          'assets/images/flutter-logo.png',
           width: 80,
           height: 80,
         ),
         Image.asset(
-          'assets/actix-logo.png',
+          'assets/images/actix-logo.png',
           width: 80,
           height: 80,
         ),
