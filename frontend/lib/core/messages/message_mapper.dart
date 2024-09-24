@@ -60,11 +60,13 @@ String getTranslatedMessage(BuildContext context, Message message) {
     }
   } else if (message is SuccessMessage) {
     switch (message.messageKey) {
-      // Generic
+      // Auth
       case 'loginSuccessful':
         return localizations.loginSuccessful;
       case 'logoutSuccessful':
         return localizations.logoutSuccessful;
+      case 'validationCodeCorrect':
+        return localizations.validationCodeCorrect;
 
       // Profile
       case 'passwordUpdateSuccessful':

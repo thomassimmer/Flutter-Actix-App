@@ -25,7 +25,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       GetIt.instance<GetProfileUsecase>();
   final PostProfileUsecase postProfileUsecase =
       GetIt.instance<PostProfileUsecase>();
-  final GenerateTwoFactorAuthenticationConfigUseCase generateTwoFactorAuthenticationConfigUseCase =
+  final GenerateTwoFactorAuthenticationConfigUseCase
+      generateTwoFactorAuthenticationConfigUseCase =
       GetIt.instance<GenerateTwoFactorAuthenticationConfigUseCase>();
   final DisableTwoFactorAuthenticationUseCase
       disableTwoFactorAuthenticationUseCase =
@@ -211,8 +212,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       profile.otpVerified = true;
 
       emit(ProfileAuthenticated(
-        profile: profile,
-      ));
+          profile: profile, message: SuccessMessage("validationCodeCorrect")));
     });
   }
 
