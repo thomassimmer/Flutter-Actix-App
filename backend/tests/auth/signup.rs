@@ -128,7 +128,7 @@ async fn user_cannot_signup_with_short_password() {
         .insert_header(ContentType::json())
         .set_json(&serde_json::json!({
         "username": "testusername",
-        "password": "password",
+        "password": "passwor",
         "locale": "en",
         "theme": "dark",
         }))
