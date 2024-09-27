@@ -9,7 +9,7 @@ This project is an application starter pack. The stack used is:
 
 Features done:
 
-- signup / login using username / password
+- signup / login using username / password (no email because my user shouldn't be personally identifiable)
 - logout
 - two factor authentication with one-time passwords
 - account recovery using recovery codes and 2FA/password
