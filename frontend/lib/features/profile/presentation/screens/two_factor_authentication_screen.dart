@@ -7,9 +7,9 @@ import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/custom_container.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/profile/profile_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/profile/profile_events.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/profile/profile_states.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class TwoFactorAuthenticationScreen extends StatelessWidget {

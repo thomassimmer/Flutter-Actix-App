@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutteractixapp/core/validators/password.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/update_password/update_password_events.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/update_password/update_password_state.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/update_password/update_password_events.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/update_password/update_password_states.dart';
 import 'package:formz/formz.dart';
 
 class ProfileUpdatePasswordFormBloc

@@ -4,8 +4,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/app_logo.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:go_router/go_router.dart';
 

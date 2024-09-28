@@ -12,8 +12,8 @@ import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_wi
 import 'package:flutteractixapp/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/validate_one_time_password_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/verify_one_time_password_use_case.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_events.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_states.dart';
 import 'package:get_it/get_it.dart';
 import 'package:universal_io/io.dart';
 

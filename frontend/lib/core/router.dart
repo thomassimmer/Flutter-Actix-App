@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutteractixapp/core/presentation/screens/error_screen.dart';
 import 'package:flutteractixapp/core/presentation/screens/root_screen.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/recover_account_screen.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/recovery_codes_screen.dart';
@@ -11,12 +11,12 @@ import 'package:flutteractixapp/features/auth/presentation/screens/unauthenticat
 import 'package:flutteractixapp/features/challenges/presentation/challenges_screen.dart';
 import 'package:flutteractixapp/features/habits/presentation/habits_screen.dart';
 import 'package:flutteractixapp/features/messages/presentation/messages_screen.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/about_screen.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/language_selection_screen.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/password_screen.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/profile_screen.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/theme_selection_screen.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/two_factor_authentication_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screens/about_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screens/language_selection_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screens/password_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screens/profile_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screens/theme_selection_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screens/two_factor_authentication_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(

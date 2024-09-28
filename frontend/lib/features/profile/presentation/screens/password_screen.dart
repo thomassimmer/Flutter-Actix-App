@@ -7,13 +7,13 @@ import 'package:flutteractixapp/core/messages/message_mapper.dart';
 import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/custom_container.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/set_password/set_password_bloc.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/set_password/set_password_events.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/update_password/update_password_bloc.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/update_password/update_password_events.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/profile/profile_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/profile/profile_events.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/profile/profile_states.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/set_password/set_password_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/set_password/set_password_events.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/update_password/update_password_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/update_password/update_password_events.dart';
 
 class PasswordScreen extends StatelessWidget {
   final TextEditingController _currentPasswordController =

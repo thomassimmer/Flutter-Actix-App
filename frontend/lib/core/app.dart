@@ -4,13 +4,13 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/router.dart';
 import 'package:flutteractixapp/core/ui/themes/dark.dart';
 import 'package:flutteractixapp/core/ui/themes/light.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth_login/auth_login_bloc.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/set_password/set_password_bloc.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/update_password/update_password_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_events.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth_login/auth_login_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/profile/profile_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/profile/profile_states.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/set_password/set_password_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/blocs/update_password/update_password_bloc.dart';
 import 'package:universal_io/io.dart';
 
 class FlutterActixApp extends StatelessWidget {
