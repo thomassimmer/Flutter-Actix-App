@@ -1,51 +1,58 @@
-# Building a Flutter / Rust app: Integration tests
+# Building a Cross-Platform App with Flutter and Rust: Writing Integration Tests
 
-## Context
+## Introduction
 
-This article explains how I wrote integration tests for my Flutter/Rust app with:
+In this article, I’ll walk you through how I wrote integration tests for a cross-platform app built using Flutter for the frontend and Actix for the backend. The app has several key features, including:
 
-- a first page where you can login / signup using a username and a password (no email because my user shouldn't be personally identifiable)
-- a second page where freshly registered users can see their recovery codes
-- a third page where freshly registered users can enable 2-factor authentication (2FA) with one-time passwords (OTP) using an external app like Google's Authenticator
-- a fourth page that is a typical app view with four tabs using a common base screen with a logout button
-- a fifth page for the profile tab where people can change their languages, theme and enable/disable 2FA
+1. A login/signup page using a username and password (without email, for privacy).
+2. A recovery code page for new users.
+3. A 2FA setup page using OTP with an external app like Google Authenticator.
+4. A main app view with four tabs.
+5. A profile tab where users can change settings like language, theme, 2FA and logout.
+6. An account recovery page for users who lose access to 2FA or their password.
 
-Don't hesitate to read the first article of this serie to get more context, [](here).
+For more context, feel free to check out [the first article](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-a-beginners-journey-92cbb893c2f9) of this series.
 
 My API uses these crates:
 
-- **actix**, the web framework, to write my routes, run my server, write my tests, etc...
-- **sqlx**, to connect and safely query my database asynchronously
-- **jsonwebtoken** to generate and decode tokens
-- **argon2** for password hashing
-- **secrecy** for ensuring my app's secrets aren't exposed anywhere
-- **totp-rs** to generate and validate one-time passwords
+- **actix-web** for managing routes, running the server, and writing tests.
+- **sqlx** for safe asynchronous database queries.
+- **jsonwebtoken** to handle token creation and decoding.
+- **argon2** for secure password hashing.
+- **secrecy** to safeguard sensitive data.
+- **totp-rs** to generate and validate one-time passwords (OTPs).
 
-## Goals
+## Goals of the Integration Tests
 
-I wanted to have an API fully tested, allowing all these actions:
+I needed to ensure the API handled these user actions seamlessly:
 
-- users can signup using a username and a password
-- after they are registered, the receive their recovery codes because we are not using any email
-- they can use their recovery code in case they lost their password and access their account
-- after they are registered, they can enable 2FA, if they accept, a QR code is sent and they have to verify it by sending a one-time password (OTP) they generated on their app
-- if 2FA is enabled, users have to generate their OTP every time they connect
-- users have a profile page when they can see and update their profile
-- when connected, users use an access token which expires after 15 minutes and can be replaced using a refresh token which expires after 7 days
+- Sign up using a username and password.
+- Receive recovery codes upon registration, as we don’t use email.
+- Recover access using recovery codes in case of password or 2FA loss.
+- Enable 2FA after registration by scanning a QR code and verifying it with an OTP.
+- Verify OTP on every login if 2FA is enabled.
+- Manage profile settings (language, theme, and 2FA) from a profile page.
+- Maintain secure sessions with an access token (expires in 15 minutes) and a refresh token (expires in 7 days).
 
-My integration tests have to ensure each of these actions are possible and that misusing them is also not possible.
+The integration tests needed to ensure not only that these actions were possible but also that improper usage was prevented.
 
-## Difficulties
+## Challenges in Writing Integration Tests
 
-One difficulty when writing integration tests for API is test concurrency. In Rust, when you run **cargo test**, your tests are generally ran in parallel, which means that if they all make queries to the same database, you might end up with conflicts and your tests can randomly fail.
+1. Handling Concurrency
 
-One way to overcome that is creating a transaction for each test and then roll it back at the end of it. This is simple and fast but not always feasible. For instance, if your views are using a state variable that is a database **pool** connection, you will struggle a lot to pass your test transaction into that, especially if your test contains many requests that depends on each other.
+A common issue with API integration tests is test concurrency. When running tests with **cargo test**, Rust runs tests in parallel, leading to potential conflicts if multiple tests query the same database simultaneously. These conflicts can cause random test failures.
 
-Another way is to use a different database for each of your tests. Ideally this database is in-memory to not have to clean it after manually. Unfortunately, I believe this is only possible for SQLite databases, not PostgreSQL ones.
+One solution is to use database transactions for each test and roll them back afterward. While this works well in simple cases, it becomes challenging when your test involves state variables, such as a shared **database connection pool**.
 
-The way I went for, which is pretty much inspired by [](zero2prod), is creating a new database everytime in my PostgreSQL container giving it a Uuid for the name to avoid reusing an existing database. Each of my test creates a database, gets a pool of connections, runs the migrations, and then executes itself.
+Another approach is to use a separate database instance for each test. Ideally, this would be an in-memory database to avoid manual cleanup. Unfortunately, PostgreSQL doesn’t support in-memory databases, so this method is only viable with SQLite.
 
-Another difficulty when writing tests in Rust is being able to control the time, when your code uses **chrono::Utc::now**. Currently, these is no way to easily "freeze" the time at a moment you decide in your tests, like **freezegun.free_time** in Python. Luckily, someone started a pull request for this issue on the chrono GitHub project [https://github.com/chronotope/chrono/pull/1244/files](here). In this PR's changes, you can see this:
+Inspired by [zero2prod](https://www.lpalmieri.com/posts/2020-08-31-zero-to-production-3-5-html-forms-databases-integration-tests/#3-2-choosing-a-database-crate), I opted to create a new PostgreSQL database for each test, using a unique UUID as the database name to avoid conflicts. Each test creates its own database, sets up a connection pool, runs the necessary migrations, and proceeds to execute.
+
+2. Controlling Time in Tests
+
+Another challenge arises when controlling time-sensitive logic, such as expiring tokens, in your tests. Rust’s **chrono::Utc::now** doesn’t provide an easy way to “freeze” time during tests, like **Python’s freezegun**.
+
+Fortunately, there’s a pull request in the works on [chrono's GitHub](https://github.com/chronotope/chrono/pull/1244/files) that introduces the OVERRIDE_NOW variable, allowing you to override the current time on a per-thread basis. Here’s the relevant part of the PR:
 
 ```rust
 // Value to use for `Utc::now()` and `Local::now()`, when set with `Local::override_now`.
@@ -55,7 +62,7 @@ thread_local!(
 );
 ```
 
-This variable **OVERRIDE_NOW** is global in a thread, which means that you can set it in a test, and no other test will be impacted by it. Using that, you can you own **now** function that will whether call **Utc::now** is **OVERRIDE_NOW** is not set, otherwise **OVERRIDE_NOW**. Then, you just have to replace usage of **Utc::now()** in your code by your own function **now()**.
+With **OVERRIDE_NOW**, you can mock the current time in your tests without affecting other tests. By creating a custom now function, you can either use the overridden time (if set) or fall back to **Utc::now()**:
 
 ```rust
 use chrono::{DateTime, FixedOffset, Utc};
@@ -76,7 +83,9 @@ pub fn now() -> DateTime<Utc> {
 }
 ```
 
-Using this trick means I cannot write my tests using an http server running in a different thread and then execute my request using the **reqwest** crate like zero2prod. Instead, and probably for the best, I can use the Actix's test utilities. I will then have to use this pattern:
+Using this method, you can control time during tests. However, this approach doesn’t work with a server running in a separate thread, such as when using the reqwest crate for HTTP requests like zero2prod did. Instead, I rely on Actix’s test utilities, which run the app in the same thread as the test, making time control easier.
+
+Here’s a basic example using Actix’s utilities:
 
 ```rust
 #[cfg(test)]
@@ -100,7 +109,7 @@ mod tests {
 }
 ```
 
-And the good thing is, I don't to rewrite my whole App with all routes and **web::Data** variables because I created a function that defines that already in **src/startup.rs**:
+The good news is that I didn’t need to rewrite my entire app with all the routes and web::Data variables for each test. Instead, I created a function in src/startup.rs that sets everything up:
 
 ```rust
 pub fn create_app(
@@ -124,7 +133,7 @@ pub fn create_app(
                 ... // The rest is not important here
 ```
 
-Here is how my simplest test look like:
+Here’s a basic test, like signing up a user:
 
 ```rust
 pub async fn user_signs_up(
@@ -157,7 +166,7 @@ async fn user_can_signup() {
 }
 ```
 
-Now if I want to control time in a test to ensure my access token will be expired after the delay I decided, I can do this:
+Now, if I want to test the expiration of an access token, I can control time using the previously mentioned override_now method:
 
 ```rust
 #[tokio::test]
@@ -196,7 +205,9 @@ async fn access_token_becomes_expired_after_15_minutes() {
 }
 ```
 
-And that's it, I hope it was useful. Don't hesitate to leave a comment!
+And that’s it! I hope you found this useful. Feel free to leave a comment if you have any questions or thoughts.
 
-See you for the next article,
+See you in the next article,
 Thomas
+
+[![Watch the video](/docs/screenshots/1.png)](https://youtu.be/ZCqYWs-lrRM)
