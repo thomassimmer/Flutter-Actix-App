@@ -1,3 +1,5 @@
+Available at: https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-writing-integration-tests-b018d472c19a
+
 # Building a Cross-Platform App with Flutter and Rust: Writing Integration Tests
 
 ## Introduction
