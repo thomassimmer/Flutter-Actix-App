@@ -112,6 +112,15 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
     final TextEditingController usernameController =
         TextEditingController(text: state.username);
 
+    void triggerNextAction() {
+      BlocProvider.of<AuthBloc>(context).add(
+        AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent(
+          username: usernameController.text,
+          passwordForgotten: state.passwordForgotten,
+        ),
+      );
+    }
+
     return Column(children: [
       Text(
         AppLocalizations.of(context)!.recoverAccount,
@@ -125,16 +134,11 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
       CustomTextField(
         controller: usernameController,
         label: AppLocalizations.of(context)!.username,
+        onFieldSubmitted: (_) => triggerNextAction(),
       ),
       SizedBox(height: 24),
       ElevatedButton(
-        onPressed: () {
-          BlocProvider.of<AuthBloc>(context).add(
-            AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent(
-                username: usernameController.text,
-                passwordForgotten: state.passwordForgotten),
-          );
-        },
+        onPressed: triggerNextAction,
         child: Text(AppLocalizations.of(context)!.next),
       ),
     ]);
@@ -145,6 +149,16 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
     final TextEditingController passwordController = TextEditingController();
     final TextEditingController recoveryCodeController =
         TextEditingController();
+
+    void recoverAccount() {
+      BlocProvider.of<AuthBloc>(context).add(
+        AuthRecoverAccountWithTwoFactorAuthenticationAndPasswordEvent(
+          username: state.username,
+          password: passwordController.text,
+          recoveryCode: recoveryCodeController.text,
+        ),
+      );
+    }
 
     return Column(children: [
       Text(
@@ -157,9 +171,9 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 16),
       CustomTextField(
-        controller: passwordController,
-        label: AppLocalizations.of(context)!.password,
-      ),
+          controller: passwordController,
+          label: AppLocalizations.of(context)!.password,
+          obscureText: true),
       SizedBox(height: 16),
       Text(
         AppLocalizations.of(context)!.enterRecoveryCode,
@@ -168,17 +182,11 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
       CustomTextField(
         controller: recoveryCodeController,
         label: AppLocalizations.of(context)!.recoveryCode,
+        onFieldSubmitted: (_) => recoverAccount(),
       ),
       SizedBox(height: 24),
       ElevatedButton(
-        onPressed: () {
-          BlocProvider.of<AuthBloc>(context).add(
-            AuthRecoverAccountWithTwoFactorAuthenticationAndPasswordEvent(
-                username: state.username,
-                password: passwordController.text,
-                recoveryCode: recoveryCodeController.text),
-          );
-        },
+        onPressed: recoverAccount,
         child: Text(AppLocalizations.of(context)!.next),
       ),
     ]);
@@ -188,6 +196,14 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
       BuildContext context, AuthRecoverAccountUsernameStepState state) {
     final TextEditingController recoveryCodeController =
         TextEditingController();
+
+    void recoverAccount() {
+      BlocProvider.of<AuthBloc>(context).add(
+        AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
+            username: state.username,
+            recoveryCode: recoveryCodeController.text),
+      );
+    }
 
     return Column(children: [
       Text(
@@ -202,16 +218,11 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
       CustomTextField(
         controller: recoveryCodeController,
         label: AppLocalizations.of(context)!.recoveryCode,
+        onFieldSubmitted: (_) => recoverAccount(),
       ),
       SizedBox(height: 24),
       ElevatedButton(
-        onPressed: () {
-          BlocProvider.of<AuthBloc>(context).add(
-            AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
-                username: state.username,
-                recoveryCode: recoveryCodeController.text),
-          );
-        },
+        onPressed: recoverAccount,
         child: Text(AppLocalizations.of(context)!.next),
       ),
     ]);
@@ -222,6 +233,14 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
     final TextEditingController recoveryCodeController =
         TextEditingController();
     final TextEditingController otpController = TextEditingController();
+
+    void recoverAccount() {
+      BlocProvider.of<AuthBloc>(context).add(
+        AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
+            username: state.username,
+            recoveryCode: recoveryCodeController.text),
+      );
+    }
 
     return Column(children: [
       Text(
@@ -245,16 +264,11 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
       CustomTextField(
         controller: otpController,
         label: AppLocalizations.of(context)!.validationCode,
+        onFieldSubmitted: (_) => recoverAccount(),
       ),
       SizedBox(height: 24),
       ElevatedButton(
-        onPressed: () {
-          BlocProvider.of<AuthBloc>(context).add(
-            AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
-                username: state.username,
-                recoveryCode: recoveryCodeController.text),
-          );
-        },
+        onPressed: recoverAccount,
         child: Text(AppLocalizations.of(context)!.next),
       ),
     ]);
