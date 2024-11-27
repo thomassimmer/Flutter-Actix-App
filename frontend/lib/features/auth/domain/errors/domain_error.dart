@@ -75,10 +75,10 @@ class PasswordNotComplexEnoughError implements DomainError {
 
 class UsernameWrongSizeError implements DomainError {
   @override
-  final String messageKey = 'usernameNotRespectingRulesError';
+  final String messageKey = 'usernameWrongSizeError';
 }
 
 class UsernameNotRespectingRulesError implements DomainError {
   @override
-  final String messageKey = 'usernameWrongSizeError';
+  final String messageKey = 'usernameNotRespectingRulesError';
 }
