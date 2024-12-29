@@ -6,10 +6,32 @@
   "cancel": "Annuler",
   "changePassword": "Changer mon mot de passe",
   "challenges": "Défis",
+  "confirmDeletion": "Confirmer la suppression",
+  "confirmDeletionQuestion": "Confirmez-vous la suppression de la session sur cet appareil ?",
   "comeBack": "Revenir en arrière",
   "currentPassword": "Mot de passe actuel",
   "dark": "Sombre",
+  "delete": "Supprimer",
   "defaultError": "Une erreur s'est produite. Veuillez réessayer.",
+  "devices": "Mes appareils",
+  "deviceInfo": "{isMobile, select, true {Appareil mobile} false {Ordinateur} other {Inconnu}}{os, select, null {. } other { exécutant {os}. }}{browser, select, null {Application} other {Navigateur : {browser}}}. {model, select, null {} other {Modèle: {model}.}}",
+  "@deviceInfo": {
+    "placeholders": {
+      "isMobile": {
+        "type": "String"
+      },
+      "os": {
+        "type": "String"
+      },
+      "browser": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceDeleteSuccessful": "Vous avez arrêté la session sur cet appareil avec succès.",
   "disableTwoFA": "Désactiver",
   "enable": "Activer",
   "enterOneTimePassword": "Entrez le code à 6 chiffres généré par votre application pour confirmer votre authentification.",
@@ -42,6 +64,7 @@
   "invalidUsernameOrRecoveryCodeError": "Nom d'utilisateur ou code de récupération invalide. Veuillez réessayer.",
   "keepRecoveryCodesSafe": "Merci de garder ces codes de récupération bien à l'abri.\nIls seront nécessaires si vous perdez votre mot de passe ou l'acès à votre application d'authentification.",
   "language": "Langue",
+  "lastActivityDate": "Date de la dernière activité :",
   "light": "Clair",
   "logIn": "Se connecter",
   "loginSuccessful": "Vous êtes bien connecté.",
@@ -52,6 +75,8 @@
   "next": "Suivant",
   "noAccountCreateOne": "Pas de compte ? Créez-le ici.",
   "noContent": "Aucun contenu à afficher",
+  "noDevices": "Aucun appareil à afficher",
+  "noDeviceInfo": "Aucune information sur l'appareil à afficher",
   "noRecoveryCodeAvailable": "Aucun code de récupération disponible.",
   "password": "Mot de passe",
   "passwordForgotten": "Vous avez oublié votre mot de passe ?",
@@ -104,5 +129,6 @@
   "validationCodeCorrect": "Votre code de validation est correct !",
   "verify": "Vérifier",
   "welcome": "Bienvenue sur Flutter Actix App.",
-  "previous": "Précédent"
+  "previous": "Précédent",
+  "unknown": "Inconnue"
 }

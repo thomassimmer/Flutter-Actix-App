@@ -1,5 +1,5 @@
 # Use the official Rust image as the base image
-FROM rust:1.80
+FROM rust:1.81
 
 # Create a new user and switch to that user
 RUN useradd -m rustuser
@@ -25,9 +25,6 @@ RUN rm -rf src
 
 # Now copy the rest of the source code
 COPY --chown=rustuser:rustuser . .
-
-# Build the application
-RUN cargo build
 
 # Expose the port the app runs on
 EXPOSE 8000

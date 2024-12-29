@@ -7,6 +7,7 @@ import 'package:flutteractixapp/core/messages/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/profile/data/errors/data_error.dart';
+import 'package:flutteractixapp/features/profile/data/models/device_model.dart';
 import 'package:flutteractixapp/features/profile/data/models/profile_model.dart';
 import 'package:flutteractixapp/features/profile/data/models/profile_request_model.dart';
 import 'package:http_interceptor/http_interceptor.dart';
@@ -158,6 +159,55 @@ class ProfileRemoteDataSource {
         throw PasswordNotComplexEnoughError();
       }
 
+      throw UnauthorizedError();
+    }
+
+    if (response.statusCode == 500) {
+      throw InternalServerError();
+    }
+
+    throw UnknownError();
+  }
+
+  Future<List<DeviceModel>> getDevices() async {
+    final url = Uri.parse('$baseUrl/devices/');
+    final response = await apiClient.get(
+      url,
+    );
+
+    final jsonBody = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      try {
+        final List<dynamic> devices = jsonBody['devices'];
+        return devices.map((device) => DeviceModel.fromJson(device)).toList();
+      } catch (e) {
+        throw ParsingError();
+      }
+    }
+
+    if (response.statusCode == 401) {
+      throw UnauthorizedError();
+    }
+
+    if (response.statusCode == 500) {
+      throw InternalServerError();
+    }
+
+    throw UnknownError();
+  }
+
+  Future<void> deleteDevice(String deviceId) async {
+    final url = Uri.parse('$baseUrl/devices/$deviceId');
+    final response = await apiClient.delete(
+      url,
+    );
+
+    if (response.statusCode == 200) {
+      return;
+    }
+
+    if (response.statusCode == 401) {
       throw UnauthorizedError();
     }
 

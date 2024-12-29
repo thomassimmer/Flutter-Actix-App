@@ -67,3 +67,16 @@ class ProfileUpdatePasswordEvent extends ProfileEvent {
   @override
   List<Object> get props => [currentPassword, newPassword];
 }
+
+class DeleteDeviceEvent extends ProfileEvent {
+  final String deviceId;
+
+  const DeleteDeviceEvent({
+    required this.deviceId,
+  });
+
+  @override
+  List<Object> get props => [
+        deviceId,
+      ];
+}

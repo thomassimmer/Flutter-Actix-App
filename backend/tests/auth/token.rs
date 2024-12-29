@@ -18,7 +18,7 @@ use crate::profile::profile::user_has_access_to_protected_route;
 pub async fn user_refreshes_token(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
     refresh_token: &str,
-) -> String {
+) -> (String, String) {
     let req = test::TestRequest::post()
         .uri("/api/auth/refresh-token")
         .insert_header(ContentType::json())
@@ -34,8 +34,9 @@ pub async fn user_refreshes_token(
     let response: RefreshTokenResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "TOKEN_REFRESHED");
+    assert!(response.refresh_token != refresh_token);
 
-    response.access_token
+    (response.access_token, response.refresh_token)
 }
 
 #[tokio::test]
@@ -43,7 +44,7 @@ async fn user_can_refresh_token() {
     let app = spawn_app().await;
     user_signs_up(&app).await;
     let (_, refresh_token) = user_logs_in(&app, "testusername", "password1_").await;
-    let access_token = user_refreshes_token(&app, &refresh_token).await;
+    let (access_token, _) = user_refreshes_token(&app, &refresh_token).await;
 
     user_has_access_to_protected_route(&app, &access_token).await;
 }
@@ -110,7 +111,7 @@ async fn refresh_token_becomes_expired_after_7_days() {
     user_signs_up(&app).await;
     let (_, refresh_token) = user_logs_in(&app, "testusername", "password1_").await;
 
-    let access_token = user_refreshes_token(&app, &refresh_token).await;
+    let (access_token, refresh_token) = user_refreshes_token(&app, &refresh_token).await;
     user_has_access_to_protected_route(&app, &access_token).await;
 
     // After 6 days, user can still refresh its access_token
@@ -118,12 +119,12 @@ async fn refresh_token_becomes_expired_after_7_days() {
         (Utc::now() + Duration::new(60 * 60 * 24 * 6, 1)).fixed_offset(),
     ));
 
-    let access_token = user_refreshes_token(&app, &refresh_token).await;
+    let (access_token, refresh_token) = user_refreshes_token(&app, &refresh_token).await;
     user_has_access_to_protected_route(&app, &access_token).await;
 
-    // After 7 days, user can still refresh its access_token
+    // After 7 days without activity, user cannot refresh its access_token
     override_now(Some(
-        (Utc::now() + Duration::new(60 * 60 * 24 * 7, 1)).fixed_offset(),
+        (Utc::now() + Duration::new(60 * 60 * 24 * (6 + 7), 1)).fixed_offset(),
     ));
 
     let req = test::TestRequest::post()

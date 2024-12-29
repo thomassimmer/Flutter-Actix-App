@@ -10,6 +10,8 @@ import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_bloc.
 import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_states.dart';
 import 'package:flutteractixapp/features/profile/domain/entities/profile.dart';
+import 'package:flutteractixapp/features/profile/domain/usecases/delete_device.dart';
+import 'package:flutteractixapp/features/profile/domain/usecases/get_devices.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/post_profile_usecase.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/set_password_use_case.dart';
@@ -37,6 +39,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       GetIt.instance<SetPasswordUseCase>();
   final UpdatePasswordUseCase updatePasswordUseCase =
       GetIt.instance<UpdatePasswordUseCase>();
+  final GetDevicesUsecase getDevicesUsecase =
+      GetIt.instance<GetDevicesUsecase>();
+  final DeleteDeviceUseCase deleteDeviceUseCase =
+      GetIt.instance<DeleteDeviceUseCase>();
 
   ProfileBloc({required this.authBloc}) : super(ProfileLoading()) {
     authBlocSubscription = authBloc.stream.listen((authState) {
@@ -58,19 +64,59 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<ProfileVerifyOneTimePasswordEvent>(_verifyOneTimePassword);
     on<ProfileSetPasswordEvent>(_setPassword);
     on<ProfileUpdatePasswordEvent>(_updatePassword);
+    on<DeleteDeviceEvent>(_deleteDevice);
   }
 
   Future<void> _initialize(
       ProfileInitializeEvent event, Emitter<ProfileState> emit) async {
-    final result = await getProfileUsecase.call();
+    final getProfileResult = await getProfileUsecase.call();
 
-    result.fold((error) {
-      if (error is ShouldLogoutError) {
-        authBloc.add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
-      } else {
-        emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
-      }
-    }, (profile) => emit(ProfileAuthenticated(profile: profile)));
+    await getProfileResult.fold(
+      (error) {
+        if (error is ShouldLogoutError) {
+          authBloc.add(
+            AuthLogoutEvent(
+              message: ErrorMessage(error.messageKey),
+            ),
+          );
+        } else {
+          emit(
+            ProfileUnauthenticated(
+              message: ErrorMessage(error.messageKey),
+            ),
+          );
+        }
+      },
+      (profile) async {
+        final getDevicesResult = await getDevicesUsecase.call();
+
+        getDevicesResult.fold(
+          (error) {
+            if (error is ShouldLogoutError) {
+              authBloc.add(
+                AuthLogoutEvent(
+                  message: ErrorMessage(error.messageKey),
+                ),
+              );
+            } else {
+              emit(
+                ProfileUnauthenticated(
+                  message: ErrorMessage(error.messageKey),
+                ),
+              );
+            }
+          },
+          (devices) {
+            emit(
+              ProfileAuthenticated(
+                profile: profile,
+                devices: devices,
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _logout(
@@ -95,12 +141,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
+          devices: currentState.devices,
           message: ErrorMessage(error.messageKey),
         ));
       }
     },
         (profile) => emit(ProfileAuthenticated(
             profile: profile,
+            devices: currentState.devices,
             message: SuccessMessage('profileUpdateSuccessful'))));
   }
 
@@ -121,12 +169,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
+          devices: currentState.devices,
           message: ErrorMessage(error.messageKey),
         ));
       }
     },
         (profile) => emit(ProfileAuthenticated(
             profile: profile,
+            devices: currentState.devices,
             message: SuccessMessage('profileUpdateSuccessful'))));
   }
 
@@ -145,6 +195,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
+          devices: currentState.devices,
           message: ErrorMessage(error.messageKey),
         ));
       }
@@ -156,6 +207,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       emit(ProfileAuthenticated(
         profile: profile,
+        devices: currentState.devices,
       ));
     });
   }
@@ -175,6 +227,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
+          devices: currentState.devices,
           message: ErrorMessage(error.messageKey),
         ));
       }
@@ -186,6 +239,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       emit(ProfileAuthenticated(
         profile: profile,
+        devices: currentState.devices,
       ));
     });
   }
@@ -204,6 +258,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
+          devices: currentState.devices,
           message: ErrorMessage(error.messageKey),
         ));
       }
@@ -212,7 +267,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       profile.otpVerified = true;
 
       emit(ProfileAuthenticated(
-          profile: profile, message: SuccessMessage("validationCodeCorrect")));
+        profile: profile,
+        devices: currentState.devices,
+        message: SuccessMessage("validationCodeCorrect"),
+      ));
     });
   }
 
@@ -230,12 +288,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
+          devices: currentState.devices,
           message: ErrorMessage(error.messageKey),
         ));
       }
     },
         (profile) => emit(ProfileAuthenticated(
             profile: profile,
+            devices: currentState.devices,
             message: SuccessMessage('passwordUpdateSuccessful'))));
   }
 
@@ -253,12 +313,47 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
+          devices: currentState.devices,
           message: ErrorMessage(error.messageKey),
         ));
       }
     },
         (profile) => emit(ProfileAuthenticated(
             profile: profile,
+            devices: currentState.devices,
             message: SuccessMessage('passwordUpdateSuccessful'))));
+  }
+
+  Future<void> _deleteDevice(
+      DeleteDeviceEvent event, Emitter<ProfileState> emit) async {
+    final currentState = state as ProfileAuthenticated;
+    emit(ProfileLoading(profile: state.profile));
+
+    final result = await deleteDeviceUseCase.call(
+      event.deviceId,
+    );
+
+    result.fold(
+      (error) {
+        if (error is ShouldLogoutError) {
+          authBloc
+              .add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
+        } else {
+          emit(ProfileAuthenticated(
+            profile: currentState.profile,
+            devices: currentState.devices,
+            message: ErrorMessage(error.messageKey),
+          ));
+        }
+      },
+      (_) {
+        emit(ProfileAuthenticated(
+            profile: currentState.profile,
+            devices: currentState.devices
+                .where((device) => device.tokenId != event.deviceId)
+                .toList(),
+            message: SuccessMessage('deviceDeleteSuccessful')));
+      },
+    );
   }
 }

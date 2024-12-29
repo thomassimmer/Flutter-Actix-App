@@ -26,21 +26,21 @@ class ProfileScreen extends StatelessWidget {
               title: Text(AppLocalizations.of(context)!.language),
               trailing: Icon(Icons.chevron_right),
               onTap: () {
-                context.goNamed('language'); // Navigate using GoRouter
+                context.goNamed('language');
               },
             ),
             ListTile(
               title: Text(AppLocalizations.of(context)!.theme),
               trailing: Icon(Icons.chevron_right),
               onTap: () {
-                context.goNamed('theme'); // Navigate using GoRouter
+                context.goNamed('theme');
               },
             ),
             ListTile(
               title: Text(AppLocalizations.of(context)!.twoFA),
               trailing: Icon(Icons.chevron_right),
               onTap: () {
-                context.goNamed('two-factor-authentication'); // Go to 2FA
+                context.goNamed('two-factor-authentication');
               },
             ),
             ListTile(
@@ -49,14 +49,21 @@ class ProfileScreen extends StatelessWidget {
                   iconData: Icons.chevron_right,
                   shouldBeWarning: shouldBeWarning),
               onTap: () {
-                context.goNamed('password'); // Navigate to password change
+                context.goNamed('password');
+              },
+            ),
+            ListTile(
+              title: Text(AppLocalizations.of(context)!.devices),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () {
+                context.goNamed('devices');
               },
             ),
             ListTile(
               title: Text(AppLocalizations.of(context)!.about),
               trailing: Icon(Icons.chevron_right),
               onTap: () {
-                context.goNamed('about'); // Navigate to password change
+                context.goNamed('about');
               },
             ),
             Padding(

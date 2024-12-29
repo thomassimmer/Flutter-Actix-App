@@ -1,10 +1,14 @@
-use crate::core::constants::errors::AppError;
+use crate::features::profile::helpers::profile::get_user;
+use crate::{core::constants::errors::AppError, features::auth::structs::models::Claims};
 
 use crate::features::auth::structs::requests::VerifyOtpRequest;
 use crate::features::auth::structs::responses::VerifyOtpResponse;
-use crate::features::profile::structs::models::User;
 
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{
+    post,
+    web::{self, ReqData},
+    HttpResponse, Responder,
+};
 
 use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
@@ -13,13 +17,23 @@ use totp_rs::{Algorithm, Secret, TOTP};
 pub async fn verify(
     body: web::Json<VerifyOtpRequest>,
     pool: web::Data<PgPool>,
-    mut request_user: User,
+    request_claims: ReqData<Claims>,
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
             return HttpResponse::InternalServerError()
                 .json(AppError::DatabaseConnection.to_response())
+        }
+    };
+
+    let mut request_user = match get_user(request_claims.user_id, &mut transaction).await {
+        Ok(user) => match user {
+            Some(user) => user,
+            None => return HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
+        },
+        Err(_) => {
+            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
         }
     };
 

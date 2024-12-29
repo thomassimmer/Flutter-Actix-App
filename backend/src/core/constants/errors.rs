@@ -19,6 +19,7 @@ pub enum AppError {
     TwoFactorAuthenticationNotEnabled,
     UsernameNotRespectingRules,
     UsernameWrongSize,
+    UserNotFound,
     UserTokenDeletion,
     UserUpdate,
 }
@@ -97,6 +98,10 @@ impl AppError {
             AppError::UsernameWrongSize => GenericResponse {
                 code: "USERNAME_WRONG_SIZE".to_string(),
                 message: "This username is too short or too long".to_string(),
+            },
+            AppError::UserNotFound => GenericResponse {
+                code: "USER_NOT_FOUND".to_string(),
+                message: "This user does not exist".to_string(),
             },
             AppError::UserTokenDeletion => GenericResponse {
                 code: "USER_TOKEN_DELETION".to_string(),

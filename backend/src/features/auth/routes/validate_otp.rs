@@ -2,15 +2,17 @@ use crate::core::{constants::errors::AppError, structs::responses::GenericRespon
 use crate::features::auth::helpers::token::generate_tokens;
 use crate::features::auth::structs::requests::ValidateOtpRequest;
 use crate::features::auth::structs::responses::UserLoginResponse;
+use crate::features::profile::helpers::device_info::get_user_agent;
 use crate::features::profile::structs::models::User;
 
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 
 use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
 
 #[post("/validate")]
 async fn validate(
+    req: HttpRequest,
     body: web::Json<ValidateOtpRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
@@ -77,14 +79,23 @@ async fn validate(
         return HttpResponse::Unauthorized().json(AppError::InvalidOneTimePassword.to_response());
     }
 
-    let (access_token, refresh_token) =
-        match generate_tokens(secret.as_bytes(), user.id, &mut transaction).await {
-            Ok((access_token, refresh_token)) => (access_token, refresh_token),
-            Err(_) => {
-                return HttpResponse::InternalServerError()
-                    .json(AppError::TokenGeneration.to_response());
-            }
-        };
+    let parsed_device_info = get_user_agent(req).await;
+
+    let (access_token, refresh_token) = match generate_tokens(
+        secret.as_bytes(),
+        user.id,
+        user.is_admin,
+        parsed_device_info,
+        &mut transaction,
+    )
+    .await
+    {
+        Ok((access_token, refresh_token)) => (access_token, refresh_token),
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(AppError::TokenGeneration.to_response());
+        }
+    };
 
     if (transaction.commit().await).is_err() {
         return HttpResponse::InternalServerError()

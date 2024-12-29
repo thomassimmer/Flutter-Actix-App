@@ -7,15 +7,16 @@ use crate::{
                 requests::RecoverAccountWithout2FAEnabledRequest, responses::UserLoginResponse,
             },
         },
-        profile::structs::models::User,
+        profile::{helpers::device_info::get_user_agent, structs::models::User},
     },
 };
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use sqlx::PgPool;
 
 #[post("/recover")]
 pub async fn recover_account_without_2fa_enabled(
+    req: HttpRequest,
     body: web::Json<RecoverAccountWithout2FAEnabledRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
@@ -123,14 +124,23 @@ pub async fn recover_account_without_2fa_enabled(
         return HttpResponse::InternalServerError().json(AppError::UserTokenDeletion.to_response());
     }
 
-    let (access_token, refresh_token) =
-        match generate_tokens(secret.as_bytes(), user.id, &mut transaction).await {
-            Ok((access_token, refresh_token)) => (access_token, refresh_token),
-            Err(_) => {
-                return HttpResponse::InternalServerError()
-                    .json(AppError::TokenGeneration.to_response());
-            }
-        };
+    let parsed_device_info = get_user_agent(req).await;
+
+    let (access_token, refresh_token) = match generate_tokens(
+        secret.as_bytes(),
+        user.id,
+        user.is_admin,
+        parsed_device_info,
+        &mut transaction,
+    )
+    .await
+    {
+        Ok((access_token, refresh_token)) => (access_token, refresh_token),
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(AppError::TokenGeneration.to_response());
+        }
+    };
 
     user.password_is_expired = true;
 

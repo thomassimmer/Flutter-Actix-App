@@ -1,4 +1,8 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{
+    post,
+    web::{self, ReqData},
+    HttpResponse, Responder,
+};
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use rand::rngs::OsRng;
 use sqlx::PgPool;
@@ -6,11 +10,15 @@ use sqlx::PgPool;
 use crate::{
     core::{constants::errors::AppError, structs::responses::GenericResponse},
     features::{
-        auth::helpers::password::{
-            password_is_long_enough, password_is_strong_enough, password_is_valid,
+        auth::{
+            helpers::password::{
+                password_is_long_enough, password_is_strong_enough, password_is_valid,
+            },
+            structs::models::Claims,
         },
-        profile::structs::{
-            models::User, requests::UpdateUserPasswordRequest, responses::UserResponse,
+        profile::{
+            helpers::profile::get_user,
+            structs::{requests::UpdateUserPasswordRequest, responses::UserResponse},
         },
     },
 };
@@ -19,13 +27,23 @@ use crate::{
 pub async fn update_password(
     body: web::Json<UpdateUserPasswordRequest>,
     pool: web::Data<PgPool>,
-    mut request_user: User,
+    request_claims: ReqData<Claims>,
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
             return HttpResponse::InternalServerError()
                 .json(AppError::DatabaseConnection.to_response())
+        }
+    };
+
+    let mut request_user = match get_user(request_claims.user_id, &mut transaction).await {
+        Ok(user) => match user {
+            Some(user) => user,
+            None => return HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
+        },
+        Err(_) => {
+            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
         }
     };
 

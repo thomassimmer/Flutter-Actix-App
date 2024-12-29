@@ -2,16 +2,18 @@ use crate::core::constants::errors::AppError;
 use crate::core::structs::responses::GenericResponse;
 use crate::features::auth::helpers::password::password_is_valid;
 use crate::features::auth::helpers::token::generate_tokens;
+use crate::features::profile::helpers::device_info::get_user_agent;
 use crate::features::profile::structs::models::User;
 use crate::{
     features::auth::structs::requests::UserLoginRequest,
     features::auth::structs::responses::{UserLoginResponse, UserLoginWhenOtpEnabledResponse},
 };
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 use sqlx::PgPool;
 
 #[post("/login")]
 pub async fn log_user_in(
+    req: HttpRequest,
     body: web::Json<UserLoginRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
@@ -73,14 +75,23 @@ pub async fn log_user_in(
         });
     }
 
-    let (access_token, refresh_token) =
-        match generate_tokens(secret.as_bytes(), user.id, &mut transaction).await {
-            Ok((access_token, refresh_token)) => (access_token, refresh_token),
-            Err(_) => {
-                return HttpResponse::InternalServerError()
-                    .json(AppError::TokenGeneration.to_response());
-            }
-        };
+    let parsed_device_info = get_user_agent(req).await;
+
+    let (access_token, refresh_token) = match generate_tokens(
+        secret.as_bytes(),
+        user.id,
+        user.is_admin,
+        parsed_device_info,
+        &mut transaction,
+    )
+    .await
+    {
+        Ok((access_token, refresh_token)) => (access_token, refresh_token),
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(AppError::TokenGeneration.to_response());
+        }
+    };
 
     if (transaction.commit().await).is_err() {
         return HttpResponse::InternalServerError()

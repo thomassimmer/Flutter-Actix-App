@@ -73,6 +73,8 @@ String getTranslatedMessage(BuildContext context, Message message) {
         return localizations.passwordUpdateSuccessful;
       case 'profileUpdateSuccessful':
         return localizations.profileUpdateSuccessful;
+      case 'deviceDeleteSuccessful':
+        return localizations.deviceDeleteSuccessful;
 
       default:
         return localizations.defaultError;
