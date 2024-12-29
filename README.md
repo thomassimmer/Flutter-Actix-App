@@ -5,7 +5,7 @@ This project is an application starter pack. The stack used is:
 - Front: Flutter, Bloc, go_router, get_it
 - Back: Actix Web, sqlx, jsonwebtoken, argon2, secrecy, totp-rs
 - DB: Postgres
-- Docker: One container for front, one for back, one for DB
+- Docker: one for back, one for DB
 
 Features done:
 
@@ -26,6 +26,7 @@ Features done:
 
 I wrote 4 articles about this project on Medium:
 
+- [JWT & Session Deactivation](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-jwt-session-deactivation-8ffad3d7ab5a)
 - [Locale Selection](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-locale-selection-1fb318224129)
 - [Writing Integration Tests](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-writing-integration-tests-b018d472c19a)
 - [Clean Architecture](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-clean-architecture-193c26599154)
@@ -61,12 +62,12 @@ Click on it to watch, it's a youtube link.
 
 ## Installation and development
 
-### Docker images
-
-To pull the right flutter image: https://github.com/cirruslabs/docker-images-flutter/pkgs/container/flutter
-
-For mac:
-docker pull ghcr.io/cirruslabs/flutter:3.24.0-0.2.pre@sha256:8e6ae5d10c653665cbe5f5737e23eb9ef50eaa6d2a0b90d834226db1352fa007
+```bash
+# Start by running db container
+docker-compose up -d db
+# Then back
+docker-compose up -d backend
+```
 
 ### Backend commands
 
