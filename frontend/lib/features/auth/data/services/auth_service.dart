@@ -34,8 +34,9 @@ class AuthService {
 
     if (response.statusCode == 200) {
       final newAccessToken = jsonBody['access_token'] as String;
+      final newRefreshToken = jsonBody['refresh_token'] as String;
 
-      await tokenStorage.saveTokens(newAccessToken, refreshToken);
+      await tokenStorage.saveTokens(newAccessToken, newRefreshToken);
       return;
     }
 
