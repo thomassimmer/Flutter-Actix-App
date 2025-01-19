@@ -34,18 +34,26 @@ use actix_web::http::header;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, Error, HttpServer};
 use sqlx::postgres::PgPoolOptions;
-use sqlx::PgPool;
+use sqlx::{PgPool, Pool, Postgres};
 
 pub fn run(listener: TcpListener, configuration: Settings) -> Result<Server, std::io::Error> {
-    let server = HttpServer::new(move || create_app(&configuration))
-        .listen(listener)?
-        .run();
+    let token_cache = TokenCache::default();
+    let connection_pool = get_connection_pool(&configuration.database);
+    let secret = configuration.application.secret;
+
+    let server = HttpServer::new(move || {
+        create_app(connection_pool.clone(), secret.clone(), token_cache.clone())
+    })
+    .listen(listener)?
+    .run();
 
     Ok(server)
 }
 
 pub fn create_app(
-    configuration: &Settings,
+    connection_pool: Pool<Postgres>,
+    secret: String,
+    token_cache: TokenCache,
 ) -> App<
     impl ServiceFactory<
         ServiceRequest,
@@ -55,9 +63,6 @@ pub fn create_app(
         InitError = (),
     >,
 > {
-    let connection_pool = get_connection_pool(&configuration.database);
-    let secret = &configuration.application.secret;
-
     let cors = Cors::default()
         .allow_any_origin()
         // .allowed_origin("localhost:3000")
@@ -69,8 +74,6 @@ pub fn create_app(
             HeaderName::from_static("x-user-agent"),
         ])
         .supports_credentials();
-
-    let cached_tokens = TokenCache::default();
 
     App::new()
         .service(
@@ -126,9 +129,9 @@ pub fn create_app(
         )
         .wrap(cors)
         .wrap(Logger::default())
-        .app_data(web::Data::new(connection_pool.clone()))
-        .app_data(web::Data::new(secret.clone()))
-        .app_data(web::Data::new(cached_tokens))
+        .app_data(web::Data::new(connection_pool))
+        .app_data(web::Data::new(secret))
+        .app_data(web::Data::new(token_cache))
 }
 
 pub struct Application {
