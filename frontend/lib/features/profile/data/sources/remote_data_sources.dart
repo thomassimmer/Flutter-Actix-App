@@ -6,8 +6,9 @@ import 'dart:convert';
 import 'package:flutteractixapp/core/messages/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
-import 'package:flutteractixapp/features/profile/data/models/user_model.dart';
-import 'package:flutteractixapp/features/profile/data/models/user_request_model.dart';
+import 'package:flutteractixapp/features/profile/data/errors/data_error.dart';
+import 'package:flutteractixapp/features/profile/data/models/profile_model.dart';
+import 'package:flutteractixapp/features/profile/data/models/profile_request_model.dart';
 import 'package:http_interceptor/http_interceptor.dart';
 
 class ProfileRemoteDataSource {
@@ -16,7 +17,7 @@ class ProfileRemoteDataSource {
 
   ProfileRemoteDataSource({required this.apiClient, required this.baseUrl});
 
-  Future<UserModel> getProfileInformation() async {
+  Future<ProfileModel> getProfileInformation() async {
     final url = Uri.parse('$baseUrl/users/me');
     final response = await apiClient.get(
       url,
@@ -26,7 +27,7 @@ class ProfileRemoteDataSource {
 
     if (response.statusCode == 200) {
       try {
-        return UserModel.fromJson(jsonBody['user']);
+        return ProfileModel.fromJson(jsonBody['user']);
       } catch (e) {
         throw ParsingError();
       }
@@ -43,8 +44,8 @@ class ProfileRemoteDataSource {
     throw UnknownError();
   }
 
-  Future<UserModel> postProfileInformation(
-      UpdateUserRequestModel profile) async {
+  Future<ProfileModel> postProfileInformation(
+      UpdateProfileRequestModel profile) async {
     final url = Uri.parse('$baseUrl/users/me');
     final response = await apiClient.post(
       url,
@@ -58,7 +59,7 @@ class ProfileRemoteDataSource {
 
     if (response.statusCode == 200) {
       try {
-        return UserModel.fromJson(jsonBody['user']);
+        return ProfileModel.fromJson(jsonBody['user']);
       } catch (e) {
         throw ParsingError();
       }
@@ -75,7 +76,7 @@ class ProfileRemoteDataSource {
     throw UnknownError();
   }
 
-  Future<UserModel> setPassword(
+  Future<ProfileModel> setPassword(
       SetPasswordRequestModel setPasswordRequestModel) async {
     final url = Uri.parse('$baseUrl/users/set-password');
     final response = await apiClient.post(
@@ -91,7 +92,7 @@ class ProfileRemoteDataSource {
 
     if (response.statusCode == 200) {
       try {
-        return UserModel.fromJson(jsonBody['user']);
+        return ProfileModel.fromJson(jsonBody['user']);
       } catch (e) {
         throw ParsingError();
       }
@@ -123,7 +124,7 @@ class ProfileRemoteDataSource {
     throw UnknownError();
   }
 
-  Future<UserModel> updatePassword(
+  Future<ProfileModel> updatePassword(
       UpdatePasswordRequestModel updatePasswordRequestModel) async {
     final url = Uri.parse('$baseUrl/users/update-password');
     final response = await apiClient.post(
@@ -139,7 +140,7 @@ class ProfileRemoteDataSource {
 
     if (response.statusCode == 200) {
       try {
-        return UserModel.fromJson(jsonBody['user']);
+        return ProfileModel.fromJson(jsonBody['user']);
       } catch (e) {
         throw ParsingError();
       }

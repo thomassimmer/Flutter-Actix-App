@@ -10,7 +10,7 @@ class UserTokenModel extends Equatable {
       required this.refreshToken,
       this.recoveryCodes});
 
-  // Factory constructor to create a UserModel from JSON data
+  // Factory constructor to create a UserTokenModel from JSON data
   factory UserTokenModel.fromJson(Map<String, dynamic> json) {
     return UserTokenModel(
         accessToken: json['access_token'] as String,

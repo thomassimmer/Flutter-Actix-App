@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
-import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
+import 'package:flutteractixapp/features/profile/domain/entities/profile.dart';
 import 'package:flutteractixapp/features/profile/domain/repositories/profile_repository.dart';
 
 class GetProfileUsecase {
@@ -8,7 +8,7 @@ class GetProfileUsecase {
 
   GetProfileUsecase(this.profileRepository);
 
-  Future<Either<DomainError, User>> call() async {
+  Future<Either<DomainError, Profile>> call() async {
     return await profileRepository.getProfileInformation();
   }
 }

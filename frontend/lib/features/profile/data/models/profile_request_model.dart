@@ -1,9 +1,9 @@
-class UpdateUserRequestModel {
+class UpdateProfileRequestModel {
   final String username;
   final String locale;
   final String theme;
 
-  const UpdateUserRequestModel(
+  const UpdateProfileRequestModel(
       {required this.username, required this.locale, required this.theme});
 
   Map<String, dynamic> toJson() {

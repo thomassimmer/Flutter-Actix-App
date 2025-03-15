@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
@@ -20,7 +19,8 @@ class ThemeSelectionScreen extends StatelessWidget {
           } else if (state is ProfileLoading) {
             return Center(child: CircularProgressIndicator());
           } else {
-            return Center(child: Text(AppLocalizations.of(context)!.failedToLoadProfile));
+            return Center(
+                child: Text(AppLocalizations.of(context)!.failedToLoadProfile));
           }
         },
       ),
@@ -42,11 +42,8 @@ class ThemeSelectionScreen extends StatelessWidget {
           value: theme['code']!,
           groupValue: state.profile.theme,
           onChanged: (String? value) {
-            User profile = state.profile;
-            profile.theme = value!;
-
             BlocProvider.of<ProfileBloc>(context)
-                .add(ProfileUpdateRequested(profile: profile));
+                .add(ProfileUpdateThemeEvent(theme: value!));
           },
         ),
       );

@@ -7,9 +7,11 @@ import 'package:flutteractixapp/core/messages/errors/data_error.dart';
 import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
-import 'package:flutteractixapp/features/profile/data/models/user_request_model.dart';
+import 'package:flutteractixapp/features/profile/data/errors/data_error.dart';
+import 'package:flutteractixapp/features/profile/data/models/profile_request_model.dart';
 import 'package:flutteractixapp/features/profile/data/sources/remote_data_sources.dart';
-import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
+import 'package:flutteractixapp/features/profile/domain/entities/profile.dart';
+import 'package:flutteractixapp/features/profile/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/profile/domain/repositories/profile_repository.dart';
 import 'package:logger/web.dart';
 
@@ -20,18 +22,18 @@ class ProfileRepositoryImpl implements ProfileRepository {
   ProfileRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<Either<DomainError, User>> getProfileInformation() async {
+  Future<Either<DomainError, Profile>> getProfileInformation() async {
     try {
-      final userModel = await remoteDataSource.getProfileInformation();
+      final profileModel = await remoteDataSource.getProfileInformation();
 
-      return Right(User(
-          username: userModel.username,
-          locale: userModel.locale,
-          theme: userModel.theme,
-          otpBase32: userModel.otpBase32,
-          otpAuthUrl: userModel.otpAuthUrl,
-          otpVerified: userModel.otpVerified,
-          passwordIsExpired: userModel.passwordIsExpired));
+      return Right(Profile(
+          username: profileModel.username,
+          locale: profileModel.locale,
+          theme: profileModel.theme,
+          otpBase32: profileModel.otpBase32,
+          otpAuthUrl: profileModel.otpAuthUrl,
+          otpVerified: profileModel.otpVerified,
+          passwordIsExpired: profileModel.passwordIsExpired));
     } on ParsingError {
       logger.e('ParsingError occurred.');
       return Left(InvalidResponseDomainError());
@@ -57,22 +59,23 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<DomainError, User>> postProfileInformation(User profile) async {
+  Future<Either<DomainError, Profile>> postProfileInformation(
+      Profile profile) async {
     try {
-      final userModel = await remoteDataSource.postProfileInformation(
-          UpdateUserRequestModel(
+      final profileModel = await remoteDataSource.postProfileInformation(
+          UpdateProfileRequestModel(
               username: profile.username,
               locale: profile.locale,
               theme: profile.theme));
 
-      return Right(User(
-          username: userModel.username,
-          locale: userModel.locale,
-          theme: userModel.theme,
-          otpBase32: userModel.otpBase32,
-          otpAuthUrl: userModel.otpAuthUrl,
-          otpVerified: userModel.otpVerified,
-          passwordIsExpired: userModel.passwordIsExpired));
+      return Right(Profile(
+          username: profileModel.username,
+          locale: profileModel.locale,
+          theme: profileModel.theme,
+          otpBase32: profileModel.otpBase32,
+          otpAuthUrl: profileModel.otpAuthUrl,
+          otpVerified: profileModel.otpVerified,
+          passwordIsExpired: profileModel.passwordIsExpired));
     } on ParsingError {
       logger.e('ParsingError occurred.');
       return Left(InvalidResponseDomainError());
@@ -98,19 +101,19 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<DomainError, User>> setPassword(String newPassword) async {
+  Future<Either<DomainError, Profile>> setPassword(String newPassword) async {
     try {
-      final userModel = await remoteDataSource
+      final profileModel = await remoteDataSource
           .setPassword(SetPasswordRequestModel(newPassword: newPassword));
 
-      return Right(User(
-          username: userModel.username,
-          locale: userModel.locale,
-          theme: userModel.theme,
-          otpBase32: userModel.otpBase32,
-          otpAuthUrl: userModel.otpAuthUrl,
-          otpVerified: userModel.otpVerified,
-          passwordIsExpired: userModel.passwordIsExpired));
+      return Right(Profile(
+          username: profileModel.username,
+          locale: profileModel.locale,
+          theme: profileModel.theme,
+          otpBase32: profileModel.otpBase32,
+          otpAuthUrl: profileModel.otpAuthUrl,
+          otpVerified: profileModel.otpVerified,
+          passwordIsExpired: profileModel.passwordIsExpired));
     } on ParsingError {
       logger.e('ParsingError occurred.');
       return Left(InvalidResponseDomainError());
@@ -145,21 +148,21 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<DomainError, User>> updatePassword(
+  Future<Either<DomainError, Profile>> updatePassword(
       String currentPassword, String newPassword) async {
     try {
-      final userModel = await remoteDataSource.updatePassword(
+      final profileModel = await remoteDataSource.updatePassword(
           UpdatePasswordRequestModel(
               currentPassword: currentPassword, newPassword: newPassword));
 
-      return Right(User(
-          username: userModel.username,
-          locale: userModel.locale,
-          theme: userModel.theme,
-          otpBase32: userModel.otpBase32,
-          otpAuthUrl: userModel.otpAuthUrl,
-          otpVerified: userModel.otpVerified,
-          passwordIsExpired: userModel.passwordIsExpired));
+      return Right(Profile(
+          username: profileModel.username,
+          locale: profileModel.locale,
+          theme: profileModel.theme,
+          otpBase32: profileModel.otpBase32,
+          otpAuthUrl: profileModel.otpAuthUrl,
+          otpVerified: profileModel.otpVerified,
+          passwordIsExpired: profileModel.passwordIsExpired));
     } on ParsingError {
       logger.e('ParsingError occurred.');
       return Left(InvalidResponseDomainError());

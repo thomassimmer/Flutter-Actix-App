@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 
 abstract class ProfileEvent extends Equatable {
   const ProfileEvent();
@@ -8,29 +7,40 @@ abstract class ProfileEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class ProfileLoadRequested extends ProfileEvent {}
+class ProfileInitializeEvent extends ProfileEvent {}
 
-class ProfileClearRequested extends ProfileEvent {}
+class ProfileLogoutEvent extends ProfileEvent {}
 
-class ProfileUpdateRequested extends ProfileEvent {
-  final User profile;
+class ProfileUpdateThemeEvent extends ProfileEvent {
+  final String theme;
 
-  const ProfileUpdateRequested({
-    required this.profile,
+  const ProfileUpdateThemeEvent({
+    required this.theme,
   });
 
   @override
-  List<Object> get props => [profile];
+  List<Object> get props => [theme];
 }
 
-class ProfileOtpGenerationRequested extends ProfileEvent {}
+class ProfileUpdateLocaleEvent extends ProfileEvent {
+  final String locale;
 
-class ProfileOtpDisablingRequested extends ProfileEvent {}
+  const ProfileUpdateLocaleEvent({
+    required this.locale,
+  });
 
-class ProfileOtpVerificationRequested extends ProfileEvent {
+  @override
+  List<Object> get props => [locale];
+}
+
+class ProfileGenerateTwoFactorAuthenticationConfigEvent extends ProfileEvent {}
+
+class ProfileDisableTwoFactorAuthenticationEvent extends ProfileEvent {}
+
+class ProfileVerifyOneTimePasswordEvent extends ProfileEvent {
   final String code;
 
-  const ProfileOtpVerificationRequested({
+  const ProfileVerifyOneTimePasswordEvent({
     required this.code,
   });
 
@@ -38,20 +48,20 @@ class ProfileOtpVerificationRequested extends ProfileEvent {
   List<Object> get props => [code];
 }
 
-class ProfileSetPasswordRequested extends ProfileEvent {
+class ProfileSetPasswordEvent extends ProfileEvent {
   final String newPassword;
 
-  const ProfileSetPasswordRequested({required this.newPassword});
+  const ProfileSetPasswordEvent({required this.newPassword});
 
   @override
   List<Object> get props => [newPassword];
 }
 
-class ProfileUpdatePasswordRequested extends ProfileEvent {
+class ProfileUpdatePasswordEvent extends ProfileEvent {
   final String currentPassword;
   final String newPassword;
 
-  const ProfileUpdatePasswordRequested(
+  const ProfileUpdatePasswordEvent(
       {required this.currentPassword, required this.newPassword});
 
   @override

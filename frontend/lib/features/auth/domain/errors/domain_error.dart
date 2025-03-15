@@ -50,10 +50,6 @@ class UserAlreadyExistingDomainError extends DomainError {
   final String messageKey = 'userAlreadyExistingError';
 }
 
-class PasswordNotExpiredDomainError extends DomainError {
-  final String messageKey = 'passwordNotExpiredError';
-}
-
 class PasswordTooShortError extends DomainError {
   final String messageKey = 'passwordTooShortError';
 }
