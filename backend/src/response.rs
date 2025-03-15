@@ -23,7 +23,20 @@ pub struct UserData {
 }
 
 #[derive(Serialize, Debug)]
-pub struct UserResponse {
+pub struct UserSignupResponse {
+    pub status: String,
+    pub user: UserData,
+    pub recovery_codes: Vec<String>,
+}
+
+#[derive(Serialize, Debug)]
+pub struct UserLoginWhenOtpEnabledResponse {
+    pub status: String,
+    pub user_id: String,
+}
+
+#[derive(Serialize, Debug)]
+pub struct UserLoginWhenOtpDisabledResponse {
     pub status: String,
     pub user: UserData,
 }

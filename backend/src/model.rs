@@ -5,17 +5,19 @@ use std::sync::{Arc, Mutex};
 #[allow(non_snake_case)]
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct User {
-    pub id: Option<String>,
+    pub id: String,
     pub username: String,
     pub password: String,
 
-    pub otp_enabled: Option<bool>,
-    pub otp_verified: Option<bool>,
+    pub otp_enabled: bool,
+    pub otp_verified: bool,
     pub otp_base32: Option<String>,
     pub otp_auth_url: Option<String>,
 
     pub createdAt: Option<DateTime<Utc>>,
     pub updatedAt: Option<DateTime<Utc>>,
+
+    pub recovery_codes: Vec<String>,
 }
 
 pub struct AppState {
