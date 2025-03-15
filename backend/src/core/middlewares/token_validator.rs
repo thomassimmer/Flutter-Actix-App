@@ -1,6 +1,7 @@
 use crate::core::helpers::mock_now::now;
 use crate::core::structs::responses::GenericResponse;
 use crate::features::auth::helpers::token::retrieve_claims_for_token;
+use crate::features::profile::structs::models::User;
 use actix_web::body::EitherBody;
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
@@ -9,17 +10,20 @@ use actix_web::{
 use actix_web::{HttpMessage, HttpResponse};
 use chrono::{DateTime, Utc};
 use futures_util::future::LocalBoxFuture;
+use sqlx::PgPool;
 use std::future::{ready, Ready};
 use std::rc::Rc;
 
 pub struct TokenValidator {
     pub secret: Rc<String>,
+    pub pool: Rc<PgPool>,
 }
 
 impl TokenValidator {
-    pub fn new(secret: String) -> Self {
+    pub fn new(secret: String, pool: PgPool) -> Self {
         TokenValidator {
             secret: Rc::new(secret),
+            pool: Rc::new(pool),
         }
     }
 }
@@ -40,6 +44,7 @@ where
         ready(Ok(TokenValidatorMiddleware {
             service: Rc::new(service),
             secret: Rc::new(self.secret.to_string()),
+            pool: self.pool.clone(),
         }))
     }
 }
@@ -47,6 +52,7 @@ where
 pub struct TokenValidatorMiddleware<S> {
     service: Rc<S>,
     secret: Rc<String>,
+    pool: Rc<PgPool>,
 }
 
 impl<S, B> Service<ServiceRequest> for TokenValidatorMiddleware<S>
@@ -62,8 +68,9 @@ where
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let secret = Rc::clone(&self.secret);
         let service = Rc::clone(&self.service);
+        let secret = Rc::clone(&self.secret);
+        let pool = Rc::clone(&self.pool);
 
         Box::pin(async move {
             match retrieve_claims_for_token(req.request().clone(), secret.to_string()) {
@@ -79,8 +86,63 @@ where
                         ));
                     }
 
-                    // Store claims in request extensions
-                    req.extensions_mut().insert(claims);
+                    let mut transaction = match pool.begin().await {
+                        Ok(t) => t,
+                        Err(_) => {
+                            return Ok(req.into_response(
+                                HttpResponse::InternalServerError()
+                                    .json(GenericResponse {
+                                        status: "error".to_string(),
+                                        message: "Failed to get a transaction".to_string(),
+                                    })
+                                    .map_into_right_body(),
+                            ));
+                        }
+                    };
+
+                    // Check if user already exists
+                    let existing_user = sqlx::query_as!(
+                        User,
+                        r#"
+                        SELECT u.*
+                        FROM users u
+                        JOIN user_tokens ut ON u.id = ut.user_id
+                        WHERE ut.token_id = $1
+                        "#,
+                        claims.jti,
+                    )
+                    .fetch_optional(&mut *transaction)
+                    .await;
+
+                    let user = match existing_user {
+                        Ok(existing_user) => {
+                            if let Some(user) = existing_user {
+                                user
+                            } else {
+                                return Ok(req.into_response(
+                                    HttpResponse::NotFound()
+                                        .json(GenericResponse {
+                                            status: "fail".to_string(),
+                                            message: "No user with this token".to_string(),
+                                        })
+                                        .map_into_right_body(),
+                                ));
+                            }
+                        }
+                        Err(_) => {
+                            return Ok(req.into_response(
+                                HttpResponse::InternalServerError()
+                                    .json(GenericResponse {
+                                        status: "error".to_string(),
+                                        message: "Database query error".to_string(),
+                                    })
+                                    .map_into_right_body(),
+                            ));
+                        }
+                    };
+
+                    // Store user in request extensions
+                    req.extensions_mut().insert(user);
                     let res = service.call(req).await?;
                     Ok(res.map_into_left_body())
                 }

@@ -1,4 +1,7 @@
+use actix_http::Payload;
+use actix_web::{FromRequest, HttpMessage, HttpRequest};
 use chrono::{DateTime, Utc};
+use futures_util::future::{err, ok, Ready};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
@@ -18,7 +21,7 @@ pub struct UserData {
     pub createdAt: DateTime<Utc>,
     pub updatedAt: DateTime<Utc>,
 
-    pub password_is_expired: bool
+    pub password_is_expired: bool,
 }
 
 #[allow(non_snake_case)]
@@ -38,7 +41,7 @@ pub struct User {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 
     pub recovery_codes: String, // case sensitive
-    pub password_is_expired: bool
+    pub password_is_expired: bool,
 }
 
 impl User {
@@ -53,7 +56,19 @@ impl User {
             otp_verified: self.otp_verified,
             createdAt: self.created_at,
             updatedAt: self.updated_at,
-            password_is_expired: self.password_is_expired
+            password_is_expired: self.password_is_expired,
         }
+    }
+}
+
+impl FromRequest for User {
+    type Error = actix_web::Error;
+    type Future = Ready<Result<Self, Self::Error>>;
+
+    fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
+        match req.extensions().get::<User>() {
+            Some(user) => return ok(user.clone()),
+            None => return err(actix_web::error::ErrorBadRequest("ups...")),
+        };
     }
 }

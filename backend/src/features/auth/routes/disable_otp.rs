@@ -1,13 +1,13 @@
+use crate::core::structs::responses::GenericResponse;
 use crate::features::auth::structs::responses::DisableOtpResponse;
 use crate::features::profile::structs::models::User;
-use crate::{core::structs::responses::GenericResponse, features::auth::structs::models::Claims};
 
 use actix_web::{get, web, HttpResponse, Responder};
 
 use sqlx::PgPool;
 
 #[get("/disable")]
-async fn disable(pool: web::Data<PgPool>, claims: Claims) -> impl Responder {
+async fn disable(pool: web::Data<PgPool>, mut request_user: User) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
@@ -18,42 +18,9 @@ async fn disable(pool: web::Data<PgPool>, claims: Claims) -> impl Responder {
         }
     };
 
-    // Check if user already exists
-    let existing_user = sqlx::query_as!(
-        User,
-        r#"
-        SELECT u.*
-        FROM users u
-        JOIN user_tokens ut ON u.id = ut.user_id
-        WHERE ut.token_id = $1
-        "#,
-        claims.jti,
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
-
-    let mut user = match existing_user {
-        Ok(existing_user) => {
-            if let Some(user) = existing_user {
-                user
-            } else {
-                return HttpResponse::NotFound().json(GenericResponse {
-                    status: "fail".to_string(),
-                    message: "No user with this token".to_string(),
-                });
-            }
-        }
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Database query error".to_string(),
-            })
-        }
-    };
-
-    user.otp_verified = false;
-    user.otp_auth_url = None;
-    user.otp_base32 = None;
+    request_user.otp_verified = false;
+    request_user.otp_auth_url = None;
+    request_user.otp_base32 = None;
 
     let updated_user_result = sqlx::query_scalar!(
         r#"
@@ -61,10 +28,10 @@ async fn disable(pool: web::Data<PgPool>, claims: Claims) -> impl Responder {
         SET otp_verified = $1, otp_auth_url = $2, otp_base32 = $3
         WHERE id = $4
         "#,
-        user.otp_verified,
-        user.otp_auth_url,
-        user.otp_base32,
-        user.id
+        request_user.otp_verified,
+        request_user.otp_auth_url,
+        request_user.otp_base32,
+        request_user.id
     )
     .fetch_optional(&mut *transaction)
     .await;

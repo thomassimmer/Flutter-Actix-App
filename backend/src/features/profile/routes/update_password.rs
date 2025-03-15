@@ -5,11 +5,8 @@ use sqlx::PgPool;
 
 use crate::{
     core::structs::responses::GenericResponse,
-    features::{
-        auth::structs::models::Claims,
-        profile::structs::{
-            models::User, requests::UpdateUserPasswordRequest, responses::UserResponse,
-        },
+    features::profile::structs::{
+        models::User, requests::UpdateUserPasswordRequest, responses::UserResponse,
     },
 };
 
@@ -17,10 +14,8 @@ use crate::{
 pub async fn update_password(
     body: web::Json<UpdateUserPasswordRequest>,
     pool: web::Data<PgPool>,
-    claims: Claims,
+    mut request_user: User,
 ) -> impl Responder {
-    let jti = claims.jti;
-
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
@@ -31,40 +26,8 @@ pub async fn update_password(
         }
     };
 
-    // Check if user already exists
-    let existing_user = sqlx::query_as!(
-        User,
-        r#"
-        SELECT u.*
-        FROM users u
-        JOIN user_tokens ut ON u.id = ut.user_id
-        WHERE ut.token_id = $1
-        "#,
-        jti,
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
-
-    let mut user = match existing_user {
-        Ok(existing_user) => match existing_user {
-            Some(existing_user) => existing_user,
-            None => {
-                return HttpResponse::InternalServerError().json(GenericResponse {
-                    status: "error".to_string(),
-                    message: "No user found for this token".to_string(),
-                })
-            }
-        },
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Database query error".to_string(),
-            })
-        }
-    };
-
     // Verify current password
-    let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&user.password) {
+    let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&request_user.password) {
         parsed_hash
     } else {
         return HttpResponse::BadRequest().json(GenericResponse {
@@ -98,8 +61,8 @@ pub async fn update_password(
         }
     };
 
-    user.password = password_hash;
-    user.password_is_expired = false;
+    request_user.password = password_hash;
+    request_user.password_is_expired = false;
 
     let updated_user_result = sqlx::query!(
         r#"
@@ -107,9 +70,9 @@ pub async fn update_password(
         SET password = $1, password_is_expired = $2
         WHERE id = $3
         "#,
-        user.password,
-        user.password_is_expired,
-        user.id
+        request_user.password,
+        request_user.password_is_expired,
+        request_user.id
     )
     .fetch_optional(&mut *transaction)
     .await;
@@ -124,7 +87,7 @@ pub async fn update_password(
     match updated_user_result {
         Ok(_) => HttpResponse::Ok().json(UserResponse {
             status: "success".to_string(),
-            user: user.to_user_data(),
+            user: request_user.to_user_data(),
         }),
         Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
             status: "error".to_string(),

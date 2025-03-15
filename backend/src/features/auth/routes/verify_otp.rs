@@ -1,4 +1,4 @@
-use crate::{core::structs::responses::GenericResponse, features::auth::structs::models::Claims};
+use crate::core::structs::responses::GenericResponse;
 
 use crate::features::auth::structs::requests::VerifyOtpRequest;
 use crate::features::auth::structs::responses::VerifyOtpResponse;
@@ -13,7 +13,7 @@ use totp_rs::{Algorithm, Secret, TOTP};
 pub async fn verify(
     body: web::Json<VerifyOtpRequest>,
     pool: web::Data<PgPool>,
-    claims: Claims,
+    mut request_user: User,
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
@@ -25,41 +25,7 @@ pub async fn verify(
         }
     };
 
-    // Check if user already exists
-    let existing_user = sqlx::query_as!(
-        User,
-        r#"
-        SELECT u.*
-        FROM users u
-        JOIN user_tokens ut ON u.id = ut.user_id
-        WHERE ut.token_id = $1
-        "#,
-        claims.jti,
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
-
-    let mut user = match existing_user {
-        Ok(existing_user) => {
-            if let Some(user) = existing_user {
-                user
-            } else {
-                return HttpResponse::NotFound().json(GenericResponse {
-                    status: "fail".to_string(),
-                    message: "No user with this token".to_string(),
-                });
-            }
-        }
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Database query error".to_string(),
-            })
-        }
-    };
-
-    let otp_base32 = user.otp_base32.to_owned().unwrap();
-
+    let otp_base32 = request_user.otp_base32.to_owned().unwrap();
     let totp = TOTP::new(
         Algorithm::SHA1,
         6,
@@ -80,7 +46,7 @@ pub async fn verify(
         return HttpResponse::Forbidden().json(json_error);
     }
 
-    user.otp_verified = true;
+    request_user.otp_verified = true;
 
     let updated_user_result = sqlx::query_scalar!(
         r#"
@@ -88,8 +54,8 @@ pub async fn verify(
         SET otp_verified = $1
         WHERE id = $2
         "#,
-        user.otp_verified,
-        user.id
+        request_user.otp_verified,
+        request_user.id
     )
     .fetch_optional(&mut *transaction)
     .await;
