@@ -54,7 +54,7 @@ pub async fn get_profile_information(
                 Ok(existing_user) => match existing_user {
                     Some(existing_user) => HttpResponse::Ok().json(UserResponse {
                         status: "success".to_string(),
-                        user: &existing_user.to_user_data(),
+                        user: existing_user.to_user_data(),
                     }),
                     None => HttpResponse::InternalServerError().json(GenericResponse {
                         status: "error".to_string(),
@@ -163,7 +163,7 @@ pub async fn post_profile_information(
             match updated_user_result {
                 Ok(_) => HttpResponse::Ok().json(UserResponse {
                     status: "success".to_string(),
-                    user: &user.to_user_data(),
+                    user: user.to_user_data(),
                 }),
                 Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
                     status: "error".to_string(),

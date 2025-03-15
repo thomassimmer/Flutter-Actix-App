@@ -9,7 +9,7 @@ pub mod profile {
     pub mod profile;
 }
 
-pub mod health_check {
+pub mod core {
     pub mod health_check;
 }
 
