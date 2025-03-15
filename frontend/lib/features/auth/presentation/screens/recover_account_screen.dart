@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/message_mapper.dart';
 import 'package:flutteractixapp/core/ui/extensions.dart';
+import 'package:flutteractixapp/core/widgets/app_logo.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
@@ -35,11 +36,7 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(
-                  height: 100,
-                  width: 100,
-                  child: Placeholder(),
-                ),
+                AppLogo(),
                 SizedBox(height: 40),
                 Container(
                     decoration: BoxDecoration(
