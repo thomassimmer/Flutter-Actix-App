@@ -5,12 +5,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/themes/app_theme.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/core/widgets/icon_with_warning.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
 import 'package:go_router/go_router.dart';
 
 class RootScreen extends StatelessWidget {

@@ -7,9 +7,9 @@ import 'package:flutteractixapp/core/messages/message_mapper.dart';
 import 'package:flutteractixapp/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile_events.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
 
 class PasswordScreen extends StatelessWidget {
   final TextEditingController _currentPasswordController =

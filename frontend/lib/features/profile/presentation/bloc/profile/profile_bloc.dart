@@ -7,16 +7,16 @@ import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/disable_otp_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/generate_otp_config_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/verify_otp_usecase.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/post_profile_usecase.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/set_password_use_case.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/update_password_use_case.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile_events.dart';
-import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
 import 'package:get_it/get_it.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
@@ -45,52 +45,47 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       }
     });
 
-    on<ProfileLoadRequested>(_onInitializeProfile);
-    on<ProfileClearRequested>(_onLogoutRequested);
-    on<ProfileUpdateRequested>(_onProfileUpdateRequest);
-    on<ProfileOtpGenerationRequested>(_onOtpGenerationRequested);
-    on<ProfileOtpDisablingRequested>(_onOtpDisablingRequested);
-    on<ProfileOtpVerificationRequested>(_onOtpVerificationRequested);
-    on<ProfileSetPasswordRequested>(_onSetPasswordRequested);
-    on<ProfileUpdatePasswordRequested>(_onUpdatePasswordRequested);
+    on<ProfileLoadRequested>(_initialize);
+    on<ProfileClearRequested>(_logout);
+    on<ProfileUpdateRequested>(_update);
+    on<ProfileOtpGenerationRequested>(_generateTwoFactorAuthenticationConfig);
+    on<ProfileOtpDisablingRequested>(_disableTwoFactorAuthentication);
+    on<ProfileOtpVerificationRequested>(_verifyOneTimePassword);
+    on<ProfileSetPasswordRequested>(_setPassword);
+    on<ProfileUpdatePasswordRequested>(_updatePassword);
   }
 
-  Future<void> _onInitializeProfile(
+  Future<void> _initialize(
       ProfileLoadRequested event, Emitter<ProfileState> emit) async {
-    try {
-      final profile = await getProfileUsecase.call();
-      emit(ProfileAuthenticated(profile: profile));
-    } on ShouldLogoutError catch (error) {
-      authBloc
-          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
-    } on DomainError catch (error) {
-      emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
-    } catch (error) {
-      emit(ProfileUnauthenticated(message: ErrorMessage('')));
-    }
+    final result = await getProfileUsecase.call();
+
+    result.fold((error) {
+      if (error is ShouldLogoutError) {
+        authBloc
+            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+      } else {
+        emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
+      }
+    }, (profile) => emit(ProfileAuthenticated(profile: profile)));
   }
 
-  Future<void> _onLogoutRequested(
+  Future<void> _logout(
       ProfileClearRequested event, Emitter<ProfileState> emit) async {
     emit(ProfileUnauthenticated());
   }
 
-  Future<void> _onProfileUpdateRequest(
+  Future<void> _update(
       ProfileUpdateRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
     emit(ProfileLoading(profile: state.profile));
 
-    try {
-      final profile = await postProfileUsecase.call(event.profile);
+    final result = await postProfileUsecase.call(event.profile);
 
-      emit(ProfileAuthenticated(
-          profile: profile,
-          message: SuccessMessage('profileUpdateSuccessfully')));
-    } on ShouldLogoutError catch (error) {
-      authBloc
-          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
-    } on DomainError catch (error) {
-      if (currentState is ProfileAuthenticated) {
+    result.fold((error) {
+      if (error is ShouldLogoutError) {
+        authBloc
+            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+      } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
           message: ErrorMessage(error.messageKey),
@@ -98,19 +93,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else {
         emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
       }
-    } catch (error) {
-      if (currentState is ProfileAuthenticated) {
-        emit(ProfileAuthenticated(
-          profile: currentState.profile,
-          message: ErrorMessage(''),
-        ));
-      } else {
-        emit(ProfileUnauthenticated(message: ErrorMessage('')));
-      }
-    }
+    },
+        (profile) => emit(ProfileAuthenticated(
+            profile: profile,
+            message: SuccessMessage('profileUpdateSuccessfully'))));
   }
 
-  Future<void> _onOtpGenerationRequested(
+  Future<void> _generateTwoFactorAuthenticationConfig(
       ProfileOtpGenerationRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
     emit(ProfileLoading(profile: state.profile));
@@ -152,7 +141,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  Future<void> _onOtpDisablingRequested(
+  Future<void> _disableTwoFactorAuthentication(
       ProfileOtpDisablingRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
     emit(ProfileLoading(profile: state.profile));
@@ -194,7 +183,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  Future<void> _onOtpVerificationRequested(
+  Future<void> _verifyOneTimePassword(
       ProfileOtpVerificationRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
     emit(ProfileLoading(profile: state.profile));
@@ -234,23 +223,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  Future<void> _onSetPasswordRequested(
+  Future<void> _setPassword(
       ProfileSetPasswordRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
     emit(ProfileLoading(profile: state.profile));
 
-    try {
-      final profile =
-          await setPasswordUseCase.call(newPassword: event.newPassword);
+    final result =
+        await setPasswordUseCase.call(newPassword: event.newPassword);
 
-      emit(ProfileAuthenticated(
-          profile: profile,
-          message: SuccessMessage('passwordUpdateSuccessfully')));
-    } on ShouldLogoutError catch (error) {
-      authBloc
-          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
-    } on DomainError catch (error) {
-      if (currentState is ProfileAuthenticated) {
+    result.fold((error) {
+      if (error is ShouldLogoutError) {
+        authBloc
+            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+      } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
           message: ErrorMessage(error.messageKey),
@@ -258,36 +243,25 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else {
         emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
       }
-    } catch (error) {
-      if (currentState is ProfileAuthenticated) {
-        emit(ProfileAuthenticated(
-          profile: currentState.profile,
-          message: ErrorMessage(''),
-        ));
-      } else {
-        emit(ProfileUnauthenticated(message: ErrorMessage('')));
-      }
-    }
+    },
+        (profile) => emit(ProfileAuthenticated(
+            profile: profile,
+            message: SuccessMessage('passwordUpdateSuccessfully'))));
   }
 
-  Future<void> _onUpdatePasswordRequested(
+  Future<void> _updatePassword(
       ProfileUpdatePasswordRequested event, Emitter<ProfileState> emit) async {
     final currentState = state;
     emit(ProfileLoading(profile: state.profile));
 
-    try {
-      final profile = await updatePasswordUseCase.call(
-          currentPassword: event.currentPassword,
-          newPassword: event.newPassword);
+    final result = await updatePasswordUseCase.call(
+        currentPassword: event.currentPassword, newPassword: event.newPassword);
 
-      emit(ProfileAuthenticated(
-          profile: profile,
-          message: SuccessMessage('passwordUpdateSuccessfully')));
-    } on ShouldLogoutError catch (error) {
-      authBloc
-          .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
-    } on DomainError catch (error) {
-      if (currentState is ProfileAuthenticated) {
+    result.fold((error) {
+      if (error is ShouldLogoutError) {
+        authBloc
+            .add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+      } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
           message: ErrorMessage(error.messageKey),
@@ -295,15 +269,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else {
         emit(ProfileUnauthenticated(message: ErrorMessage(error.messageKey)));
       }
-    } catch (error) {
-      if (currentState is ProfileAuthenticated) {
-        emit(ProfileAuthenticated(
-          profile: currentState.profile,
-          message: ErrorMessage(''),
-        ));
-      } else {
-        emit(ProfileUnauthenticated(message: ErrorMessage('')));
-      }
-    }
+    },
+        (profile) => emit(ProfileAuthenticated(
+            profile: profile,
+            message: SuccessMessage('passwordUpdateSuccessfully'))));
   }
 }
