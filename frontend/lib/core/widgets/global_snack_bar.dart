@@ -29,6 +29,10 @@ class GlobalSnackBar {
         content: Text(messageTranslated),
         backgroundColor: backgroundColor,
         showCloseIcon: true,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5.0),
+        ),
       ),
     ));
   }

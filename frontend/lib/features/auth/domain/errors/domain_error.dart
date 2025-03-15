@@ -1,6 +1,16 @@
 import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 
-class RefreshTokenExpiredDomainError extends DomainError {
+class ShouldLogoutError extends DomainError {}
+
+class RefreshTokenExpiredDomainError extends ShouldLogoutError {
+  final String messageKey = 'refreshTokenExpiredError';
+}
+
+class InvalidRefreshTokenDomainError extends ShouldLogoutError {
+  final String messageKey = 'refreshTokenExpiredError';
+}
+
+class RefreshTokenNotFoundDomainError extends ShouldLogoutError {
   final String messageKey = 'refreshTokenExpiredError';
 }
 
@@ -42,14 +52,6 @@ class UserAlreadyExistingDomainError extends DomainError {
 
 class PasswordNotExpiredDomainError extends DomainError {
   final String messageKey = 'passwordNotExpiredError';
-}
-
-class InvalidRefreshTokenDomainError extends DomainError {
-  final String messageKey = 'defaultError';
-}
-
-class RefreshTokenNotFoundDomainError extends DomainError {
-  final String messageKey = 'defaultError';
 }
 
 class PasswordTooShortError extends DomainError {
