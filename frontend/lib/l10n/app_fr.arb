@@ -7,5 +7,17 @@
   "theme": "Thème",
   "selectTheme": "Sélection du thème",
   "dark": "Sombre",
-  "light": "Clair"
+  "light": "Clair",
+  "twoFA": "Authentification à deux facteurs",
+  "twoFASetup": "Activez l'authenfication à deux facteurs pour renforcer la sécurité de votre compte.",
+  "twoFAScanQrCode": "Scannez ce QR-code dans votre application d'authentification.",
+  "twoFASecretKey": "Votre clé secrète est : {secretKey}",
+  "twoFAIsWellSetup": "L'authenfication à deux facteurs est en place sur votre compte.",
+  "generateNewQrCode": "Générer un nouveau QR-code",
+  "disableTwoFA": "Désactiver",
+  "validationCode": "Entrez votre code de validation ici",
+  "verify": "Vérifier",
+  "regenerateQrCode": "Regénérer un QR-code",
+  "cancel": "Annuler",
+  "enable": "Activer"
 }

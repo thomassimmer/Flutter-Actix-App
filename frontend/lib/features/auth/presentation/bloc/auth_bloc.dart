@@ -1,7 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:get_it/get_it.dart';
 import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/disable_otp_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/generate_otp_config_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/login_usecase.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/signup_usecase.dart';
@@ -9,6 +7,7 @@ import 'package:flutteractixapp/features/auth/domain/usecases/validate_otp_useca
 import 'package:flutteractixapp/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
+import 'package:get_it/get_it.dart';
 import 'package:universal_io/io.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -19,8 +18,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifyOtpUseCase verifyOtpUseCase = GetIt.instance<VerifyOtpUseCase>();
   final ValidateOtpUsecase validateOtpUsecase =
       GetIt.instance<ValidateOtpUsecase>();
-  final DisableOtpUseCase disableOtpUseCase =
-      GetIt.instance<DisableOtpUseCase>();
 
   AuthBloc() : super(AuthLoading()) {
     on<AuthInitRequested>(_onInitializeAuth);
@@ -105,10 +102,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
 
     try {
-      final userOrUserId =
+      final userTokenOrUserId =
           await loginUseCase.call(event.username, event.password);
 
-      await userOrUserId.fold(
+      await userTokenOrUserId.fold(
         (userToken) async {
           // Store tokens securely after successful login
           await TokenStorage().saveTokens(
@@ -135,7 +132,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
 
     try {
-      await validateOtpUsecase.call(event.userId, event.code);
+      final userToken = await validateOtpUsecase.call(event.userId, event.code);
+
+      // Store tokens securely after successful login
+      await TokenStorage().saveTokens(
+        userToken.accessToken,
+        userToken.refreshToken,
+        userToken.expiresIn,
+      );
 
       emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
     } catch (e) {

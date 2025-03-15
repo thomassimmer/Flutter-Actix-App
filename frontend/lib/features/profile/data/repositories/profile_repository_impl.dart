@@ -2,7 +2,6 @@
 
 import 'dart:async';
 
-import 'package:logger/web.dart';
 import 'package:flutteractixapp/core/errors/data_error.dart';
 import 'package:flutteractixapp/core/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
@@ -12,6 +11,7 @@ import 'package:flutteractixapp/features/profile/data/sources/remote_data_source
 import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 import 'package:flutteractixapp/features/profile/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/profile/domain/repositories/profile_repository.dart';
+import 'package:logger/web.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;
@@ -22,10 +22,16 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<User> getProfileInformation(String accessToken) async {
     try {
-      final user = await remoteDataSource.getProfileInformation(accessToken);
+      final userModel =
+          await remoteDataSource.getProfileInformation(accessToken);
 
       return User(
-          username: user.username, locale: user.locale, theme: user.theme);
+          username: userModel.username,
+          locale: userModel.locale,
+          theme: userModel.theme,
+          otpBase32: userModel.otpBase32,
+          otpAuthUrl: userModel.otpAuthUrl,
+          otpVerified: userModel.otpVerified);
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
       throw NetworkDomainError(
@@ -45,7 +51,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<User> postProfileInformation(String accessToken, User profile) async {
     try {
-      final user = await remoteDataSource.postProfileInformation(
+      final userModel = await remoteDataSource.postProfileInformation(
           accessToken,
           UpdateUserRequestModel(
               username: profile.username,
@@ -53,7 +59,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
               theme: profile.theme));
 
       return User(
-          username: user.username, locale: user.locale, theme: user.theme);
+          username: userModel.username,
+          locale: userModel.locale,
+          theme: userModel.theme,
+          otpBase32: userModel.otpBase32,
+          otpAuthUrl: userModel.otpAuthUrl,
+          otpVerified: userModel.otpVerified);
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
       throw NetworkDomainError(

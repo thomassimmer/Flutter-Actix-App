@@ -8,13 +8,6 @@ class ValidateOtpUsecase {
 
   /// Validates the OTP provided by the user. It's for login.
   Future<UserToken> call(String userId, String code) async {
-    final userTokenModel =
-        await authRepository.validateOtp(userId: userId, code: code);
-
-    return UserToken(
-        accessToken: userTokenModel.accessToken,
-        refreshToken: userTokenModel.refreshToken,
-        expiresIn: userTokenModel.expiresIn,
-        recoveryCodes: userTokenModel.recoveryCodes);
+    return await authRepository.validateOtp(userId: userId, code: code);
   }
 }

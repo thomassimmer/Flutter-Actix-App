@@ -8,13 +8,7 @@ class SignupUseCase {
 
   Future<UserToken> call(
       String username, String password, String locale, String theme) async {
-    final userTokenModel = await authRepository.register(
+    return await authRepository.register(
         username: username, password: password, locale: locale, theme: theme);
-
-    return UserToken(
-        accessToken: userTokenModel.accessToken,
-        refreshToken: userTokenModel.refreshToken,
-        expiresIn: userTokenModel.expiresIn,
-        recoveryCodes: userTokenModel.recoveryCodes);
   }
 }

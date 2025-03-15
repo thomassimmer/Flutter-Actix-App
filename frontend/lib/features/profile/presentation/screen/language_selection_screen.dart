@@ -50,10 +50,8 @@ class LocaleSelectionScreen extends StatelessWidget {
           value: locale['code']!,
           groupValue: state.profile.locale,
           onChanged: (String? value) {
-            final profile = User(
-                username: state.profile.username,
-                locale: value!,
-                theme: state.profile.theme);
+            User profile = state.profile;
+            profile.locale = value!;
 
             BlocProvider.of<ProfileBloc>(context)
                 .add(ProfileUpdateRequested(profile: profile));

@@ -9,9 +9,6 @@ class GetProfileUsecase {
 
   Future<User> call() async {
     final accessToken = await TokenStorage().getAccessToken();
-    final result = await profileRepository.getProfileInformation(accessToken!);
-
-    return User(
-        username: result.username, locale: result.locale, theme: result.theme);
+    return await profileRepository.getProfileInformation(accessToken!);
   }
 }

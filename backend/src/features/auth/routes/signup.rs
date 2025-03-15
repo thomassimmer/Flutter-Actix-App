@@ -109,7 +109,6 @@ pub async fn register_user(
         password: password_hash,
         locale: body.locale,
         theme: body.theme,
-        otp_enabled: false,
         otp_verified: false,
         otp_base32: None,
         otp_auth_url: None,
@@ -121,13 +120,12 @@ pub async fn register_user(
     // Insert the new user into the database
     let insert_result = sqlx::query!(
         r#"
-        INSERT INTO users (id, username, password, otp_enabled, otp_verified, otp_base32, otp_auth_url, created_at, updated_at, recovery_codes)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        INSERT INTO users (id, username, password, otp_verified, otp_base32, otp_auth_url, created_at, updated_at, recovery_codes)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         "#,
         new_user.id,
         new_user.username,
         new_user.password,
-        new_user.otp_enabled,
         new_user.otp_verified,
         new_user.otp_base32,
         new_user.otp_auth_url,

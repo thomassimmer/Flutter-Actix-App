@@ -9,16 +9,6 @@ class LoginUseCase {
 
   Future<Either<UserToken, String>> call(
       String username, String password) async {
-    final result =
-        await authRepository.login(username: username, password: password);
-
-    return result.fold(
-      (userTokenModel) => Left(UserToken(
-          accessToken: userTokenModel.accessToken,
-          refreshToken: userTokenModel.refreshToken,
-          expiresIn: userTokenModel.expiresIn,
-          recoveryCodes: userTokenModel.recoveryCodes)),
-      (userId) => Right(userId),
-    );
+    return await authRepository.login(username: username, password: password);
   }
 }

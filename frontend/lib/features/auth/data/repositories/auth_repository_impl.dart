@@ -6,6 +6,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutteractixapp/core/errors/data_error.dart';
 import 'package:flutteractixapp/core/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
+import 'package:flutteractixapp/features/auth/data/models/otp_request_model.dart';
 import 'package:flutteractixapp/features/auth/data/models/user_token_request_model.dart';
 import 'package:flutteractixapp/features/auth/data/sources/remote_data_sources.dart';
 import 'package:flutteractixapp/features/auth/domain/entities/otp_generation.dart';

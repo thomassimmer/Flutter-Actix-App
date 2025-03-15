@@ -42,11 +42,9 @@ class ThemeSelectionScreen extends StatelessWidget {
           value: theme['code']!,
           groupValue: state.profile.theme,
           onChanged: (String? value) {
-            final profile = User(
-              username: state.profile.username,
-              locale: state.profile.locale,
-              theme: value!,
-            );
+            User profile = state.profile;
+            profile.theme = value!;
+
             BlocProvider.of<ProfileBloc>(context)
                 .add(ProfileUpdateRequested(profile: profile));
           },
