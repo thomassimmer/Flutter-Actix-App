@@ -22,6 +22,15 @@ Features done:
 - 1 profile tabs ready to be continued
 - snackbar displaying translated error / success / info messages
 
+## Medium articles
+
+I wrote 4 articles about this project on Medium:
+
+- [Locale Selection](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-locale-selection-1fb318224129)
+- [Writing Integration Tests](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-writing-integration-tests-b018d472c19a)
+- [Clean Architecture](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-clean-architecture-193c26599154)
+- [A Beginner’s Journey](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-a-beginners-journey-92cbb893c2f9)
+
 ## Context
 
 I plan to develop a real app, but it will take a lot of time, and due to personal reasons, there are chances it will never be released. I don't want to spoil here what this app will be about, but you can find some hints in this project. Before starting this app, I wanted to create a starter template to share my discoveries with people who learn these technologies.
