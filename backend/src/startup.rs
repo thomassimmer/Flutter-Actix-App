@@ -4,18 +4,21 @@ use std::net::TcpListener;
 
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::core::routes::health_check::health_check;
-use crate::features::auth::routes::login::log_user_in;
-use crate::features::auth::routes::otp::{disable, generate, validate, verify};
-use crate::features::auth::routes::recovery::{
-    recover_account_using_2fa::recover_account_using_2fa,
-    recover_account_using_password::recover_account_using_password,
-    recover_account_without_2fa_enabled::recover_account_without_2fa_enabled,
-};
+use crate::features::auth::routes::disable_otp::disable;
+use crate::features::auth::routes::generate_otp::generate;
+use crate::features::auth::routes::log_user_in::log_user_in;
+use crate::features::auth::routes::recover_account_using_2fa::recover_account_using_2fa;
+use crate::features::auth::routes::recover_account_using_password::recover_account_using_password;
+use crate::features::auth::routes::recover_account_without_2fa_enabled::recover_account_without_2fa_enabled;
+use crate::features::auth::routes::validate_otp::validate;
+use crate::features::auth::routes::verify_otp::verify;
+
 use crate::features::auth::routes::signup::register_user;
 use crate::features::auth::routes::token::refresh_token;
-use crate::features::profile::routes::profile::{
-    get_profile_information, is_otp_enabled, post_profile_information,
-};
+use crate::features::profile::routes::get_profile_information::get_profile_information;
+use crate::features::profile::routes::is_otp_enabled::is_otp_enabled;
+use crate::features::profile::routes::post_profile_information::post_profile_information;
+
 use crate::features::profile::routes::set_password::set_password;
 use crate::features::profile::routes::update_password::update_password;
 use actix_cors::Cors;
