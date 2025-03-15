@@ -42,14 +42,14 @@ class LoginScreen extends StatelessWidget {
                     (context, state) {
                   GlobalSnackBar.show(context, state.message);
 
-                  if (state is AuthAuthenticated) {
+                  if (state is AuthAuthenticatedState) {
                     context.go('/home');
                   }
                 }, child:
                     BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-                  if (state is AuthLoading) {
+                  if (state is AuthLoadingState) {
                     return _buildLoadingScreen(context, state);
-                  } else if (state is AuthOtpValidate) {
+                  } else if (state is AuthValidateOneTimePasswordState) {
                     return _buildOtpVerificationScreen(context, state);
                   } else {
                     return _buildLoginViewScreen(context, state);
@@ -74,7 +74,7 @@ class LoginScreen extends StatelessWidget {
   }
 
   Widget _buildOtpVerificationScreen(
-      BuildContext context, AuthOtpValidate state) {
+      BuildContext context, AuthValidateOneTimePasswordState state) {
     return Column(children: [
       Text(
         AppLocalizations.of(context)!.logIn,
@@ -101,7 +101,7 @@ class LoginScreen extends StatelessWidget {
         text: AppLocalizations.of(context)!.logIn,
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
-            AuthOtpValidationRequested(
+            AuthValidationOneTimePasswordEvent(
               userId: state.userId,
               code: _codeController.text,
             ),
@@ -132,7 +132,7 @@ class LoginScreen extends StatelessWidget {
       TextButton(
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
-              AuthAccountRecoveryForUsernameRequested(
+              AuthRecoverAccountForUsernameEvent(
                   username: _usernameController.text, passwordForgotten: true));
           context.go('/recover-account');
         },
@@ -145,7 +145,7 @@ class LoginScreen extends StatelessWidget {
         text: AppLocalizations.of(context)!.logIn,
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
-            AuthLoginRequested(
+            AuthLoginEvent(
               username: _usernameController.text,
               password: _passwordController.text,
             ),

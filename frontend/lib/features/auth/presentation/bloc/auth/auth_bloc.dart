@@ -37,179 +37,179 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       recoverAccountWithRecoveryCodeUseCase =
       GetIt.instance<RecoverAccountWithRecoveryCodeUseCase>();
 
-  AuthBloc() : super(AuthLoading()) {
-    on<AuthInitRequested>(_onInitializeAuth);
-    on<AuthSignupRequested>(_onSignupRequested);
-    on<AuthOtpGenerationRequested>(_onOtpGenerationRequested);
-    on<AuthOtpVerificationRequested>(_onOtpVerificationRequested);
-    on<AuthLoginRequested>(_onLoginRequested);
-    on<AuthOtpValidationRequested>(_onOtpValidationRequested);
-    on<AuthLogoutRequested>(_onLogoutRequested);
-    on<AuthAccountRecoveryForUsernameRequested>(
-        _onAccountRecoveryForUsernameRequested);
-    on<AuthDoesAccountHaveOtpEnabledRequested>(
-        _onDoesAccountHaveOtpEnabledRequested);
-    on<AuthAccountRecoveryWithOtpEnabledAndPasswordRequested>(
-        _onAccountRecoveryWithOtpEnabledAndPasswordRequested);
-    on<AuthAccountRecoveryWithOtpEnabledAndOtpRequested>(
-        _onAccountRecoveryWithOtpEnabledAndOtpRequested);
-    on<AuthAccountRecoveryWithOtpDisabledRequested>(
-        _onAccountRecoveryWithOtpDisabledRequested);
+  AuthBloc() : super(AuthLoadingState()) {
+    on<AuthInitializeEvent>(_initialize);
+    on<AuthSignupEvent>(_signup);
+    on<AuthGenerateTwoFactorAuthenticationConfigEvent>(
+        _generateTwoFactorAuthenticationConfig);
+    on<AuthVerifyOneTimePasswordEvent>(_verifyOneTimePassword);
+    on<AuthLoginEvent>(_login);
+    on<AuthValidationOneTimePasswordEvent>(_validateOneTimePassword);
+    on<AuthLogoutEvent>(_logout);
+    on<AuthRecoverAccountForUsernameEvent>(_recoverAccountForUsername);
+    on<AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent>(
+        _checkIfAccountHasTwoFactorAuthenticationEnabled);
+    on<AuthRecoverAccountWithTwoFactorAuthenticationAndPasswordEvent>(
+        _recoverAccountWithTwoFactorAuthenticationAndPassword);
+    on<AuthRecoverAccountWithTwoFactorAuthenticationAndOneTimePasswordEvent>(
+        _recoverAccountWithTwoFactorAuthenticationAndOneTimePassword);
+    on<AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent>(
+        _recoverAccountWithoutTwoFactorAuthenticationEnabled);
   }
 
   // Function to check initial authentication state
-  Future<void> _onInitializeAuth(
-      AuthInitRequested event, Emitter<AuthState> emit) async {
+  Future<void> _initialize(
+      AuthInitializeEvent event, Emitter<AuthState> emit) async {
     final result = await TokenStorage().getAccessToken();
 
     if (result == null) {
-      emit(AuthUnauthenticated());
+      emit(AuthUnauthenticatedState());
     } else {
-      emit(AuthAuthenticatedAfterLogin(
+      emit(AuthAuthenticatedAfterLoginState(
         hasValidatedOtp: false,
       ));
     }
   }
 
-  void _onSignupRequested(
-      AuthSignupRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+  void _signup(AuthSignupEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoadingState());
 
     // We use the device locale by default on signup
     final result = await signupUseCase.call(
         event.username, event.password, Platform.localeName, event.theme);
 
     result.fold(
-        (error) =>
-            emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
+        (error) => emit(
+            AuthUnauthenticatedState(message: ErrorMessage(error.messageKey))),
         (userToken) async {
-      emit(AuthAuthenticatedAfterRegistration(
+      emit(AuthAuthenticatedAfterRegistrationState(
           recoveryCodes: userToken.recoveryCodes, hasVerifiedOtp: false));
     });
   }
 
-  void _onOtpGenerationRequested(
-      AuthOtpGenerationRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+  void _generateTwoFactorAuthenticationConfig(
+      AuthGenerateTwoFactorAuthenticationConfigEvent event,
+      Emitter<AuthState> emit) async {
+    emit(AuthLoadingState());
 
     final result = await generateOtpConfigUseCase.call();
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
-        add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+        add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
       } else {
-        emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey)));
+        emit(AuthUnauthenticatedState(message: ErrorMessage(error.messageKey)));
       }
     },
         (generatedOtpConfig) => {
-              emit(AuthOtpVerify(
+              emit(AuthVerifyOneTimePasswordState(
                   otpAuthUrl: generatedOtpConfig.otpAuthUrl,
                   otpBase32: generatedOtpConfig.otpBase32))
             });
   }
 
-  void _onOtpVerificationRequested(
-      AuthOtpVerificationRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+  void _verifyOneTimePassword(
+      AuthVerifyOneTimePasswordEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoadingState());
 
     try {
       await verifyOtpUseCase.call(event.code);
 
-      emit(AuthAuthenticatedAfterRegistration(
+      emit(AuthAuthenticatedAfterRegistrationState(
           hasVerifiedOtp: true,
           message: SuccessMessage("validationCodeCorrect")));
     } on ShouldLogoutError catch (error) {
-      add(AuthLogoutRequested(message: ErrorMessage(error.messageKey)));
+      add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
     } on DomainError catch (error) {
-      emit(AuthOtpVerify(
+      emit(AuthVerifyOneTimePasswordState(
           otpAuthUrl: event.otpAuthUrl,
           otpBase32: event.otpBase32,
           message: ErrorMessage(error.messageKey)));
     } catch (error) {
-      emit(AuthOtpVerify(
+      emit(AuthVerifyOneTimePasswordState(
           otpAuthUrl: event.otpAuthUrl,
           otpBase32: event.otpBase32,
           message: ErrorMessage('')));
     }
   }
 
-  Future<void> _onLoginRequested(
-      AuthLoginRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+  Future<void> _login(AuthLoginEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoadingState());
 
     final result = await loginUseCase.call(event.username, event.password);
 
     result.fold(
-        (error) =>
-            emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
+        (error) => emit(
+            AuthUnauthenticatedState(message: ErrorMessage(error.messageKey))),
         (userTokenOrUserId) {
       userTokenOrUserId.fold((userToken) {
-        emit(AuthAuthenticatedAfterLogin(
+        emit(AuthAuthenticatedAfterLoginState(
             hasValidatedOtp: false,
             message: SuccessMessage("loginSuccessful")));
-      }, (userId) => emit(AuthOtpValidate(userId: userId)));
+      }, (userId) => emit(AuthValidateOneTimePasswordState(userId: userId)));
     });
   }
 
-  void _onOtpValidationRequested(
-      AuthOtpValidationRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+  void _validateOneTimePassword(
+      AuthValidationOneTimePasswordEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoadingState());
 
     final result = await validateOtpUsecase.call(event.userId, event.code);
 
     result.fold(
-        (error) => emit(AuthOtpValidate(
+        (error) => emit(AuthValidateOneTimePasswordState(
             message: ErrorMessage(error.messageKey),
             userId: event.userId)), (userToken) async {
-      emit(AuthAuthenticatedAfterLogin(
+      emit(AuthAuthenticatedAfterLoginState(
           hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
     });
   }
 
-  void _onLogoutRequested(
-      AuthLogoutRequested event, Emitter<AuthState> emit) async {
+  void _logout(AuthLogoutEvent event, Emitter<AuthState> emit) async {
     await TokenStorage().deleteTokens();
 
     if (event.message == null) {
-      emit(AuthUnauthenticated(message: SuccessMessage('logoutSuccessful')));
+      emit(AuthUnauthenticatedState(
+          message: SuccessMessage('logoutSuccessful')));
     } else {
-      emit(AuthUnauthenticated(message: event.message));
+      emit(AuthUnauthenticatedState(message: event.message));
     }
   }
 
-  void _onAccountRecoveryForUsernameRequested(
-      AuthAccountRecoveryForUsernameRequested event,
-      Emitter<AuthState> emit) async {
-    emit(AuthRecoveringAccountUsernameStep(
+  void _recoverAccountForUsername(
+      AuthRecoverAccountForUsernameEvent event, Emitter<AuthState> emit) async {
+    emit(AuthRecoverAccountUsernameStepState(
         username: event.username, passwordForgotten: event.passwordForgotten));
   }
 
-  void _onDoesAccountHaveOtpEnabledRequested(
-      AuthDoesAccountHaveOtpEnabledRequested event,
+  void _checkIfAccountHasTwoFactorAuthenticationEnabled(
+      AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent event,
       Emitter<AuthState> emit) async {
     final currentState = state;
-    emit(AuthLoading());
+    emit(AuthLoadingState());
 
     final result = await checkIfOtpEnabledUsecase.call(event.username);
 
     result.fold(
-        (error) => emit(AuthRecoveringAccountUsernameStep(
+        (error) => emit(AuthRecoverAccountUsernameStepState(
             username: event.username,
             passwordForgotten: event.passwordForgotten,
             message: ErrorMessage(error.messageKey))), (isOtpEnabled) async {
-      if (currentState is AuthRecoveringAccountUsernameStep) {
+      if (currentState is AuthRecoverAccountUsernameStepState) {
         if (isOtpEnabled) {
           if (currentState.passwordForgotten) {
-            emit(AuthRecoveringAccountWithOtpEnabledAndUsingOtp(
-                username: event.username,
-                passwordForgotten: currentState.passwordForgotten));
+            emit(
+                AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState(
+                    username: event.username,
+                    passwordForgotten: currentState.passwordForgotten));
           } else {
-            emit(AuthRecoveringAccountWithOtpEnabledAndUsingPassword(
-                username: event.username,
-                passwordForgotten: currentState.passwordForgotten));
+            emit(
+                AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndPasswordState(
+                    username: event.username,
+                    passwordForgotten: currentState.passwordForgotten));
           }
         } else {
-          emit(AuthRecoveringAccountWithOtpDisabled(
+          emit(AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState(
               username: event.username,
               passwordForgotten: currentState.passwordForgotten));
         }
@@ -217,10 +217,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
   }
 
-  void _onAccountRecoveryWithOtpEnabledAndPasswordRequested(
-      AuthAccountRecoveryWithOtpEnabledAndPasswordRequested event,
+  void _recoverAccountWithTwoFactorAuthenticationAndPassword(
+      AuthRecoverAccountWithTwoFactorAuthenticationAndPasswordEvent event,
       Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+    emit(AuthLoadingState());
 
     final result = await recoverAccountWithRecoveryCodeAndPasswordUseCase.call(
         username: event.username,
@@ -228,18 +228,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         recoveryCode: event.recoveryCode);
 
     result.fold(
-        (error) =>
-            emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
+        (error) => emit(
+            AuthUnauthenticatedState(message: ErrorMessage(error.messageKey))),
         (userToken) async {
-      emit(AuthAuthenticatedAfterLogin(
+      emit(AuthAuthenticatedAfterLoginState(
           hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
     });
   }
 
-  void _onAccountRecoveryWithOtpEnabledAndOtpRequested(
-      AuthAccountRecoveryWithOtpEnabledAndOtpRequested event,
+  void _recoverAccountWithTwoFactorAuthenticationAndOneTimePassword(
+      AuthRecoverAccountWithTwoFactorAuthenticationAndOneTimePasswordEvent
+          event,
       Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+    emit(AuthLoadingState());
 
     final result = await recoverAccountWithRecoveryCodeAndOtpUseCase.call(
         username: event.username,
@@ -247,27 +248,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         recoveryCode: event.recoveryCode);
 
     result.fold(
-        (error) =>
-            emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
+        (error) => emit(
+            AuthUnauthenticatedState(message: ErrorMessage(error.messageKey))),
         (userToken) async {
-      emit(AuthAuthenticatedAfterLogin(
+      emit(AuthAuthenticatedAfterLoginState(
           hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
     });
   }
 
-  void _onAccountRecoveryWithOtpDisabledRequested(
-      AuthAccountRecoveryWithOtpDisabledRequested event,
+  void _recoverAccountWithoutTwoFactorAuthenticationEnabled(
+      AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent event,
       Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+    emit(AuthLoadingState());
 
     final result = await recoverAccountWithRecoveryCodeUseCase.call(
         username: event.username, recoveryCode: event.recoveryCode);
 
     result.fold(
-        (error) =>
-            emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
+        (error) => emit(
+            AuthUnauthenticatedState(message: ErrorMessage(error.messageKey))),
         (userToken) async {
-      emit(AuthAuthenticatedAfterLogin(
+      emit(AuthAuthenticatedAfterLoginState(
           hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
     });
   }

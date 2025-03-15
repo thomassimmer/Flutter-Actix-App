@@ -43,23 +43,26 @@ class RecoveryCodesScreen extends StatelessWidget {
                         listener: (context, state) {
                           GlobalSnackBar.show(context, state.message);
 
-                          if (state is AuthAuthenticatedAfterRegistration) {
+                          if (state
+                              is AuthAuthenticatedAfterRegistrationState) {
                             if (state.hasVerifiedOtp) {
                               context.go('/home');
                             } else {
                               context.go('/recovery-codes');
                             }
-                          } else if (state is AuthOtpVerify) {
+                          } else if (state is AuthVerifyOneTimePasswordState) {
                             _otpController.text = '';
                           }
                         },
                         child: BlocBuilder<AuthBloc, AuthState>(
                           builder: (context, state) {
-                            if (state is AuthAuthenticatedAfterRegistration) {
+                            if (state
+                                is AuthAuthenticatedAfterRegistrationState) {
                               return _buildRecoveryCodesView(context, state);
-                            } else if (state is AuthOtpGenerate) {
+                            } else if (state
+                                is AuthGenerateTwoFactorAuthenticationConfigState) {
                               return _buildOtpSetupView(context, state);
-                            } else if (state is AuthLoading) {
+                            } else if (state is AuthLoadingState) {
                               return _buildLoadingScreen(context, state);
                             } else {
                               return _buildErrorScreen(context, state);
@@ -94,7 +97,7 @@ class RecoveryCodesScreen extends StatelessWidget {
   }
 
   Widget _buildRecoveryCodesView(
-      BuildContext context, AuthAuthenticatedAfterRegistration state) {
+      BuildContext context, AuthAuthenticatedAfterRegistrationState state) {
     if (state.recoveryCodes == null) {
       return Column(children: [
         Text(
@@ -146,7 +149,7 @@ class RecoveryCodesScreen extends StatelessWidget {
             text: AppLocalizations.of(context)!.goToTwoFASetup,
             onPressed: () {
               BlocProvider.of<AuthBloc>(context).add(
-                AuthOtpGenerationRequested(),
+                AuthGenerateTwoFactorAuthenticationConfigEvent(),
               );
             },
             size: ButtonSize.small,
@@ -157,7 +160,8 @@ class RecoveryCodesScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildOtpSetupView(BuildContext context, AuthOtpGenerate state) {
+  Widget _buildOtpSetupView(BuildContext context,
+      AuthGenerateTwoFactorAuthenticationConfigState state) {
     return Column(
       children: [
         Text(
@@ -183,7 +187,7 @@ class RecoveryCodesScreen extends StatelessWidget {
           text: AppLocalizations.of(context)!.signUp,
           onPressed: () {
             BlocProvider.of<AuthBloc>(context).add(
-              AuthOtpVerificationRequested(
+              AuthVerifyOneTimePasswordEvent(
                 otpBase32: state.otpBase32,
                 otpAuthUrl: state.otpAuthUrl,
                 code: _otpController.text,

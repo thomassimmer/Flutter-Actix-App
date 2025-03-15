@@ -8,34 +8,34 @@ abstract class AuthEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class AuthInitRequested extends AuthEvent {}
+class AuthInitializeEvent extends AuthEvent {}
 
-class AuthLogoutRequested extends AuthEvent {
+class AuthLogoutEvent extends AuthEvent {
   final Message? message;
 
-  const AuthLogoutRequested({this.message});
+  const AuthLogoutEvent({this.message});
 
   @override
   List<Object?> get props => [message];
 }
 
-class AuthSignupRequested extends AuthEvent {
+class AuthSignupEvent extends AuthEvent {
   final String username;
   final String password;
   final String theme;
 
-  const AuthSignupRequested(
+  const AuthSignupEvent(
       {required this.username, required this.password, required this.theme});
 
   @override
   List<Object> get props => [username, password, theme];
 }
 
-class AuthLoginRequested extends AuthEvent {
+class AuthLoginEvent extends AuthEvent {
   final String username;
   final String password;
 
-  const AuthLoginRequested({
+  const AuthLoginEvent({
     required this.username,
     required this.password,
   });
@@ -44,66 +44,70 @@ class AuthLoginRequested extends AuthEvent {
   List<Object> get props => [username, password];
 }
 
-class AuthOtpGenerationRequested extends AuthEvent {}
+class AuthGenerateTwoFactorAuthenticationConfigEvent extends AuthEvent {}
 
-class AuthOtpVerificationRequested extends AuthEvent {
+class AuthVerifyOneTimePasswordEvent extends AuthEvent {
   final String otpBase32;
   final String otpAuthUrl;
   final String code;
 
-  const AuthOtpVerificationRequested(
+  const AuthVerifyOneTimePasswordEvent(
       {required this.otpBase32, required this.otpAuthUrl, required this.code});
 }
 
-class AuthOtpValidationRequested extends AuthEvent {
+class AuthValidationOneTimePasswordEvent extends AuthEvent {
   final String userId;
   final String code;
 
-  const AuthOtpValidationRequested({required this.userId, required this.code});
+  const AuthValidationOneTimePasswordEvent(
+      {required this.userId, required this.code});
 
   @override
   List<Object> get props => [userId, code];
 }
 
-class AuthAccountRecoveryForUsernameRequested extends AuthEvent {
+class AuthRecoverAccountForUsernameEvent extends AuthEvent {
   final String username;
   final bool passwordForgotten;
 
-  const AuthAccountRecoveryForUsernameRequested(
+  const AuthRecoverAccountForUsernameEvent(
       {required this.username, required this.passwordForgotten});
 
   @override
   List<Object> get props => [username, passwordForgotten];
 }
 
-class AuthDoesAccountHaveOtpEnabledRequested extends AuthEvent {
+class AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent
+    extends AuthEvent {
   final String username;
   final bool passwordForgotten;
 
-  const AuthDoesAccountHaveOtpEnabledRequested(
+  const AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent(
       {required this.username, required this.passwordForgotten});
 
   @override
   List<Object?> get props => [username, passwordForgotten];
 }
 
-class AuthAccountRecoveryWithOtpDisabledRequested extends AuthEvent {
+class AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent
+    extends AuthEvent {
   final String username;
   final String recoveryCode;
 
-  const AuthAccountRecoveryWithOtpDisabledRequested(
+  const AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
       {required this.username, required this.recoveryCode});
 
   @override
   List<Object?> get props => [username, recoveryCode];
 }
 
-class AuthAccountRecoveryWithOtpEnabledAndPasswordRequested extends AuthEvent {
+class AuthRecoverAccountWithTwoFactorAuthenticationAndPasswordEvent
+    extends AuthEvent {
   final String username;
   final String password;
   final String recoveryCode;
 
-  const AuthAccountRecoveryWithOtpEnabledAndPasswordRequested(
+  const AuthRecoverAccountWithTwoFactorAuthenticationAndPasswordEvent(
       {required this.username,
       required this.password,
       required this.recoveryCode});
@@ -112,12 +116,13 @@ class AuthAccountRecoveryWithOtpEnabledAndPasswordRequested extends AuthEvent {
   List<Object?> get props => [username, password, recoveryCode];
 }
 
-class AuthAccountRecoveryWithOtpEnabledAndOtpRequested extends AuthEvent {
+class AuthRecoverAccountWithTwoFactorAuthenticationAndOneTimePasswordEvent
+    extends AuthEvent {
   final String username;
   final String code;
   final String recoveryCode;
 
-  const AuthAccountRecoveryWithOtpEnabledAndOtpRequested(
+  const AuthRecoverAccountWithTwoFactorAuthenticationAndOneTimePasswordEvent(
       {required this.username, required this.code, required this.recoveryCode});
 
   @override

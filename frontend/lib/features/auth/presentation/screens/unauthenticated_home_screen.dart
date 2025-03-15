@@ -22,13 +22,13 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
                 listener: (context, state) {
                   GlobalSnackBar.show(context, state.message);
 
-                  if (state is AuthAuthenticatedAfterLogin) {
+                  if (state is AuthAuthenticatedAfterLoginState) {
                     context.go('/home');
                   }
                 },
                 child:
                     BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-                  if (state is AuthLoading) {
+                  if (state is AuthLoadingState) {
                     return _buildLoadingScreen(context, state);
                   } else {
                     return _buildUnauthenticatedHomeScreen(context, state);

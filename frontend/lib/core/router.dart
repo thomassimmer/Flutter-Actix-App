@@ -22,7 +22,7 @@ final router = GoRouter(
       redirect: (context, state) {
         final authState = context.read<AuthBloc>().state;
 
-        if (authState is AuthAuthenticated) {
+        if (authState is AuthAuthenticatedState) {
           return '/home';
         }
         return null;
@@ -33,7 +33,7 @@ final router = GoRouter(
       builder: (context, state) => LoginScreen(),
       redirect: (context, state) {
         final authState = context.read<AuthBloc>().state;
-        if (authState is AuthAuthenticated) {
+        if (authState is AuthAuthenticatedState) {
           return '/home';
         }
         return null;
@@ -44,7 +44,7 @@ final router = GoRouter(
       builder: (context, state) => SignupScreen(),
       redirect: (context, state) {
         final authState = context.read<AuthBloc>().state;
-        if (authState is AuthAuthenticated) {
+        if (authState is AuthAuthenticatedState) {
           return '/home';
         }
         return null;
@@ -59,7 +59,7 @@ final router = GoRouter(
       builder: (context, state) => RecoverAccountScreen(),
       redirect: (context, state) {
         final authState = context.read<AuthBloc>().state;
-        if (authState is AuthAuthenticated) {
+        if (authState is AuthAuthenticatedState) {
           return '/home';
         }
         return null;
@@ -92,7 +92,7 @@ final router = GoRouter(
       redirect: (context, state) {
         final authState = context.read<AuthBloc>().state;
 
-        if (authState is AuthAuthenticated) {
+        if (authState is AuthAuthenticatedState) {
           return null;
         } else {
           return '/';

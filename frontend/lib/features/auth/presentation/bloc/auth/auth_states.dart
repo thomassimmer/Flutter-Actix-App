@@ -10,47 +10,49 @@ abstract class AuthState extends Equatable {
   List<Object?> get props => [message];
 }
 
-class AuthUnauthenticated extends AuthState {
-  const AuthUnauthenticated({super.message});
+class AuthUnauthenticatedState extends AuthState {
+  const AuthUnauthenticatedState({super.message});
 
   @override
   List<Object?> get props => [message];
 }
 
-class AuthLoading extends AuthState {}
+class AuthLoadingState extends AuthState {}
 
-class AuthAuthenticated extends AuthState {
-  const AuthAuthenticated({super.message});
+class AuthAuthenticatedState extends AuthState {
+  const AuthAuthenticatedState({super.message});
 
   @override
   List<Object?> get props => [message];
 }
 
-class AuthAuthenticatedAfterRegistration extends AuthAuthenticated {
+class AuthAuthenticatedAfterRegistrationState extends AuthAuthenticatedState {
   final List<String>? recoveryCodes;
   final bool hasVerifiedOtp;
 
-  AuthAuthenticatedAfterRegistration(
+  AuthAuthenticatedAfterRegistrationState(
       {super.message, this.recoveryCodes, required this.hasVerifiedOtp});
 
   @override
   List<Object?> get props => [message, recoveryCodes, hasVerifiedOtp];
 }
 
-class AuthAuthenticatedAfterLogin extends AuthAuthenticated {
+class AuthAuthenticatedAfterLoginState extends AuthAuthenticatedState {
   final bool hasValidatedOtp;
 
-  AuthAuthenticatedAfterLogin({super.message, required this.hasValidatedOtp});
+  AuthAuthenticatedAfterLoginState(
+      {super.message, required this.hasValidatedOtp});
 
   @override
   List<Object?> get props => [message, hasValidatedOtp];
 }
 
-class AuthOtpGenerate extends AuthAuthenticated {
+class AuthGenerateTwoFactorAuthenticationConfigState
+    extends AuthAuthenticatedState {
   final String otpBase32;
   final String otpAuthUrl;
 
-  AuthOtpGenerate({
+  AuthGenerateTwoFactorAuthenticationConfigState({
     super.message,
     required this.otpBase32,
     required this.otpAuthUrl,
@@ -60,50 +62,51 @@ class AuthOtpGenerate extends AuthAuthenticated {
   List<Object?> get props => [message, otpBase32, otpAuthUrl];
 }
 
-class AuthOtpVerify extends AuthOtpGenerate {
-  AuthOtpVerify(
+class AuthVerifyOneTimePasswordState
+    extends AuthGenerateTwoFactorAuthenticationConfigState {
+  AuthVerifyOneTimePasswordState(
       {super.message, required super.otpBase32, required super.otpAuthUrl});
 }
 
-class AuthOtpValidate extends AuthState {
+class AuthValidateOneTimePasswordState extends AuthState {
   final String userId;
 
-  const AuthOtpValidate({super.message, required this.userId});
+  const AuthValidateOneTimePasswordState({super.message, required this.userId});
 
   @override
   List<Object?> get props => [message, userId];
 }
 
-class AuthRecoveringAccountUsernameStep extends AuthUnauthenticated {
+class AuthRecoverAccountUsernameStepState extends AuthUnauthenticatedState {
   final String username;
   final bool passwordForgotten;
 
-  AuthRecoveringAccountUsernameStep(
+  AuthRecoverAccountUsernameStepState(
       {super.message, required this.username, required this.passwordForgotten});
 
   @override
   List<Object?> get props => [message, username, passwordForgotten];
 }
 
-class AuthRecoveringAccountWithOtpDisabled
-    extends AuthRecoveringAccountUsernameStep {
-  AuthRecoveringAccountWithOtpDisabled(
+class AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState
+    extends AuthRecoverAccountUsernameStepState {
+  AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState(
       {super.message,
       required super.username,
       required super.passwordForgotten});
 }
 
-class AuthRecoveringAccountWithOtpEnabledAndUsingPassword
-    extends AuthRecoveringAccountUsernameStep {
-  AuthRecoveringAccountWithOtpEnabledAndUsingPassword(
+class AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndPasswordState
+    extends AuthRecoverAccountUsernameStepState {
+  AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndPasswordState(
       {super.message,
       required super.username,
       required super.passwordForgotten});
 }
 
-class AuthRecoveringAccountWithOtpEnabledAndUsingOtp
-    extends AuthRecoveringAccountUsernameStep {
-  AuthRecoveringAccountWithOtpEnabledAndUsingOtp(
+class AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState
+    extends AuthRecoverAccountUsernameStepState {
+  AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState(
       {super.message,
       required super.username,
       required super.passwordForgotten});
