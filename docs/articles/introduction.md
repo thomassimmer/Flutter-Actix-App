@@ -1,3 +1,5 @@
+Available at: https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-a-beginners-journey-92cbb893c2f9
+
 # Building a Cross-Platform App with Flutter and Rust: A Beginner’s Journey
 
 ## Context

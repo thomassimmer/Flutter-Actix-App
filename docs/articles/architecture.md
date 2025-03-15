@@ -1,3 +1,5 @@
+Available at: https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-clean-architecture-193c26599154
+
 # Building a Cross-Platform App with Flutter and Rust: Clean Architecture
 
 ## Introduction
