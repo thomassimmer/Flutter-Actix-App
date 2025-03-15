@@ -7,6 +7,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
 
-  setup_service_locator();
+  setupServiceLocator();
   runApp(FlutterActixApp());
 }

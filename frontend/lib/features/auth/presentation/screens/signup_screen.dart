@@ -19,10 +19,10 @@ import 'package:go_router/go_router.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
-  _SignupScreenState createState() => _SignupScreenState();
+  SignupScreenState createState() => SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen>
+class SignupScreenState extends State<SignupScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();

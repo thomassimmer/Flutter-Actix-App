@@ -14,10 +14,10 @@ import 'package:go_router/go_router.dart';
 
 class RecoverAccountScreen extends StatefulWidget {
   @override
-  _RecoverAccountScreenState createState() => _RecoverAccountScreenState();
+  RecoverAccountScreenState createState() => RecoverAccountScreenState();
 }
 
-class _RecoverAccountScreenState extends State<RecoverAccountScreen>
+class RecoverAccountScreenState extends State<RecoverAccountScreen>
     with SingleTickerProviderStateMixin {
   bool _isAuthenticated = false;
 
@@ -115,7 +115,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
   Widget _buildUsernameStepView(
       BuildContext context, AuthRecoverAccountUsernameStepState state) {
     // Reuse the username that the user wrote on the login screen
-    final TextEditingController _usernameController =
+    final TextEditingController usernameController =
         TextEditingController(text: state.username);
 
     return Column(children: [
@@ -129,7 +129,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 16),
       CustomTextField(
-        controller: _usernameController,
+        controller: usernameController,
         label: AppLocalizations.of(context)!.username,
       ),
       SizedBox(height: 24),
@@ -138,7 +138,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(
             AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent(
-                username: _usernameController.text,
+                username: usernameController.text,
                 passwordForgotten: state.passwordForgotten),
           );
         },
@@ -150,8 +150,8 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
 
   Widget _buildRecoveryCodeAndPasswordView(
       BuildContext context, AuthRecoverAccountUsernameStepState state) {
-    final TextEditingController _passwordController = TextEditingController();
-    final TextEditingController _recoveryCodeController =
+    final TextEditingController passwordController = TextEditingController();
+    final TextEditingController recoveryCodeController =
         TextEditingController();
 
     return Column(children: [
@@ -165,7 +165,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 16),
       CustomTextField(
-        controller: _passwordController,
+        controller: passwordController,
         label: AppLocalizations.of(context)!.password,
       ),
       SizedBox(height: 16),
@@ -174,7 +174,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 16),
       CustomTextField(
-        controller: _recoveryCodeController,
+        controller: recoveryCodeController,
         label: AppLocalizations.of(context)!.recoveryCode,
       ),
       SizedBox(height: 24),
@@ -184,8 +184,8 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
           BlocProvider.of<AuthBloc>(context).add(
             AuthRecoverAccountWithTwoFactorAuthenticationAndPasswordEvent(
                 username: state.username,
-                password: _passwordController.text,
-                recoveryCode: _recoveryCodeController.text),
+                password: passwordController.text,
+                recoveryCode: recoveryCodeController.text),
           );
         },
         isPrimary: true,
@@ -196,7 +196,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
 
   Widget _buildRecoveryCodeView(
       BuildContext context, AuthRecoverAccountUsernameStepState state) {
-    final TextEditingController _recoveryCodeController =
+    final TextEditingController recoveryCodeController =
         TextEditingController();
 
     return Column(children: [
@@ -210,7 +210,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 16),
       CustomTextField(
-        controller: _recoveryCodeController,
+        controller: recoveryCodeController,
         label: AppLocalizations.of(context)!.recoveryCode,
       ),
       SizedBox(height: 24),
@@ -220,7 +220,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
           BlocProvider.of<AuthBloc>(context).add(
             AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
                 username: state.username,
-                recoveryCode: _recoveryCodeController.text),
+                recoveryCode: recoveryCodeController.text),
           );
         },
         isPrimary: true,
@@ -231,9 +231,9 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
 
   Widget _buildRecoveryCodeAndOneTimePasswordView(
       BuildContext context, AuthRecoverAccountUsernameStepState state) {
-    final TextEditingController _recoveryCodeController =
+    final TextEditingController recoveryCodeController =
         TextEditingController();
-    final TextEditingController _otpController = TextEditingController();
+    final TextEditingController otpController = TextEditingController();
 
     return Column(children: [
       Text(
@@ -246,7 +246,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 16),
       CustomTextField(
-        controller: _recoveryCodeController,
+        controller: recoveryCodeController,
         label: AppLocalizations.of(context)!.recoveryCode,
       ),
       SizedBox(height: 16),
@@ -255,7 +255,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 16),
       CustomTextField(
-        controller: _otpController,
+        controller: otpController,
         label: AppLocalizations.of(context)!.validationCode,
       ),
       SizedBox(height: 24),
@@ -265,7 +265,7 @@ class _RecoverAccountScreenState extends State<RecoverAccountScreen>
           BlocProvider.of<AuthBloc>(context).add(
             AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
                 username: state.username,
-                recoveryCode: _recoveryCodeController.text),
+                recoveryCode: recoveryCodeController.text),
           );
         },
         isPrimary: true,

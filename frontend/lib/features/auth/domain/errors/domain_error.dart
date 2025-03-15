@@ -2,66 +2,83 @@ import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 
 class ShouldLogoutError extends DomainError {}
 
-class RefreshTokenExpiredDomainError extends ShouldLogoutError {
+class RefreshTokenExpiredDomainError implements ShouldLogoutError {
+  @override
   final String messageKey = 'refreshTokenExpiredError';
 }
 
-class InvalidRefreshTokenDomainError extends ShouldLogoutError {
+class InvalidRefreshTokenDomainError implements ShouldLogoutError {
+  @override
   final String messageKey = 'refreshTokenExpiredError';
 }
 
-class RefreshTokenNotFoundDomainError extends ShouldLogoutError {
+class RefreshTokenNotFoundDomainError implements ShouldLogoutError {
+  @override
   final String messageKey = 'refreshTokenExpiredError';
 }
 
-class InvalidUsernameOrCodeOrRecoveryCodeDomainError extends DomainError {
+class InvalidUsernameOrCodeOrRecoveryCodeDomainError implements DomainError {
+  @override
   final String messageKey = 'invalidUsernameOrCodeOrRecoveryCodeError';
 }
 
-class TwoFactorAuthenticationNotEnabledDomainError extends DomainError {
+class TwoFactorAuthenticationNotEnabledDomainError implements DomainError {
+  @override
   final String messageKey = 'twoFactorAuthenticationNotEnabledError';
 }
 
-class InvalidUsernameOrRecoveryCodeDomainError extends DomainError {
+class InvalidUsernameOrRecoveryCodeDomainError implements DomainError {
+  @override
   final String messageKey = 'invalidUsernameOrRecoveryCodeError';
 }
 
-class InvalidUsernameOrPasswordOrRecoveryCodeDomainError extends DomainError {
+class InvalidUsernameOrPasswordOrRecoveryCodeDomainError
+    implements DomainError {
+  @override
   final String messageKey = 'invalidUsernameOrPasswordOrRecoveryCodeError';
 }
 
-class UserNotFoundDomainError extends DomainError {
+class UserNotFoundDomainError implements DomainError {
+  @override
   final String messageKey = 'userNotFoundError';
 }
 
-class InvalidOneTimePasswordDomainError extends DomainError {
+class InvalidOneTimePasswordDomainError implements DomainError {
+  @override
   final String messageKey = 'invalidOneTimePasswordError';
 }
 
-class InvalidUsernameOrPasswordDomainError extends DomainError {
+class InvalidUsernameOrPasswordDomainError implements DomainError {
+  @override
   final String messageKey = 'invalidUsernameOrPasswordError';
 }
 
-class PasswordMustBeChangedDomainError extends DomainError {
+class PasswordMustBeChangedDomainError implements DomainError {
+  @override
   final String messageKey = 'passwordMustBeChangedError';
 }
 
-class UserAlreadyExistingDomainError extends DomainError {
+class UserAlreadyExistingDomainError implements DomainError {
+  @override
   final String messageKey = 'userAlreadyExistingError';
 }
 
-class PasswordTooShortError extends DomainError {
+class PasswordTooShortError implements DomainError {
+  @override
   final String messageKey = 'passwordTooShortError';
 }
 
-class PasswordNotComplexEnoughError extends DomainError {
+class PasswordNotComplexEnoughError implements DomainError {
+  @override
   final String messageKey = 'passwordNotComplexEnough';
 }
 
-class UsernameWrongSizeError extends DomainError {
+class UsernameWrongSizeError implements DomainError {
+  @override
   final String messageKey = 'usernameNotRespectingRulesError';
 }
 
-class UsernameNotRespectingRulesError extends DomainError {
+class UsernameNotRespectingRulesError implements DomainError {
+  @override
   final String messageKey = 'usernameWrongSizeError';
 }

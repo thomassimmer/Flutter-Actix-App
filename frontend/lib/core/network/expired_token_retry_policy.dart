@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutteractixapp/features/auth/data/services/auth_service.dart';
 import 'package:http_interceptor/http_interceptor.dart';
 
-class ExpiredTokenRetryPolicy extends RetryPolicy {
+class ExpiredTokenRetryPolicy implements RetryPolicy {
   final AuthService authService;
 
   ExpiredTokenRetryPolicy({required this.authService});
@@ -28,4 +29,17 @@ class ExpiredTokenRetryPolicy extends RetryPolicy {
 
     return false;
   }
+
+  @override
+  FutureOr<bool> shouldAttemptRetryOnException(
+          Exception reason, BaseRequest request) =>
+      false;
+
+  @override
+  Duration delayRetryAttemptOnException({required int retryAttempt}) =>
+      Duration.zero;
+
+  @override
+  Duration delayRetryAttemptOnResponse({required int retryAttempt}) =>
+      Duration.zero;
 }
