@@ -7,14 +7,15 @@ import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_events.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
 import 'package:reallystick/features/auth/presentation/widgets/button.dart';
+import 'package:reallystick/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:reallystick/features/profile/presentation/bloc/profile_states.dart';
 
-class RootScreen extends StatefulWidget {
-  @override
-  RootScreenState createState() => RootScreenState();
-}
+class RootScreen extends StatelessWidget {
+  final Widget child;
 
-class RootScreenState extends State<RootScreen> {
-  static int _calculateSelectedIndex(BuildContext context) {
+  const RootScreen({required this.child});
+
+  int _calculateSelectedIndex(BuildContext context) {
     final String location = GoRouterState.of(context).uri.path;
     if (location.startsWith('/habits')) {
       return 0;
@@ -48,29 +49,39 @@ class RootScreenState extends State<RootScreen> {
       }
     }
 
-    return Scaffold(
-        appBar: AppBar(
-          title: Row(
-            children: [
-              Text(
-                'Really',
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                'Stick',
-                style: TextStyle(color: Colors.grey),
-              ),
-              Spacer(),
-              BlocListener<AuthBloc, AuthState>(
-                listener: (context, state) {
-                  if (state is AuthUnauthenticated) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Successfully logged out')),
-                    );
-                    context.go('/');
-                  }
-                },
-                child: Button(
+    return MultiBlocListener(
+        listeners: [
+          BlocListener<AuthBloc, AuthState>(listener: (context, state) {
+            if (state is AuthUnauthenticated) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Successfully logged out')),
+              );
+              context.go('/');
+            }
+          }),
+          BlocListener<ProfileBloc, ProfileState>(listener: (context, state) {
+            if (state is ProfileUnauthenticated) {
+              if (state.message != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message!)),
+                );
+              }
+            }
+          }),
+        ],
+        child: Scaffold(
+            appBar: AppBar(
+              title: Row(children: [
+                Text(
+                  'Really',
+                  style: TextStyle(color: Colors.white),
+                ),
+                Text(
+                  'Stick',
+                  style: TextStyle(color: Colors.grey),
+                ),
+                Spacer(),
+                Button(
                   text: 'Logout',
                   onPressed: () {
                     BlocProvider.of<AuthBloc>(context)
@@ -79,98 +90,100 @@ class RootScreenState extends State<RootScreen> {
                   isPrimary: true,
                   size: ButtonSize.small,
                 ),
-              )
-            ],
-          ),
-          backgroundColor: AppTheme.lightTheme.primaryColor,
-          systemOverlayStyle: SystemUiOverlayStyle(
-            systemNavigationBarColor: Colors.green,
-          ),
-        ),
-        body: Row(
-          children: [
-            if (isLargeScreen) ...[
-              NavigationRail(
-                backgroundColor: AppTheme.lightTheme.primaryColor,
-                unselectedLabelTextStyle: TextStyle(color: Colors.white),
-                selectedLabelTextStyle: TextStyle(color: Colors.blue),
-                selectedIconTheme: IconThemeData(color: Colors.blue),
-                unselectedIconTheme: IconThemeData(color: Colors.white),
-                groupAlignment: 0.0,
-                selectedIndex: _calculateSelectedIndex(context),
-                onDestinationSelected: onItemTapped,
-                labelType: NavigationRailLabelType.all,
-                destinations: const <NavigationRailDestination>[
-                  NavigationRailDestination(
-                    icon: Icon(Icons.check_circle_outline),
-                    selectedIcon: Icon(Icons.check_circle),
-                    label: Text('Habits'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.flag_outlined),
-                    selectedIcon: Icon(Icons.flag),
-                    label: Text('Challenges'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.message_outlined),
-                    selectedIcon: Icon(Icons.message),
-                    label: Text('Messages'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.person_outline),
-                    selectedIcon: Icon(Icons.person),
-                    label: Text('Profile'),
+              ]),
+              backgroundColor: AppTheme.lightTheme.primaryColor,
+              systemOverlayStyle: SystemUiOverlayStyle(
+                systemNavigationBarColor: Colors.green,
+              ),
+            ),
+            body: Row(
+              children: [
+                if (isLargeScreen) ...[
+                  NavigationRail(
+                    backgroundColor: AppTheme.lightTheme.primaryColor,
+                    unselectedLabelTextStyle: TextStyle(color: Colors.white),
+                    selectedLabelTextStyle: TextStyle(color: Colors.blue),
+                    selectedIconTheme: IconThemeData(color: Colors.blue),
+                    unselectedIconTheme: IconThemeData(color: Colors.white),
+                    groupAlignment: 0.0,
+                    selectedIndex: _calculateSelectedIndex(context),
+                    onDestinationSelected: onItemTapped,
+                    labelType: NavigationRailLabelType.all,
+                    destinations: const <NavigationRailDestination>[
+                      NavigationRailDestination(
+                        icon: Icon(Icons.check_circle_outline),
+                        selectedIcon: Icon(Icons.check_circle),
+                        label: Text('Habits'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.flag_outlined),
+                        selectedIcon: Icon(Icons.flag),
+                        label: Text('Challenges'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.message_outlined),
+                        selectedIcon: Icon(Icons.message),
+                        label: Text('Messages'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.person_outline),
+                        selectedIcon: Icon(Icons.person),
+                        label: Text('Profile'),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ],
-          ],
-        ),
-        bottomNavigationBar: isLargeScreen
-            ? null
-            : NavigationBarTheme(
-                data: NavigationBarThemeData(
-                  iconTheme: WidgetStateProperty.resolveWith<IconThemeData>(
-                    (Set<WidgetState> states) =>
-                        states.contains(WidgetState.selected)
-                            ? const IconThemeData(color: Colors.blue)
-                            : const IconThemeData(color: Colors.white),
-                  ),
-                  labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
-                    (Set<WidgetState> states) =>
-                        states.contains(WidgetState.selected)
-                            ? const TextStyle(color: Colors.blue)
-                            : const TextStyle(color: Colors.white),
-                  ),
+                Expanded(
+                  child: this.child,
                 ),
-                child: NavigationBar(
-                  backgroundColor: AppTheme.lightTheme.primaryColor,
-                  indicatorColor: Colors.white,
-                  selectedIndex: _calculateSelectedIndex(context),
-                  onDestinationSelected: onItemTapped,
-                  destinations: const <NavigationDestination>[
-                    NavigationDestination(
-                      icon: Icon(Icons.check_circle_outline),
-                      selectedIcon: Icon(Icons.check_circle),
-                      label: 'Habits',
+              ],
+            ),
+            bottomNavigationBar: isLargeScreen
+                ? null
+                : NavigationBarTheme(
+                    data: NavigationBarThemeData(
+                      iconTheme: WidgetStateProperty.resolveWith<IconThemeData>(
+                        (Set<WidgetState> states) =>
+                            states.contains(WidgetState.selected)
+                                ? const IconThemeData(color: Colors.blue)
+                                : const IconThemeData(color: Colors.white),
+                      ),
+                      labelTextStyle:
+                          WidgetStateProperty.resolveWith<TextStyle>(
+                        (Set<WidgetState> states) =>
+                            states.contains(WidgetState.selected)
+                                ? const TextStyle(color: Colors.blue)
+                                : const TextStyle(color: Colors.white),
+                      ),
                     ),
-                    NavigationDestination(
-                      icon: Icon(Icons.flag_outlined),
-                      selectedIcon: Icon(Icons.flag),
-                      label: 'Challenges',
+                    child: NavigationBar(
+                      backgroundColor: AppTheme.lightTheme.primaryColor,
+                      indicatorColor: Colors.white,
+                      selectedIndex: _calculateSelectedIndex(context),
+                      onDestinationSelected: onItemTapped,
+                      destinations: const <NavigationDestination>[
+                        NavigationDestination(
+                          icon: Icon(Icons.check_circle_outline),
+                          selectedIcon: Icon(Icons.check_circle),
+                          label: 'Habits',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.flag_outlined),
+                          selectedIcon: Icon(Icons.flag),
+                          label: 'Challenges',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.message_outlined),
+                          selectedIcon: Icon(Icons.message),
+                          label: 'Messages',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.person_outline),
+                          selectedIcon: Icon(Icons.person),
+                          label: 'Profile',
+                        ),
+                      ],
                     ),
-                    NavigationDestination(
-                      icon: Icon(Icons.message_outlined),
-                      selectedIcon: Icon(Icons.message),
-                      label: 'Messages',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.person_outline),
-                      selectedIcon: Icon(Icons.person),
-                      label: 'Profile',
-                    ),
-                  ],
-                ),
-              ));
+                  )));
   }
 }

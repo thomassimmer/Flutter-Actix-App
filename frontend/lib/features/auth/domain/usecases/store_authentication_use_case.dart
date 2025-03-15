@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:reallystick/core/constants/errors.dart';
 import 'package:reallystick/features/auth/domain/errors/failures.dart';
 
 class StoreAuthenticationUseCase {

@@ -5,13 +5,12 @@ import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
 import 'package:http/http.dart' as http;
+import 'package:reallystick/core/constants/repositories.dart';
 import 'package:reallystick/features/auth/data/models/otp_generation_model.dart';
 import 'package:reallystick/features/auth/data/models/user_token_model.dart';
 
-class AuthRepository {
-  final String baseUrl;
-
-  AuthRepository({required this.baseUrl});
+class AuthRepository extends ApiRepository {
+  AuthRepository({required super.baseUrl});
 
   Future<UserTokenModel> register({
     required String username,

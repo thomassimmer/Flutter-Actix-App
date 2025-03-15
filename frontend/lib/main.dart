@@ -20,18 +20,21 @@ import 'package:reallystick/features/auth/presentation/screens/unauthenticated_h
 import 'package:reallystick/features/challenges/presentation/challenges_screen.dart';
 import 'package:reallystick/features/habits/presentation/habits_screen.dart';
 import 'package:reallystick/features/messages/presentation/messages_screen.dart';
-import 'package:reallystick/features/profile/presentation/profile_screen.dart';
+import 'package:reallystick/features/profile/data/repositories/profile_repository.dart';
+import 'package:reallystick/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:reallystick/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:reallystick/features/profile/presentation/screen/profile_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
 
-  // Initialize use cases
-  final AuthRepository authRepository = AuthRepository(
-    baseUrl: '${dotenv.env['API_BASE_URL']}/api',
-  );
+  final String baseUrl = '${dotenv.env['API_BASE_URL']}/api';
 
-  // Create an instance of AuthBloc
+  final AuthRepository authRepository = AuthRepository(baseUrl: baseUrl);
+  final ProfileRepository profileRepository =
+      ProfileRepository(baseUrl: baseUrl);
+
   final authBloc = AuthBloc(
     loginUseCase: LoginUseCase(authRepository),
     signupUseCase: SignupUseCase(authRepository),
@@ -41,12 +44,17 @@ Future<void> main() async {
     removeAuthenticationUseCase: RemoveAuthenticationUseCase(),
   );
 
+  final profileBloc = ProfileBloc(
+      authBloc: authBloc,
+      getProfileUsecase: GetProfileUsecase(profileRepository));
+
   authBloc.add(AuthInitRequested());
 
   runApp(
     BlocProvider<AuthBloc>(
       create: (_) => authBloc,
-      child: MyApp(),
+      child:
+          BlocProvider<ProfileBloc>(create: (_) => profileBloc, child: MyApp()),
     ),
   );
 }
@@ -93,7 +101,7 @@ final _router = GoRouter(
       builder: (context, state) => RecoveryCodesScreen(),
     ),
     ShellRoute(
-      builder: (context, state, child) => RootScreen(),
+      builder: (context, state, child) => RootScreen(child: child),
       routes: [
         GoRoute(
           path: '/home',
