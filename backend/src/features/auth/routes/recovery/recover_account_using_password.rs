@@ -48,7 +48,7 @@ pub async fn recover_account_using_password(
     .fetch_optional(&mut *transaction)
     .await;
 
-    let user = match existing_user {
+    let mut user = match existing_user {
         Ok(existing_user) => {
             if let Some(user) = existing_user {
                 user
@@ -187,17 +187,42 @@ pub async fn recover_account_using_password(
     .execute(&mut *transaction)
     .await;
 
-    if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
-    }
-
     if insert_result.is_err() {
         return HttpResponse::InternalServerError().json(GenericResponse {
             status: "error".to_string(),
             message: "Failed to insert user token into the database".to_string(),
+        });
+    }
+
+    user.otp_verified = false;
+    user.otp_auth_url = None;
+    user.otp_base32 = None;
+
+    let updated_user_result = sqlx::query_scalar!(
+        r#"
+                UPDATE users
+                SET otp_verified = $1, otp_auth_url = $2, otp_base32 = $3
+                WHERE id = $4
+                "#,
+        user.otp_verified,
+        user.otp_auth_url,
+        user.otp_base32,
+        user.id
+    )
+    .fetch_optional(&mut *transaction)
+    .await;
+
+    if updated_user_result.is_err() {
+        return HttpResponse::InternalServerError().json(GenericResponse {
+            status: "error".to_string(),
+            message: "Failed to update user into the database".to_string(),
+        });
+    }
+
+    if (transaction.commit().await).is_err() {
+        return HttpResponse::InternalServerError().json(GenericResponse {
+            status: "error".to_string(),
+            message: "Failed to commit transaction".to_string(),
         });
     }
 

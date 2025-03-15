@@ -48,7 +48,7 @@ async fn registered_user_can_access_profile_information() {
     let (access_token, _, _) = user_signs_up(&app).await;
 
     // User can access a route protected by token authentication
-    user_has_access_to_protected_route(&app, access_token).await;
+    user_has_access_to_protected_route(&app, &access_token).await;
 }
 
 #[tokio::test]

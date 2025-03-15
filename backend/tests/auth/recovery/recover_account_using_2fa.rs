@@ -14,8 +14,8 @@ use crate::profile::profile::user_has_access_to_protected_route;
 
 pub async fn user_recovers_account_using_2fa(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
-    recovery_code: String,
-    code: String,
+    recovery_code: &str,
+    code: &str,
 ) -> (String, String) {
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-2fa")
@@ -55,10 +55,9 @@ async fn user_can_recover_account_using_2fa() {
     let code = totp.generate_current().unwrap();
 
     for recovery_code in recovery_codes {
-        let (access_token, _) =
-            user_recovers_account_using_2fa(&app, recovery_code.clone(), code.clone()).await;
+        let (access_token, _) = user_recovers_account_using_2fa(&app, &recovery_code, &code).await;
 
-        user_has_access_to_protected_route(&app, access_token).await;
+        user_has_access_to_protected_route(&app, &access_token).await;
     }
 }
 
@@ -179,10 +178,9 @@ async fn user_cannot_recover_account_using_2fa_using_code_twice() {
     )
     .unwrap();
     let code = totp.generate_current().unwrap();
-    let (access_token, _) =
-        user_recovers_account_using_2fa(&app, recovery_codes[0].clone(), code.clone()).await;
+    let (access_token, _) = user_recovers_account_using_2fa(&app, &recovery_codes[0], &code).await;
 
-    user_has_access_to_protected_route(&app, access_token).await;
+    user_has_access_to_protected_route(&app, &access_token).await;
 
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-2fa")
