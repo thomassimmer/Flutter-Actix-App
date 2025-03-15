@@ -132,7 +132,7 @@ async fn user_cannot_login_after_recover_account_using_old_password() {
         .insert_header(ContentType::json())
         .set_json(&serde_json::json!({
         "username": "testusername",
-        "password": "password",
+        "password": "password1_",
         }))
         .to_request();
     let response = test::call_service(&app, req).await;

@@ -42,7 +42,7 @@ pub async fn user_refreshes_token(
 async fn user_can_refresh_token() {
     let app = spawn_app().await;
     user_signs_up(&app).await;
-    let (_, refresh_token) = user_logs_in(&app, "testusername", "password").await;
+    let (_, refresh_token) = user_logs_in(&app, "testusername", "password1_").await;
     let access_token = user_refreshes_token(&app, &refresh_token).await;
 
     user_has_access_to_protected_route(&app, &access_token).await;
@@ -108,7 +108,7 @@ async fn access_token_becomes_expired_after_15_minutes() {
 async fn refresh_token_becomes_expired_after_7_days() {
     let app = spawn_app().await;
     user_signs_up(&app).await;
-    let (_, refresh_token) = user_logs_in(&app, "testusername", "password").await;
+    let (_, refresh_token) = user_logs_in(&app, "testusername", "password1_").await;
 
     let access_token = user_refreshes_token(&app, &refresh_token).await;
     user_has_access_to_protected_route(&app, &access_token).await;

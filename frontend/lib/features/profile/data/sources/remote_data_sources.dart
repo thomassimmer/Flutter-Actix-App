@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:flutteractixapp/core/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
+import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/profile/data/models/user_model.dart';
 import 'package:flutteractixapp/features/profile/data/models/user_request_model.dart';
 import 'package:http_interceptor/http_interceptor.dart';
@@ -97,6 +98,13 @@ class ProfileRemoteDataSource {
     }
 
     if (response.statusCode == 401) {
+      if (responseCode == 'PASSWORD_TOO_SHORT') {
+        throw PasswordTooShortError();
+      }
+      if (responseCode == 'PASSWORD_TOO_WEAK') {
+        throw PasswordNotComplexEnoughError();
+      }
+
       throw UnauthorizedError();
     }
 
@@ -141,6 +149,14 @@ class ProfileRemoteDataSource {
       if (responseCode == 'INVALID_USERNAME_OR_PASSWORD') {
         throw InvalidUsernameOrPasswordError();
       }
+
+      if (responseCode == 'PASSWORD_TOO_SHORT') {
+        throw PasswordTooShortError();
+      }
+      if (responseCode == 'PASSWORD_TOO_WEAK') {
+        throw PasswordNotComplexEnoughError();
+      }
+
       throw UnauthorizedError();
     }
 

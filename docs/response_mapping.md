@@ -17,13 +17,15 @@
 | 200         | USER_LOGS_IN_WITH_OTP_ENABLED                 |            |              |                   |
 | 201         | USER_SIGNED_UP                                |            |              |                   |
 | 401         | ACCESS_TOKEN_EXPIRED                          |            |              |                   |
-| 401         | REFRESH_TOKEN_EXPIRED                         |            |              |                   |
 | 401         | INVALID_ACCESS_TOKEN                          |            |              |                   |
 | 401         | INVALID_REFRESH_TOKEN                         |            |              |                   |
 | 401         | INVALID_USERNAME_OR_CODE_OR_RECOVERY_CODE     |            |              |                   |
 | 401         | INVALID_USERNAME_OR_PASSWORD                  |            |              |                   |
 | 401         | INVALID_USERNAME_OR_PASSWORD_OR_RECOVERY_CODE |            |              |                   |
 | 401         | INVALID_USERNAME_OR_RECOVERY_CODE             |            |              |                   |
+| 401         | REFRESH_TOKEN_EXPIRED                         |            |              |                   |
+| 401         | PASSWORD_TOO_SHORT                            |            |              |                   |
+| 401         | PASSWORD_TOO_WEAK                             |            |              |                   |
 | 403         | PASSWORD_MUST_BE_CHANGED                      |            |              |                   |
 | 403         | PASSWORD_NOT_EXPIRED                          |            |              |                   |
 | 403         | TWO_FACTOR_AUTHENTICATION_NOT_ENABLED         |            |              |                   |

@@ -16,11 +16,11 @@ pub async fn user_signs_up(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
 ) -> (String, String, Vec<String>) {
     let req = test::TestRequest::post()
-        .uri("/api/auth/register")
+        .uri("/api/auth/signup")
         .insert_header(ContentType::json())
         .set_json(&serde_json::json!({
         "username": "testusername",
-        "password": "password",
+        "password": "password1_",
         "locale": "en",
         "theme": "dark",
         }))
@@ -102,11 +102,11 @@ async fn user_cannot_create_account_with_already_existing_username() {
     user_signs_up(&app).await;
 
     let req = test::TestRequest::post()
-        .uri("/api/auth/register")
+        .uri("/api/auth/signup")
         .insert_header(ContentType::json())
         .set_json(&serde_json::json!({
         "username": "testusername",
-        "password": "password",
+        "password": "password1_",
         "locale": "en",
         "theme": "dark",
         }))
@@ -119,4 +119,28 @@ async fn user_cannot_create_account_with_already_existing_username() {
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "USER_ALREADY_EXISTS");
+}
+
+#[tokio::test]
+async fn user_cannot_create_account_with_too_short_password() {
+    let app = spawn_app().await;
+
+    let req = test::TestRequest::post()
+        .uri("/api/auth/signup")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+        "username": "testusername",
+        "password": "password",
+        "locale": "en",
+        "theme": "dark",
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(401, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "PASSWORD_TOO_SHORT");
 }

@@ -91,7 +91,7 @@ async fn registered_user_can_validate_otp() {
         .insert_header(ContentType::json())
         .set_json(&serde_json::json!({
         "username": "testusername",
-        "password": "password",
+        "password": "password1_",
         }))
         .to_request();
     let response = test::call_service(&app, req).await;

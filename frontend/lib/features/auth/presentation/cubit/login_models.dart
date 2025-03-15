@@ -1,8 +1,5 @@
+import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:formz/formz.dart';
-
-class PasswordTooShortError implements Exception {}
-
-class PasswordNotComplexEnough implements Exception {}
 
 class Password extends FormzInput<String, Exception> {
   const Password.pure() : super.pure('');
@@ -13,12 +10,18 @@ class Password extends FormzInput<String, Exception> {
   Exception? validator(String? value) {
     if (value!.length < 8) {
       return PasswordTooShortError();
-    } else if (!RegExp(
-            r'(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]')
-        .hasMatch(value)) {
-      return PasswordNotComplexEnough();
     }
-    return null;
+
+    bool hasLetter = value.contains(RegExp(r'[A-Za-z]'));
+    bool hasDigit = value.contains(RegExp(r'\d'));
+    bool hasSpecial = value.contains(RegExp(r'[@$!%*?&_]'));
+    bool validCharacters = value.contains(RegExp(r'^[A-Za-z\d@$!%*?&_]+$'));
+
+    if (hasLetter && hasDigit && hasSpecial && validCharacters) {
+      return null;
+    }
+
+    return PasswordNotComplexEnoughError();
   }
 }
 

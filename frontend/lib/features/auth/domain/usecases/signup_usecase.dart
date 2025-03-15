@@ -8,7 +8,7 @@ class SignupUseCase {
 
   Future<UserToken> call(
       String username, String password, String locale, String theme) async {
-    return await authRepository.register(
+    return await authRepository.signup(
         username: username, password: password, locale: locale, theme: theme);
   }
 }

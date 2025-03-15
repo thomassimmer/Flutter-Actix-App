@@ -48,7 +48,7 @@ async fn user_can_recover_account_using_password() {
 
         user_verifies_otp(&app, &access_token, &otp_base32).await;
 
-        access_token = user_recovers_account_using_password(&app, &recovery_code, "password")
+        access_token = user_recovers_account_using_password(&app, &recovery_code, "password1_")
             .await
             .0;
 
@@ -88,7 +88,7 @@ async fn user_cannot_recover_account_using_password_without_2fa_enabled() {
         .set_json(&serde_json::json!({
             "username": "testusername",
             "recovery_code": "wrong_recovery_code",
-            "password": "password".to_string(),
+            "password": "password1_".to_string(),
         }))
         .to_request();
     let response = test::call_service(&app, req).await;
@@ -115,7 +115,7 @@ async fn user_cannot_recover_account_using_password_with_wrong_code() {
         .set_json(&serde_json::json!({
             "username": "testusername",
             "recovery_code": "wrong_recovery_code",
-            "password": "password".to_string(),
+            "password": "password1_".to_string(),
         }))
         .to_request();
     let response = test::call_service(&app, req).await;
@@ -145,7 +145,7 @@ async fn user_cannot_recover_account_using_password_with_wrong_username() {
         .set_json(&serde_json::json!({
             "username": "wrong_username",
             "recovery_code": recovery_codes[0],
-            "password": "password".to_string(),
+            "password": "password1_".to_string(),
         }))
         .to_request();
     let response = test::call_service(&app, req).await;
@@ -200,7 +200,7 @@ async fn user_cannot_recover_account_using_password_using_code_twice() {
     user_verifies_otp(&app, &access_token, &otp_base32).await;
 
     let (access_token, _) =
-        user_recovers_account_using_password(&app, &recovery_codes[0], "password").await;
+        user_recovers_account_using_password(&app, &recovery_codes[0], "password1_").await;
 
     user_has_access_to_protected_route(&app, &access_token).await;
 
@@ -214,7 +214,7 @@ async fn user_cannot_recover_account_using_password_using_code_twice() {
         .set_json(&serde_json::json!({
             "username": "testusername",
             "recovery_code": recovery_codes[0],
-            "password": "password".to_string(),
+            "password": "password1_".to_string(),
         }))
         .to_request();
     let response = test::call_service(&app, req).await;

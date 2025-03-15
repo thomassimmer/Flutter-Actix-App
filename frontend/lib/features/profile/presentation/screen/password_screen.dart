@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/errors/mapper.dart';
+import 'package:flutteractixapp/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
@@ -9,6 +10,10 @@ import 'package:flutteractixapp/features/profile/presentation/bloc/profile_event
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
 
 class PasswordScreen extends StatelessWidget {
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,8 +55,12 @@ class PasswordScreen extends StatelessWidget {
 
   Widget _buildSetPasswordView(
       BuildContext context, ProfileAuthenticated state) {
-    final TextEditingController _newPasswordController =
-        TextEditingController();
+    final displayPasswordError = context.select(
+      (LoginCubit cubit) => cubit.state.password.displayError,
+    );
+    final displayPasswordErrorMessage = displayPasswordError is Exception
+        ? ErrorMapper(context).mapFailureToMessage(displayPasswordError)
+        : null;
 
     return SingleChildScrollView(
         child: Column(
@@ -76,8 +85,12 @@ class PasswordScreen extends StatelessWidget {
                           child: Column(children: [
                             CustomTextField(
                               controller: _newPasswordController,
-                              label: AppLocalizations.of(context)!.newPassword,
+                              onChanged: (password) => context
+                                  .read<LoginCubit>()
+                                  .passwordChanged(password),
                               obscureText: true,
+                              label: AppLocalizations.of(context)!.newPassword,
+                              errorText: displayPasswordErrorMessage,
                             ),
                             SizedBox(height: 24),
                             Button(
@@ -88,6 +101,7 @@ class PasswordScreen extends StatelessWidget {
                                     newPassword: _newPasswordController.text,
                                   ),
                                 );
+                                _newPasswordController.text = '';
                               },
                               isPrimary: true,
                               size: ButtonSize.small,
@@ -100,10 +114,12 @@ class PasswordScreen extends StatelessWidget {
 
   Widget _buildUpdatePasswordView(
       BuildContext context, ProfileAuthenticated state) {
-    final TextEditingController _currentPasswordController =
-        TextEditingController();
-    final TextEditingController _newPasswordController =
-        TextEditingController();
+    final displayPasswordError = context.select(
+      (LoginCubit cubit) => cubit.state.password.displayError,
+    );
+    final displayPasswordErrorMessage = displayPasswordError is Exception
+        ? ErrorMapper(context).mapFailureToMessage(displayPasswordError)
+        : null;
 
     return SingleChildScrollView(
         child: Column(
@@ -135,8 +151,12 @@ class PasswordScreen extends StatelessWidget {
                             SizedBox(height: 24),
                             CustomTextField(
                               controller: _newPasswordController,
-                              label: AppLocalizations.of(context)!.newPassword,
+                              onChanged: (password) => context
+                                  .read<LoginCubit>()
+                                  .passwordChanged(password),
                               obscureText: true,
+                              label: AppLocalizations.of(context)!.newPassword,
+                              errorText: displayPasswordErrorMessage,
                             ),
                             SizedBox(height: 24),
                             Button(
@@ -149,6 +169,8 @@ class PasswordScreen extends StatelessWidget {
                                     newPassword: _newPasswordController.text,
                                   ),
                                 );
+                                _currentPasswordController.text = '';
+                                _newPasswordController.text = '';
                               },
                               isPrimary: true,
                               size: ButtonSize.small,

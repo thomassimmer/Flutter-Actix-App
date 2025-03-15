@@ -47,8 +47,8 @@ pub async fn user_can_set_password_after_account_recovery() {
     let (access_token, _) =
         user_recovers_account_without_2fa_enabled(&app, &recovery_codes[0]).await;
 
-    user_sets_password(&app, &access_token, "new_password").await;
-    user_logs_in(&app, "testusername", "new_password").await;
+    user_sets_password(&app, &access_token, "new_password1_").await;
+    user_logs_in(&app, "testusername", "new_password1_").await;
 }
 
 #[tokio::test]
@@ -61,7 +61,7 @@ pub async fn user_cannot_set_password_if_its_not_expired() {
         .insert_header((header::AUTHORIZATION, format!("Bearer {}", access_token)))
         .insert_header(ContentType::json())
         .set_json(&serde_json::json!({
-            "new_password": "new_password",
+            "new_password": "new_password1_",
         }))
         .to_request();
     let response = test::call_service(&app, req).await;

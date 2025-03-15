@@ -39,7 +39,7 @@ pub async fn user_logs_in(
 async fn user_can_login() {
     let app = spawn_app().await;
     user_signs_up(&app).await;
-    user_logs_in(&app, "testusername", "password").await;
+    user_logs_in(&app, "testusername", "password1_").await;
 }
 
 #[tokio::test]
@@ -75,7 +75,7 @@ async fn user_cannot_login_with_wrong_username() {
         .insert_header(ContentType::json())
         .set_json(&serde_json::json!({
         "username": "wrong_username",
-        "password": "password",
+        "password": "password1_",
         }))
         .to_request();
     let response = test::call_service(&app, req).await;
@@ -93,7 +93,7 @@ async fn logged_in_user_can_access_profile_information() {
     let app = spawn_app().await;
     user_signs_up(&app).await;
 
-    let (access_token, _) = user_logs_in(&app, "testusername", "password").await;
+    let (access_token, _) = user_logs_in(&app, "testusername", "password1_").await;
 
     // User can access a route protected by token authentication
     user_has_access_to_protected_route(&app, &access_token).await;

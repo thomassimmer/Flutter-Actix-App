@@ -27,3 +27,7 @@ class PasswordNotExpiredDomainError extends DomainError {}
 class InvalidRefreshTokenDomainError extends DomainError {}
 
 class RefreshTokenNotFoundDomainError extends DomainError {}
+
+class PasswordTooShortError extends DomainError {}
+
+class PasswordNotComplexEnoughError extends DomainError {}
