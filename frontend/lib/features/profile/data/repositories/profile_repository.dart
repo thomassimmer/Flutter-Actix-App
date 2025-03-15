@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:reallystick/core/constants/repositories.dart';
 import 'package:reallystick/features/profile/data/models/user_model.dart';
+import 'package:reallystick/features/profile/domain/entities/user_entity.dart';
 
 class ProfileRepository extends ApiRepository {
   ProfileRepository({required super.baseUrl});
@@ -17,6 +18,30 @@ class ProfileRepository extends ApiRepository {
       headers: {
         'Authorization': 'Bearer $accessToken',
       },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonBody = json.decode(response.body);
+
+      return UserModel.fromJson(jsonBody['user']);
+    }
+
+    throw Exception(response.body);
+  }
+
+  Future<UserModel> postProfileInformation(
+      String accessToken, UserEntity profile) async {
+    final url = Uri.parse('$baseUrl/users/me');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: json.encode({
+        'username': profile.username,
+        'locale': profile.locale,
+      }),
     );
 
     if (response.statusCode == 200) {

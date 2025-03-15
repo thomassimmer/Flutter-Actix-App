@@ -2,8 +2,8 @@ use crate::auth::helpers::token::generate_tokens;
 use crate::auth::structs::model::UserToken;
 use crate::core::helpers::mock_now::now;
 use crate::core::structs::response::GenericResponse;
+use crate::profile::structs::model::User;
 use crate::{
-    auth::structs::model::User,
     auth::structs::request::UserLoginRequest,
     auth::structs::response::{UserLoginResponse, UserLoginWhenOtpEnabledResponse},
 };

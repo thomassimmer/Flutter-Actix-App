@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reallystick/core/presentation/root_screen.dart';
 import 'package:reallystick/features/auth/data/repositories/auth_repository.dart';
@@ -22,8 +23,11 @@ import 'package:reallystick/features/habits/presentation/habits_screen.dart';
 import 'package:reallystick/features/messages/presentation/messages_screen.dart';
 import 'package:reallystick/features/profile/data/repositories/profile_repository.dart';
 import 'package:reallystick/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:reallystick/features/profile/domain/usecases/post_profile_usecase.dart';
 import 'package:reallystick/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:reallystick/features/profile/presentation/bloc/profile_states.dart';
 import 'package:reallystick/features/profile/presentation/screen/profile_screen.dart';
+import 'package:universal_io/io.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +50,8 @@ Future<void> main() async {
 
   final profileBloc = ProfileBloc(
       authBloc: authBloc,
-      getProfileUsecase: GetProfileUsecase(profileRepository));
+      getProfileUsecase: GetProfileUsecase(profileRepository),
+      postProfileUsecase: PostProfileUsecase(profileRepository));
 
   authBloc.add(AuthInitRequested());
 
@@ -142,9 +147,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      routerConfig: _router,
-    );
+    return BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
+      Locale locale = Locale(Platform.localeName); // device locale by default
+
+      if (state is ProfileAuthenticated) {
+        locale = Locale(state.profile.locale);
+      }
+
+      return MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        routerConfig: _router,
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      );
+    });
   }
 }

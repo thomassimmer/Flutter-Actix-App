@@ -11,9 +11,20 @@ pub mod auth {
     pub mod routes {
         pub mod login;
         pub mod otp;
-        pub mod profile;
         pub mod signup;
         pub mod token;
+    }
+
+    pub mod structs {
+        pub mod model;
+        pub mod request;
+        pub mod response;
+    }
+}
+
+pub mod profile {
+    pub mod routes {
+        pub mod profile;
     }
 
     pub mod structs {

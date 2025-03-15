@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use super::model::UserData;
-
 #[derive(Serialize, Debug, Deserialize)]
 pub struct UserSignupResponse {
     pub status: String,
@@ -30,12 +28,6 @@ pub struct RefreshTokenResponse {
     pub status: String,
     pub access_token: String,
     pub expires_in: u64,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct UserResponse {
-    pub status: String,
-    pub user: UserData,
 }
 
 #[derive(Serialize, Deserialize)]

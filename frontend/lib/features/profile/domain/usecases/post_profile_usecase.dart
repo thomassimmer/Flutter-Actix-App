@@ -4,14 +4,16 @@ import 'package:reallystick/features/profile/data/repositories/profile_repositor
 import 'package:reallystick/features/profile/domain/entities/user_entity.dart';
 import 'package:reallystick/features/profile/domain/errors/failures.dart';
 
-class GetProfileUsecase {
+class PostProfileUsecase {
   final ProfileRepository profileRepository;
 
-  GetProfileUsecase(this.profileRepository);
+  PostProfileUsecase(this.profileRepository);
 
-  Future<Either<UserEntity, Failure>> getProfile(String accessToken) async {
+  Future<Either<UserEntity, Failure>> postProfile(
+      String accessToken, UserEntity profile) async {
     try {
-      final result = await profileRepository.getProfileInformation(accessToken);
+      final result =
+          await profileRepository.postProfileInformation(accessToken, profile);
 
       return Left(UserEntity(username: result.username, locale: result.locale));
     } catch (e) {

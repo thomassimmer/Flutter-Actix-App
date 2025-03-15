@@ -4,6 +4,7 @@ use serde::Deserialize;
 pub struct UserRegisterRequest {
     pub username: String,
     pub password: String,
+    pub locale: String
 }
 
 #[derive(Debug, Deserialize)]
