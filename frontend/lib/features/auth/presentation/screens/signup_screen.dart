@@ -112,6 +112,15 @@ class SignupScreenState extends State<SignupScreen>
             context, ErrorMessage(displayPasswordError.messageKey))
         : null;
 
+    void triggerSignUp() {
+      BlocProvider.of<AuthBloc>(context).add(
+        AuthSignupEvent(
+            username: _usernameController.text,
+            password: _passwordController.text,
+            theme: themeData),
+      );
+    }
+
     return Column(
       children: [
         Text(
@@ -135,18 +144,12 @@ class SignupScreenState extends State<SignupScreen>
           obscureText: true,
           label: AppLocalizations.of(context)!.password,
           errorText: displayPasswordErrorMessage,
+          onFieldSubmitted: (_) => triggerSignUp(),
         ),
         SizedBox(height: 24),
         ElevatedButton(
+          onPressed: triggerSignUp,
           child: Text(AppLocalizations.of(context)!.signUp),
-          onPressed: () {
-            BlocProvider.of<AuthBloc>(context).add(
-              AuthSignupEvent(
-                  username: _usernameController.text,
-                  password: _passwordController.text,
-                  theme: themeData),
-            );
-          },
         ),
         SizedBox(height: 16),
         TextButton(

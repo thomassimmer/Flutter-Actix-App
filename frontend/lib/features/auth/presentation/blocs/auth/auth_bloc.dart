@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
@@ -39,7 +38,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       GetIt.instance<
           RecoverAccountWithTwoFactorAuthenticationAndOneTimePasswordUseCase>();
   final RecoverAccountWithoutTwoFactorAuthenticationEnabledUseCase
-      recoverAccountWithoutTwoFactorAuthenticationEnabledUseCase = GetIt.instance<
+      recoverAccountWithoutTwoFactorAuthenticationEnabledUseCase =
+      GetIt.instance<
           RecoverAccountWithoutTwoFactorAuthenticationEnabledUseCase>();
 
   AuthBloc() : super(AuthLoadingState()) {
@@ -198,7 +198,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (error) => emit(AuthRecoverAccountUsernameStepState(
             username: event.username,
             passwordForgotten: event.passwordForgotten,
-            message: ErrorMessage(error.messageKey))), (isTwoFactorAuthenticationEnabled) async {
+            message: ErrorMessage(error.messageKey))),
+        (isTwoFactorAuthenticationEnabled) async {
       if (currentState is AuthRecoverAccountUsernameStepState) {
         if (isTwoFactorAuthenticationEnabled) {
           if (currentState.passwordForgotten) {
@@ -268,8 +269,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Emitter<AuthState> emit) async {
     emit(AuthLoadingState());
 
-    final result = await recoverAccountWithoutTwoFactorAuthenticationEnabledUseCase.call(
-        username: event.username, recoveryCode: event.recoveryCode);
+    final result =
+        await recoverAccountWithoutTwoFactorAuthenticationEnabledUseCase.call(
+            username: event.username, recoveryCode: event.recoveryCode);
 
     result.fold(
         (error) => emit(

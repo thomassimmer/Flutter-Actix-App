@@ -10,6 +10,7 @@ class CustomTextField extends StatelessWidget {
   final int? maxLength;
   final String? errorText;
   final void Function(String)? onChanged;
+  final void Function(String)? onFieldSubmitted;
 
   CustomTextField(
       {required this.controller,
@@ -19,7 +20,8 @@ class CustomTextField extends StatelessWidget {
       this.obscureText = false,
       this.maxLength,
       this.errorText,
-      this.onChanged});
+      this.onChanged,
+      this.onFieldSubmitted});
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,7 @@ class CustomTextField extends StatelessWidget {
         obscureText: obscureText,
         maxLength: maxLength,
         onChanged: onChanged,
+        onFieldSubmitted: onFieldSubmitted,
         decoration: InputDecoration(
           labelText: label,
           errorMaxLines: 10,

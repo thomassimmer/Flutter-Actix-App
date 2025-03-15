@@ -55,6 +55,15 @@ class PasswordScreen extends StatelessWidget {
             context, ErrorMessage(displayPasswordError.messageKey))
         : null;
 
+    void triggerSavePassword() {
+      BlocProvider.of<ProfileBloc>(context).add(
+        ProfileSetPasswordEvent(
+          newPassword: _newPasswordController.text,
+        ),
+      );
+      _newPasswordController.text = '';
+    }
+
     return SingleChildScrollView(
         child: Center(
             child: Column(children: [
@@ -72,17 +81,11 @@ class PasswordScreen extends StatelessWidget {
           obscureText: true,
           label: AppLocalizations.of(context)!.newPassword,
           errorText: displayPasswordErrorMessage,
+          onFieldSubmitted: (_) => triggerSavePassword(),
         ),
         SizedBox(height: 24),
         ElevatedButton(
-          onPressed: () {
-            BlocProvider.of<ProfileBloc>(context).add(
-              ProfileSetPasswordEvent(
-                newPassword: _newPasswordController.text,
-              ),
-            );
-            _newPasswordController.text = '';
-          },
+          onPressed: triggerSavePassword,
           style: context.styles.buttonMedium,
           child: Text(AppLocalizations.of(context)!.verify),
         ),
@@ -99,6 +102,17 @@ class PasswordScreen extends StatelessWidget {
         ? getTranslatedMessage(
             context, ErrorMessage(displayPasswordError.messageKey))
         : null;
+
+    void triggerSavePassword() {
+      BlocProvider.of<ProfileBloc>(context).add(
+        ProfileUpdatePasswordEvent(
+          currentPassword: _currentPasswordController.text,
+          newPassword: _newPasswordController.text,
+        ),
+      );
+      _currentPasswordController.text = '';
+      _newPasswordController.text = '';
+    }
 
     return SingleChildScrollView(
         child: Center(
@@ -123,19 +137,11 @@ class PasswordScreen extends StatelessWidget {
           obscureText: true,
           label: AppLocalizations.of(context)!.newPassword,
           errorText: displayPasswordErrorMessage,
+          onFieldSubmitted: (_) => triggerSavePassword(),
         ),
         SizedBox(height: 24),
         ElevatedButton(
-          onPressed: () {
-            BlocProvider.of<ProfileBloc>(context).add(
-              ProfileUpdatePasswordEvent(
-                currentPassword: _currentPasswordController.text,
-                newPassword: _newPasswordController.text,
-              ),
-            );
-            _currentPasswordController.text = '';
-            _newPasswordController.text = '';
-          },
+          onPressed: triggerSavePassword,
           child: Text(AppLocalizations.of(context)!.save),
         ),
       ])),

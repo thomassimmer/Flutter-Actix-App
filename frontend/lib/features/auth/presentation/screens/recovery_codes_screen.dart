@@ -157,6 +157,16 @@ class RecoveryCodesScreen extends StatelessWidget {
 
   Widget _buildTwoFactorAuthenticationSetupView(BuildContext context,
       AuthGenerateTwoFactorAuthenticationConfigState state) {
+    void triggerNextAction() {
+      BlocProvider.of<AuthBloc>(context).add(
+        AuthVerifyOneTimePasswordEvent(
+          otpBase32: state.otpBase32,
+          otpAuthUrl: state.otpAuthUrl,
+          code: _otpController.text,
+        ),
+      );
+    }
+
     return Column(
       children: [
         Text(
@@ -196,18 +206,11 @@ class RecoveryCodesScreen extends StatelessWidget {
           controller: _otpController,
           label: AppLocalizations.of(context)!.validationCode,
           obscureText: true,
+          onFieldSubmitted: (_) => triggerNextAction(),
         ),
         SizedBox(height: 24),
         ElevatedButton(
-          onPressed: () {
-            BlocProvider.of<AuthBloc>(context).add(
-              AuthVerifyOneTimePasswordEvent(
-                otpBase32: state.otpBase32,
-                otpAuthUrl: state.otpAuthUrl,
-                code: _otpController.text,
-              ),
-            );
-          },
+          onPressed: triggerNextAction,
           child: Text(AppLocalizations.of(context)!.verify),
         ),
       ],

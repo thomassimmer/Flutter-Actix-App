@@ -88,6 +88,14 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
 
   Widget _buildOneTimePasswordVerificationView(
       BuildContext context, ProfileAuthenticated state) {
+    void triggerOneTimePasswordVerification() {
+      BlocProvider.of<ProfileBloc>(context).add(
+        ProfileVerifyOneTimePasswordEvent(
+          code: _otpController.text,
+        ),
+      );
+    }
+
     return SingleChildScrollView(
         child: Column(
       children: [
@@ -108,11 +116,9 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                   SizedBox(height: 16),
                   Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
-                      alignment: WrapAlignment
-                          .center, // Align the elements to the center
-                      spacing: 8.0, // Add spacing between elements
-                      direction: Axis
-                          .horizontal, // Horizontal direction for the initial layout
+                      alignment: WrapAlignment.center,
+                      spacing: 8.0,
+                      direction: Axis.horizontal,
                       children: [
                         SelectableText(AppLocalizations.of(context)!
                             .twoFASecretKey(state.profile.otpBase32!)),
@@ -139,16 +145,12 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                       controller: _otpController,
                       label: AppLocalizations.of(context)!.validationCode,
                       obscureText: true,
+                      onFieldSubmitted: (_) =>
+                          triggerOneTimePasswordVerification(),
                     ),
                     SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () {
-                        BlocProvider.of<ProfileBloc>(context).add(
-                          ProfileVerifyOneTimePasswordEvent(
-                            code: _otpController.text,
-                          ),
-                        );
-                      },
+                      onPressed: triggerOneTimePasswordVerification,
                       style: context.styles.buttonMedium,
                       child: Text(AppLocalizations.of(context)!.verify),
                     ),
