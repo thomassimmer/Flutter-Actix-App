@@ -3,7 +3,7 @@ use crate::core::structs::responses::GenericResponse;
 use crate::features::auth::helpers::password::password_is_valid;
 use crate::features::auth::helpers::token::generate_tokens;
 use crate::features::profile::helpers::device_info::get_user_agent;
-use crate::features::profile::structs::models::User;
+use crate::features::profile::helpers::profile::get_user_by_username;
 use crate::{
     features::auth::structs::requests::UserLoginRequest,
     features::auth::structs::responses::{UserLoginResponse, UserLoginWhenOtpEnabledResponse},
@@ -24,25 +24,15 @@ pub async fn log_user_in(
         Err(e) => {
             error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
     let body = body.into_inner();
     let username_lower = body.username.to_lowercase();
 
-    // Check if user already exists
-    let existing_user = sqlx::query_as!(
-        User,
-        r#"
-        SELECT *
-        FROM users
-        WHERE username = $1
-        "#,
-        username_lower,
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
+
+    let existing_user = get_user_by_username(&mut *transaction, &username_lower).await;
 
     let user = match existing_user {
         Ok(existing_user) => {
@@ -55,7 +45,7 @@ pub async fn log_user_in(
         }
         Err(e) => {
             error!("Error: {}", e);
-            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
+            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response());
         }
     };
 
@@ -81,11 +71,11 @@ pub async fn log_user_in(
     let parsed_device_info = get_user_agent(req).await;
 
     let (access_token, refresh_token) = match generate_tokens(
+        &mut *transaction,
         secret.as_bytes(),
         user.id,
         user.is_admin,
         parsed_device_info,
-        &mut transaction,
     )
     .await
     {

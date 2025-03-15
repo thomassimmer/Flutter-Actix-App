@@ -1,7 +1,8 @@
 use crate::{
     core::constants::errors::AppError,
-    features::profile::structs::{
-        models::User, requests::IsOtpEnabledRequest, responses::IsOtpEnabledResponse,
+    features::profile::{
+        helpers::profile::get_user_by_username,
+        structs::{requests::IsOtpEnabledRequest, responses::IsOtpEnabledResponse},
     },
 };
 use actix_web::{post, web, HttpResponse, Responder};
@@ -22,18 +23,7 @@ pub async fn is_otp_enabled(
         }
     };
 
-    // Check if user already exists
-    let existing_user = sqlx::query_as!(
-        User,
-        r#"
-        SELECT *
-        FROM users
-        WHERE username = $1
-        "#,
-        body.username,
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
+    let existing_user = get_user_by_username(&mut *transaction, &body.username).await;
 
     match existing_user {
         Ok(existing_user) => match existing_user {

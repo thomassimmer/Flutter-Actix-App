@@ -16,7 +16,13 @@ use crate::{
             },
             structs::{requests::UserRegisterRequest, responses::UserSignupResponse},
         },
-        profile::{helpers::device_info::get_user_agent, structs::models::User},
+        profile::{
+            helpers::{
+                device_info::get_user_agent,
+                profile::{create_user, get_user_by_username},
+            },
+            structs::models::User,
+        },
     },
 };
 
@@ -39,18 +45,8 @@ pub async fn register_user(
     let body = body.into_inner();
     let username_lower = body.username.to_lowercase();
 
-    // Check if user already exists
-    let existing_user = sqlx::query_as!(
-        User,
-        r#"
-        SELECT *
-        FROM users
-        WHERE username = $1
-        "#,
-        username_lower,
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
+
+    let existing_user = get_user_by_username(&mut *transaction, &username_lower).await;
 
     match existing_user {
         Ok(existing_user) => {
@@ -132,37 +128,7 @@ pub async fn register_user(
     };
 
     // Insert the new user into the database
-    let insert_result = sqlx::query!(
-        r#"
-        INSERT INTO users (
-            id,
-            username,
-            password,
-            otp_verified,
-            otp_base32,
-            otp_auth_url,
-            created_at,
-            updated_at,
-            recovery_codes,
-            password_is_expired,
-            is_admin
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        "#,
-        new_user.id,
-        new_user.username,
-        new_user.password,
-        new_user.otp_verified,
-        new_user.otp_base32,
-        new_user.otp_auth_url,
-        new_user.created_at,
-        new_user.updated_at,
-        new_user.recovery_codes,
-        new_user.password_is_expired,
-        new_user.is_admin,
-    )
-    .execute(&mut *transaction)
-    .await;
+    let insert_result = create_user(&mut *transaction, &new_user).await;
 
     if let Err(e) = insert_result {
         error!("Error: {}", e);
@@ -175,11 +141,11 @@ pub async fn register_user(
     let parsed_device_info = get_user_agent(req).await;
 
     let (access_token, refresh_token) = match generate_tokens(
+        &mut *transaction,
         secret.as_bytes(),
         new_user.id,
         new_user.is_admin,
         parsed_device_info,
-        &mut transaction,
     )
     .await
     {

@@ -23,16 +23,7 @@ pub async fn delete_device(
     params: web::Path<DeleteDeviceParams>,
     cached_tokens: web::Data<TokenCache>,
 ) -> impl Responder {
-    let mut transaction = match pool.begin().await {
-        Ok(t) => t,
-        Err(e) => {
-            error!("Error: {}", e);
-            return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response());
-        }
-    };
-
-    let token = get_user_token(claims.user_id, params.token_id, &mut transaction).await;
+    let token = get_user_token(&**pool, claims.user_id, params.token_id).await;
 
     match token {
         Ok(r) => {
@@ -47,7 +38,7 @@ pub async fn delete_device(
         }
     };
 
-    let result_delete_token = delete_token(params.token_id, &mut transaction).await;
+    let result_delete_token = delete_token(&**pool, params.token_id).await;
 
     if let Err(e) = result_delete_token {
         error!("Error: {}", e);
@@ -55,12 +46,6 @@ pub async fn delete_device(
     }
 
     cached_tokens.remove_key(claims.jti).await;
-
-    if let Err(e) = transaction.commit().await {
-        error!("Error: {}", e);
-        return HttpResponse::InternalServerError()
-            .json(AppError::DatabaseTransaction.to_response());
-    }
 
     HttpResponse::Ok().json(DeviceDeleteResponse {
         code: "DEVICE_DELETED".to_string(),

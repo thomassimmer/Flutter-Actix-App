@@ -18,7 +18,7 @@ use crate::{
             structs::models::Claims,
         },
         profile::{
-            helpers::profile::get_user,
+            helpers::profile::{get_user_by_id, update_user},
             structs::{requests::UpdateUserPasswordRequest, responses::UserResponse},
         },
     },
@@ -30,16 +30,7 @@ pub async fn update_password(
     pool: web::Data<PgPool>,
     request_claims: ReqData<Claims>,
 ) -> impl Responder {
-    let mut transaction = match pool.begin().await {
-        Ok(t) => t,
-        Err(e) => {
-            error!("Error: {}", e);
-            return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response());
-        }
-    };
-
-    let mut request_user = match get_user(request_claims.user_id, &mut transaction).await {
+    let mut request_user = match get_user_by_id(&**pool, request_claims.user_id).await {
         Ok(user) => match user {
             Some(user) => user,
             None => return HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
@@ -86,24 +77,7 @@ pub async fn update_password(
     request_user.password = password_hash;
     request_user.password_is_expired = false;
 
-    let updated_user_result = sqlx::query!(
-        r#"
-        UPDATE users
-        SET password = $1, password_is_expired = $2
-        WHERE id = $3
-        "#,
-        request_user.password,
-        request_user.password_is_expired,
-        request_user.id
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
-
-    if let Err(e) = transaction.commit().await {
-        error!("Error: {}", e);
-        return HttpResponse::InternalServerError()
-            .json(AppError::DatabaseTransaction.to_response());
-    }
+    let updated_user_result = update_user(&**pool, &request_user).await;
 
     match updated_user_result {
         Ok(_) => HttpResponse::Ok().json(UserResponse {

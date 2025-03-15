@@ -2,12 +2,15 @@ use crate::{
     core::constants::errors::AppError,
     features::{
         auth::{
-            helpers::token::generate_tokens,
+            helpers::token::{delete_user_tokens, generate_tokens},
             structs::{
                 requests::RecoverAccountWithout2FAEnabledRequest, responses::UserLoginResponse,
             },
         },
-        profile::{helpers::device_info::get_user_agent, structs::models::User},
+        profile::helpers::{
+            device_info::get_user_agent,
+            profile::{get_user_by_username, update_user},
+        },
     },
 };
 use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
@@ -27,25 +30,15 @@ pub async fn recover_account_without_2fa_enabled(
         Err(e) => {
             error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
     let body = body.into_inner();
     let username_lower = body.username.to_lowercase();
 
-    // Check if user already exists
-    let existing_user = sqlx::query_as!(
-        User,
-        r#"
-            SELECT *
-            FROM users
-            WHERE username = $1
-            "#,
-        username_lower,
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
+
+    let existing_user = get_user_by_username(&mut *transaction, &username_lower).await;
 
     let mut user = match existing_user {
         Ok(existing_user) => {
@@ -58,7 +51,7 @@ pub async fn recover_account_without_2fa_enabled(
         }
         Err(e) => {
             error!("Error: {}", e);
-            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
+            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response());
         }
     };
 
@@ -87,17 +80,9 @@ pub async fn recover_account_without_2fa_enabled(
                 }
             }
 
-            let updated_user_result = sqlx::query!(
-                r#"
-                UPDATE users
-                SET recovery_codes = $1
-                WHERE id = $2
-                "#,
-                new_recovery_codes.join(";"),
-                user.id
-            )
-            .fetch_optional(&mut *transaction)
-            .await;
+            user.recovery_codes = new_recovery_codes.join(";");
+
+            let updated_user_result = update_user(&mut *transaction, &user).await;
 
             if let Err(e) = updated_user_result {
                 error!("Error: {}", e);
@@ -115,14 +100,7 @@ pub async fn recover_account_without_2fa_enabled(
     }
 
     // Delete any other existing tokens for that user
-    let delete_result = sqlx::query!(
-        r#"
-        DELETE FROM user_tokens WHERE user_id = $1
-        "#,
-        user.id,
-    )
-    .execute(&mut *transaction)
-    .await;
+    let delete_result = delete_user_tokens(&mut *transaction, user.id).await;
 
     if let Err(e) = delete_result {
         error!("Error: {}", e);
@@ -132,11 +110,11 @@ pub async fn recover_account_without_2fa_enabled(
     let parsed_device_info = get_user_agent(req).await;
 
     let (access_token, refresh_token) = match generate_tokens(
+        &mut *transaction,
         secret.as_bytes(),
         user.id,
         user.is_admin,
         parsed_device_info,
-        &mut transaction,
     )
     .await
     {
@@ -150,17 +128,7 @@ pub async fn recover_account_without_2fa_enabled(
 
     user.password_is_expired = true;
 
-    let updated_user_result = sqlx::query_scalar!(
-        r#"
-        UPDATE users
-        SET password_is_expired = $1
-        WHERE id = $2
-        "#,
-        user.password_is_expired,
-        user.id
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
+    let updated_user_result = update_user(&mut *transaction, &user).await;
 
     if let Err(e) = updated_user_result {
         error!("Error: {}", e);

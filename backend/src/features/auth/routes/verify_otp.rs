@@ -1,4 +1,4 @@
-use crate::features::profile::helpers::profile::get_user;
+use crate::features::profile::helpers::profile::{get_user_by_id, update_user};
 use crate::{core::constants::errors::AppError, features::auth::structs::models::Claims};
 
 use crate::features::auth::structs::requests::VerifyOtpRequest;
@@ -20,16 +20,7 @@ pub async fn verify(
     pool: web::Data<PgPool>,
     request_claims: ReqData<Claims>,
 ) -> impl Responder {
-    let mut transaction = match pool.begin().await {
-        Ok(t) => t,
-        Err(e) => {
-            error!("Error: {}", e);
-            return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response());
-        }
-    };
-
-    let mut request_user = match get_user(request_claims.user_id, &mut transaction).await {
+    let mut request_user = match get_user_by_id(&**pool, request_claims.user_id).await {
         Ok(user) => match user {
             Some(user) => user,
             None => return HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
@@ -58,23 +49,7 @@ pub async fn verify(
 
     request_user.otp_verified = true;
 
-    let updated_user_result = sqlx::query_scalar!(
-        r#"
-        UPDATE users
-        SET otp_verified = $1
-        WHERE id = $2
-        "#,
-        request_user.otp_verified,
-        request_user.id
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
-
-    if let Err(e) = transaction.commit().await {
-        error!("Error: {}", e);
-        return HttpResponse::InternalServerError()
-            .json(AppError::DatabaseTransaction.to_response());
-    }
+    let updated_user_result = update_user(&**pool, &request_user).await;
 
     match updated_user_result {
         Ok(_) => HttpResponse::Ok().json(VerifyOtpResponse {

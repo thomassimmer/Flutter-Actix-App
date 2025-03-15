@@ -3,7 +3,7 @@ use crate::features::auth::helpers::token::generate_tokens;
 use crate::features::auth::structs::requests::ValidateOtpRequest;
 use crate::features::auth::structs::responses::UserLoginResponse;
 use crate::features::profile::helpers::device_info::get_user_agent;
-use crate::features::profile::structs::models::User;
+use crate::features::profile::helpers::profile::get_user_by_id;
 
 use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 
@@ -18,30 +18,10 @@ async fn validate(
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
 ) -> impl Responder {
-    let mut transaction = match pool.begin().await {
-        Ok(t) => t,
-        Err(e) => {
-            error!("Error: {}", e);
-            return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
-        }
-    };
-
     let body = body.into_inner();
     let user_id = body.user_id;
 
-    // Check if user already exists
-    let existing_user = sqlx::query_as!(
-        User,
-        r#"
-        SELECT *
-        FROM users
-        WHERE id = $1
-        "#,
-        user_id,
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
+    let existing_user = get_user_by_id(&**pool, user_id).await;
 
     let user = match existing_user {
         Ok(existing_user) => {
@@ -56,7 +36,7 @@ async fn validate(
         }
         Err(e) => {
             error!("Error: {}", e);
-            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
+            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response());
         }
     };
 
@@ -85,11 +65,11 @@ async fn validate(
     let parsed_device_info = get_user_agent(req).await;
 
     let (access_token, refresh_token) = match generate_tokens(
+        &**pool,
         secret.as_bytes(),
         user.id,
         user.is_admin,
         parsed_device_info,
-        &mut transaction,
     )
     .await
     {
@@ -100,12 +80,6 @@ async fn validate(
                 .json(AppError::TokenGeneration.to_response());
         }
     };
-
-    if let Err(e) = transaction.commit().await {
-        error!("Error: {}", e);
-        return HttpResponse::InternalServerError()
-            .json(AppError::DatabaseTransaction.to_response());
-    }
 
     HttpResponse::Ok().json(UserLoginResponse {
         code: "USER_LOGGED_IN_AFTER_OTP_VALIDATION".to_string(),

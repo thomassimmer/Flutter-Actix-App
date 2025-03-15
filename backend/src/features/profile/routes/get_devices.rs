@@ -25,26 +25,11 @@ pub async fn get_devices(
     pool: web::Data<PgPool>,
     cached_tokens: web::Data<TokenCache>,
 ) -> impl Responder {
-    let mut transaction = match pool.begin().await {
-        Ok(t) => t,
-        Err(e) => {
-            error!("Error: {}", e);
-            return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response());
-        }
-    };
-
-    let get_tokens_result = get_user_tokens(claims.user_id, &mut transaction).await;
+    let get_tokens_result = get_user_tokens(&**pool, claims.user_id).await;
 
     if let Err(e) = get_tokens_result {
         error!("Error: {}", e);
         return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response());
-    }
-
-    if let Err(e) = transaction.commit().await {
-        error!("Error: {}", e);
-        return HttpResponse::InternalServerError()
-            .json(AppError::DatabaseTransaction.to_response());
     }
 
     let mut devices = Vec::new();

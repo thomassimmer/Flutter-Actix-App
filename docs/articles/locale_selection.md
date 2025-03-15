@@ -478,7 +478,7 @@ where
                         }
                     };
 
-                    // Check if user already exists
+
                     let existing_user = sqlx::query_as!(
                         User,
                         r#"

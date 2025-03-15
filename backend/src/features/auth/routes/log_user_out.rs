@@ -13,28 +13,13 @@ pub async fn log_user_out(
     pool: web::Data<PgPool>,
     cached_tokens: web::Data<TokenCache>,
 ) -> impl Responder {
-    let mut transaction = match pool.begin().await {
-        Ok(t) => t,
-        Err(e) => {
-            error!("Error: {}", e);
-            return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response());
-        }
-    };
-
-    if let Err(e) = delete_token(request_claims.jti, &mut transaction).await {
+    if let Err(e) = delete_token(&**pool, request_claims.jti).await {
         error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }
 
     cached_tokens.remove_key(request_claims.jti).await;
-
-    if let Err(e) = transaction.commit().await {
-        error!("Error: {}", e);
-        return HttpResponse::InternalServerError()
-            .json(AppError::DatabaseTransaction.to_response());
-    }
 
     HttpResponse::Ok().json(GenericResponse {
         code: "LOGGED_OUT".to_string(),
