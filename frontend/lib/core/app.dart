@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutteractixapp/core/router.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
-import 'package:flutteractixapp/features/auth/presentation/cubit/login_cubit.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_login/auth_login_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
-import 'package:flutteractixapp/core/router.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/set_password/set_password_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/update_password/update_password_bloc.dart';
 import 'package:universal_io/io.dart';
 
 class FlutterActixApp extends StatelessWidget {
@@ -47,19 +49,28 @@ class FlutterActixApp extends StatelessWidget {
 
   List<BlocProvider> _createBlocProviders() {
     final authBloc = AuthBloc();
+    final authSignupFormBloc = AuthSignupFormBloc();
     final profileBloc = ProfileBloc(authBloc: authBloc);
+    final profileSetPasswordFormBloc = ProfileSetPasswordFormBloc();
+    final profileUpdatePasswordFormBloc = ProfileUpdatePasswordFormBloc();
 
     authBloc.add(AuthInitRequested());
 
     return [
-      BlocProvider<LoginCubit>(
-        create: (context) => LoginCubit(),
+      BlocProvider<AuthSignupFormBloc>(
+        create: (context) => authSignupFormBloc,
       ),
       BlocProvider<AuthBloc>(
         create: (context) => authBloc,
       ),
       BlocProvider<ProfileBloc>(
         create: (context) => profileBloc,
+      ),
+      BlocProvider<ProfileSetPasswordFormBloc>(
+        create: (context) => profileSetPasswordFormBloc,
+      ),
+      BlocProvider<ProfileUpdatePasswordFormBloc>(
+        create: (context) => profileUpdatePasswordFormBloc,
       ),
     ];
   }

@@ -83,12 +83,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (error) =>
             emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
         (userToken) async {
-      // Store tokens securely after successful login
-      await TokenStorage().saveTokens(
-        userToken.accessToken,
-        userToken.refreshToken,
-      );
-
       emit(AuthAuthenticatedAfterRegistration(
           recoveryCodes: userToken.recoveryCodes, hasVerifiedOtp: false));
     });
@@ -139,7 +133,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onLoginRequested(
+  Future<void> _onLoginRequested(
       AuthLoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
@@ -148,23 +142,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
         (error) =>
             emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
-        (userTokenOrUserId) async {
-      await userTokenOrUserId.fold(
-        (userToken) async {
-          // Store tokens securely after successful login
-          await TokenStorage().saveTokens(
-            userToken.accessToken,
-            userToken.refreshToken,
-          );
-
-          emit(AuthAuthenticatedAfterLogin(
-              hasValidatedOtp: false,
-              message: SuccessMessage("loginSuccessfull")));
-        },
-        (userId) {
-          emit(AuthOtpValidate(userId: userId));
-        },
-      );
+        (userTokenOrUserId) {
+      userTokenOrUserId.fold((userToken) {
+        emit(AuthAuthenticatedAfterLogin(
+            hasValidatedOtp: false,
+            message: SuccessMessage("loginSuccessful")));
+      }, (userId) => emit(AuthOtpValidate(userId: userId)));
     });
   }
 
@@ -178,14 +161,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (error) => emit(AuthOtpValidate(
             message: ErrorMessage(error.messageKey),
             userId: event.userId)), (userToken) async {
-      // Store tokens securely after successful login
-      await TokenStorage().saveTokens(
-        userToken.accessToken,
-        userToken.refreshToken,
-      );
-
       emit(AuthAuthenticatedAfterLogin(
-          hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
+          hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
     });
   }
 
@@ -194,7 +171,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await TokenStorage().deleteTokens();
 
     if (event.message == null) {
-      emit(AuthUnauthenticated(message: SuccessMessage('logoutSuccessfull')));
+      emit(AuthUnauthenticated(message: SuccessMessage('logoutSuccessful')));
     } else {
       emit(AuthUnauthenticated(message: event.message));
     }
@@ -254,14 +231,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (error) =>
             emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
         (userToken) async {
-      // Store tokens securely after successful login
-      await TokenStorage().saveTokens(
-        userToken.accessToken,
-        userToken.refreshToken,
-      );
-
       emit(AuthAuthenticatedAfterLogin(
-          hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
+          hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
     });
   }
 
@@ -279,14 +250,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (error) =>
             emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
         (userToken) async {
-      // Store tokens securely after successful login
-      await TokenStorage().saveTokens(
-        userToken.accessToken,
-        userToken.refreshToken,
-      );
-
       emit(AuthAuthenticatedAfterLogin(
-          hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
+          hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
     });
   }
 
@@ -302,14 +267,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (error) =>
             emit(AuthUnauthenticated(message: ErrorMessage(error.messageKey))),
         (userToken) async {
-      // Store tokens securely after successful login
-      await TokenStorage().saveTokens(
-        userToken.accessToken,
-        userToken.refreshToken,
-      );
-
       emit(AuthAuthenticatedAfterLogin(
-          hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
+          hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
     });
   }
 }
