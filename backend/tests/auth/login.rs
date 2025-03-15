@@ -3,11 +3,11 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
-use reallystick::auth::structs::response::UserLoginResponse;
+use reallystick::features::auth::structs::response::UserLoginResponse;
 
 use crate::auth::signup::user_signs_up;
-use crate::helpers::spawn_app;
 use crate::profile::profile::user_accesses_protected_route;
+use crate::helpers::spawn_app;
 
 pub async fn user_logs_in(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,

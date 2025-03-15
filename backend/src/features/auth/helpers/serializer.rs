@@ -1,4 +1,4 @@
-use crate::profile::structs::model::{User, UserData};
+use crate::features::profile::structs::model::{User, UserData};
 
 pub fn user_to_response(user: &User) -> UserData {
     UserData {

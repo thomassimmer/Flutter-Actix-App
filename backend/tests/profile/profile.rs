@@ -5,7 +5,7 @@ use actix_web::{
     http::header::ContentType,
     test, Error,
 };
-use reallystick::profile::structs::response::UserResponse;
+use reallystick::features::profile::structs::response::UserResponse;
 
 use crate::{auth::signup::user_signs_up, helpers::spawn_app};
 

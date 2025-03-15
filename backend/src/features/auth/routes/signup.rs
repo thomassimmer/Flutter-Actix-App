@@ -5,12 +5,12 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    auth::{
+    core::{helpers::mock_now::now, structs::response::GenericResponse},
+    features::auth::{
         helpers::token::generate_tokens,
         structs::{model::UserToken, request::UserRegisterRequest, response::UserSignupResponse},
     },
-    core::{helpers::mock_now::now, structs::response::GenericResponse},
-    profile::structs::model::User,
+    features::profile::structs::model::User,
 };
 
 #[post("/register")]

@@ -1,9 +1,9 @@
 use crate::{
-    auth::{
+    core::{helpers::mock_now::now, structs::response::GenericResponse},
+    features::auth::{
         helpers::token::generate_tokens,
         structs::{model::Claims, request::RefreshTokenRequest, response::RefreshTokenResponse},
     },
-    core::{helpers::mock_now::now, structs::response::GenericResponse},
 };
 use actix_web::{post, web, HttpResponse, Responder};
 use jsonwebtoken::{decode, DecodingKey, Validation};

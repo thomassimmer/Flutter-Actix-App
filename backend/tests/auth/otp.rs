@@ -3,7 +3,7 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
-use reallystick::auth::structs::response::{
+use reallystick::features::auth::structs::response::{
     DisableOtpResponse, GenerateOtpResponse, UserLoginResponse, UserLoginWhenOtpEnabledResponse,
     VerifyOtpResponse,
 };

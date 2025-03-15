@@ -2,13 +2,15 @@
 
 use std::net::TcpListener;
 
-use crate::auth::routes::login::log_user_in;
-use crate::auth::routes::otp::{disable, generate, validate, verify};
-use crate::auth::routes::signup::register_user;
-use crate::auth::routes::token::refresh_token;
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::core::routes::health_check::health_check;
-use crate::profile::routes::profile::{get_profile_information, post_profile_information};
+use crate::features::auth::routes::login::log_user_in;
+use crate::features::auth::routes::otp::{disable, generate, validate, verify};
+use crate::features::auth::routes::signup::register_user;
+use crate::features::auth::routes::token::refresh_token;
+use crate::features::profile::routes::profile::{
+    get_profile_information, post_profile_information,
+};
 use actix_cors::Cors;
 use actix_web::body::MessageBody;
 use actix_web::dev::{Server, ServiceFactory, ServiceRequest, ServiceResponse};
