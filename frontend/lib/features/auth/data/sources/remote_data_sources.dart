@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
 import 'package:http_interceptor/http_interceptor.dart';
+import 'package:reallystick/core/errors/data_error.dart';
 import 'package:reallystick/features/auth/data/models/otp_generation_model.dart';
 import 'package:reallystick/features/auth/data/models/user_token_model.dart';
 import 'package:reallystick/features/auth/data/models/user_token_request_model.dart';
@@ -18,11 +19,20 @@ class AuthRemoteDataSource {
     final response = await apiClient.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: registerUserRequestModel.toJson(),
+      body: json.encode(registerUserRequestModel.toJson()),
     );
-    final jsonBody = json.decode(response.body);
 
-    return UserTokenModel.fromJson(jsonBody);
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return UserTokenModel.fromJson(jsonBody);
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
   }
 
   Future<Either<UserTokenModel, String>> login(
@@ -31,19 +41,27 @@ class AuthRemoteDataSource {
     final response = await apiClient.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: loginUserRequestModel.toJson(),
+      body: json.encode(loginUserRequestModel.toJson()),
     );
 
-    final jsonBody = json.decode(response.body);
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
 
-    // If otp is not enabled
-    if (jsonBody.containsKey('access_token')) {
-      return Left(UserTokenModel.fromJson(jsonBody));
-    }
+        // If otp is not enabled
+        if (jsonBody.containsKey('access_token')) {
+          return Left(UserTokenModel.fromJson(jsonBody));
+        }
 
-    // If otp is enabled
-    else {
-      return Right(jsonBody['user_id']);
+        // If otp is enabled
+        else {
+          return Right(jsonBody['user_id']);
+        }
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
     }
   }
 
@@ -52,9 +70,18 @@ class AuthRemoteDataSource {
     final response = await apiClient.post(
       url,
     );
-    final jsonBody = json.decode(response.body);
 
-    return OtpGenerationModel.fromJson(jsonBody);
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return OtpGenerationModel.fromJson(jsonBody);
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
   }
 
   Future<bool> verifyOtp(VerifyOtpRequestModel verifyOtpRequestModel) async {
@@ -64,11 +91,20 @@ class AuthRemoteDataSource {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: verifyOtpRequestModel.toJson(),
+      body: json.encode(verifyOtpRequestModel.toJson()),
     );
-    final jsonBody = json.decode(response.body);
 
-    return jsonBody['otp_verified'] as bool;
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return jsonBody['otp_verified'] as bool;
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
   }
 
   Future<UserTokenModel> validateOtp(
@@ -79,11 +115,20 @@ class AuthRemoteDataSource {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: validateOtpRequestModel.toJson(),
+      body: json.encode(validateOtpRequestModel.toJson()),
     );
-    final jsonBody = json.decode(response.body);
 
-    return UserTokenModel.fromJson(jsonBody);
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return UserTokenModel.fromJson(jsonBody);
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
   }
 
   Future<bool> disableOtp({
@@ -91,8 +136,17 @@ class AuthRemoteDataSource {
   }) async {
     final url = Uri.parse('$baseUrl/auth/otp/disable');
     final response = await apiClient.get(url);
-    final jsonBody = json.decode(response.body);
 
-    return jsonBody['otp_enabled'] as bool;
+    if (response.statusCode == 200) {
+      try {
+        final jsonBody = json.decode(response.body);
+
+        return jsonBody['otp_enabled'] as bool;
+      } catch (e) {
+        throw ParsingError('Failed to parse response data: ${e.toString()}');
+      }
+    } else {
+      throw NetworkError('Failed with status code: ${response.statusCode}');
+    }
   }
 }

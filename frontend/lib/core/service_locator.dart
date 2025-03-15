@@ -37,32 +37,30 @@ void setup() {
   );
 
   // Remote Data Sources
-  sl.registerLazySingleton<AuthRemoteDataSource>(
-      () => AuthRemoteDataSource(apiClient: apiClient, baseUrl: baseUrl));
-  sl.registerLazySingleton<ProfileRemoteDataSource>(
-      () => ProfileRemoteDataSource(apiClient: apiClient, baseUrl: baseUrl));
+  sl.registerSingleton<AuthRemoteDataSource>(
+      AuthRemoteDataSource(apiClient: apiClient, baseUrl: baseUrl));
+  sl.registerSingleton<ProfileRemoteDataSource>(
+      ProfileRemoteDataSource(apiClient: apiClient, baseUrl: baseUrl));
 
   // Repositories
-  sl.registerLazySingleton<AuthRepository>(
-      () => AuthRepositoryImpl(sl<AuthRemoteDataSource>()));
-  sl.registerLazySingleton<ProfileRepository>(
-      () => ProfileRepositoryImpl(sl<ProfileRemoteDataSource>()));
+  sl.registerSingleton<AuthRepository>(
+      AuthRepositoryImpl(sl<AuthRemoteDataSource>()));
+  sl.registerSingleton<ProfileRepository>(
+      ProfileRepositoryImpl(sl<ProfileRemoteDataSource>()));
 
   // Use cases
-  sl.registerLazySingleton<LoginUseCase>(
-      () => LoginUseCase(sl<AuthRepository>()));
-  sl.registerLazySingleton<SignupUseCase>(
-      () => SignupUseCase(sl<AuthRepository>()));
-  sl.registerLazySingleton<VerifyOtpUseCase>(
-      () => VerifyOtpUseCase(sl<AuthRepository>()));
-  sl.registerLazySingleton<ValidateOtpUsecase>(
-      () => ValidateOtpUsecase(sl<AuthRepository>()));
-  sl.registerLazySingleton<GenerateOtpConfigUseCase>(
-      () => GenerateOtpConfigUseCase(sl<AuthRepository>()));
-  sl.registerLazySingleton<DisableOtpUseCase>(
-      () => DisableOtpUseCase(sl<AuthRepository>()));
-  sl.registerLazySingleton<GetProfileUsecase>(
-      () => GetProfileUsecase(sl<ProfileRepository>()));
-  sl.registerLazySingleton<PostProfileUsecase>(
-      () => PostProfileUsecase(sl<ProfileRepository>()));
+  sl.registerSingleton<LoginUseCase>(LoginUseCase(sl<AuthRepository>()));
+  sl.registerSingleton<SignupUseCase>(SignupUseCase(sl<AuthRepository>()));
+  sl.registerSingleton<VerifyOtpUseCase>(
+      VerifyOtpUseCase(sl<AuthRepository>()));
+  sl.registerSingleton<ValidateOtpUsecase>(
+      ValidateOtpUsecase(sl<AuthRepository>()));
+  sl.registerSingleton<GenerateOtpConfigUseCase>(
+      GenerateOtpConfigUseCase(sl<AuthRepository>()));
+  sl.registerSingleton<DisableOtpUseCase>(
+      DisableOtpUseCase(sl<AuthRepository>()));
+  sl.registerSingleton<GetProfileUsecase>(
+      GetProfileUsecase(sl<ProfileRepository>()));
+  sl.registerSingleton<PostProfileUsecase>(
+      PostProfileUsecase(sl<ProfileRepository>()));
 }

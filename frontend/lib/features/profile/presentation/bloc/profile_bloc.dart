@@ -33,10 +33,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onInitializeProfile(
       ProfileLoadRequested event, Emitter<ProfileState> emit) async {
-    final profile = await getProfileUsecase.call();
-
-    profile.fold((profile) => emit(ProfileAuthenticated(profile: profile)),
-        (failure) => emit(ProfileUnauthenticated(message: failure.message)));
+    try {
+      final profile = await getProfileUsecase.call();
+      emit(ProfileAuthenticated(profile: profile));
+    } catch (e) {
+      emit(ProfileUnauthenticated(message: e.toString()));
+    }
   }
 
   Future<void> _onLogoutRequested(
@@ -46,9 +48,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onProfileUpdateRequest(
       ProfileUpdateRequested event, Emitter<ProfileState> emit) async {
-    final profile = await postProfileUsecase.call(event.profile);
+    final currentState = state;
 
-    profile.fold((profile) => emit(ProfileAuthenticated(profile: profile)),
-        (failure) => emit(ProfileUnauthenticated(message: failure.message)));
+    try {
+      final profile = await postProfileUsecase.call(event.profile);
+
+      emit(ProfileAuthenticated(profile: profile));
+    } catch (e) {
+      if (currentState is ProfileAuthenticated) {
+        // Emit the previous profile with an error message
+        emit(ProfileAuthenticated(
+          profile: currentState.profile,
+          message: e.toString(),
+        ));
+      } else {
+        // Handle case where there's no previous profile data
+        emit(ProfileUnauthenticated(message: e.toString()));
+      }
+    }
   }
 }

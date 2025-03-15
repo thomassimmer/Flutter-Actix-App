@@ -10,21 +10,29 @@ class LocaleSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.selectLanguage),
-      ),
-      body: BlocBuilder<ProfileBloc, ProfileState>(
-        builder: (context, state) {
-          if (state is ProfileAuthenticated) {
-            return _buildLocaleSelectionView(context, state);
-          } else if (state is ProfileLoading) {
-            return Center(child: CircularProgressIndicator());
-          } else {
-            return Center(child: Text('Failed to load profile'));
-          }
-        },
-      ),
-    );
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.selectLanguage),
+        ),
+        body: BlocListener<ProfileBloc, ProfileState>(
+          listener: (context, state) {
+            if (state.message != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message!)),
+              );
+            }
+          },
+          child: BlocBuilder<ProfileBloc, ProfileState>(
+            builder: (context, state) {
+              if (state is ProfileAuthenticated) {
+                return _buildLocaleSelectionView(context, state);
+              } else if (state is ProfileLoading) {
+                return Center(child: CircularProgressIndicator());
+              } else {
+                return Center(child: Text('Failed to load profile'));
+              }
+            },
+          ),
+        ));
   }
 
   Widget _buildLocaleSelectionView(

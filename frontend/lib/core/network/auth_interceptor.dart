@@ -28,29 +28,23 @@ class AuthInterceptor extends InterceptorContract {
       {required BaseResponse response}) async {
     // Unauthorized, token might be expired
     if (response.statusCode == 401) {
-      bool refreshed = await authService.refreshToken();
+      await authService.refreshToken();
 
       // Retry the request with new token
-      if (refreshed) {
-        String? newAccessToken = await tokenStorage.getAccessToken();
+      String? newAccessToken = await tokenStorage.getAccessToken();
 
-        response.request!.headers['Authorization'] = 'Bearer $newAccessToken';
+      response.request!.headers['Authorization'] = 'Bearer $newAccessToken';
 
-        final retryResponse = await InterceptedClient.build(interceptors: [
-          AuthInterceptor(
-              baseUrl: baseUrl,
-              authService: authService,
-              tokenStorage: tokenStorage)
-        ]).send(response.request!);
+      final retryResponse = await InterceptedClient.build(interceptors: [
+        AuthInterceptor(
+            baseUrl: baseUrl,
+            authService: authService,
+            tokenStorage: tokenStorage)
+      ]).send(response.request!);
 
-        return retryResponse;
-      }
-
-      // Failed, refresh token might be expired
-      else {
-        await tokenStorage.deleteTokens();
-      }
+      return retryResponse;
     }
+
     return response;
   }
 }

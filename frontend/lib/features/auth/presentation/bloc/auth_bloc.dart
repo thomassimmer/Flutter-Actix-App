@@ -50,101 +50,97 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthSignupRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    // We use the device locale by default on signup
-    final result = await signupUseCase.call(
-        event.username, event.password, Platform.localeName, event.theme);
+    try {
+      // We use the device locale by default on signup
+      final userToken = await signupUseCase.call(
+          event.username, event.password, Platform.localeName, event.theme);
 
-    await result.fold(
-      (userToken) async {
-        // Store tokens securely after successful login
-        await TokenStorage().saveTokens(
-          userToken.accessToken,
-          userToken.refreshToken,
-          userToken.expiresIn,
-        );
+      // Store tokens securely after successful login
+      await TokenStorage().saveTokens(
+        userToken.accessToken,
+        userToken.refreshToken,
+        userToken.expiresIn,
+      );
 
-        emit(AuthAuthenticatedAfterRegistration(
-            recoveryCodes: userToken.recoveryCodes, hasVerifiedOtp: false));
-      },
-      (failure) {
-        emit(AuthFailure(message: failure.message));
-      },
-    );
+      emit(AuthAuthenticatedAfterRegistration(
+          recoveryCodes: userToken.recoveryCodes, hasVerifiedOtp: false));
+    } catch (e) {
+      emit(AuthFailure(message: e.toString()));
+    }
   }
 
   void _onOtpGenerationRequested(
       AuthOtpGenerationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await generateOtpConfigUseCase.call();
+    try {
+      final generatedOtpConfig = await generateOtpConfigUseCase.call();
 
-    result.fold(
-      (generatedOtpConfig) => emit(AuthOtpVerify(
+      emit(AuthOtpVerify(
           otpAuthUrl: generatedOtpConfig.otpAuthUrl,
-          otpBase32: generatedOtpConfig.otpBase32)),
-      (failure) => emit(AuthFailure(message: failure.message)),
-    );
+          otpBase32: generatedOtpConfig.otpBase32));
+    } catch (e) {
+      emit(AuthFailure(message: e.toString()));
+    }
   }
 
   void _onOtpVerificationRequested(
       AuthOtpVerificationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await verifyOtpUseCase.call(event.code);
+    try {
+      await verifyOtpUseCase.call(event.code);
 
-    result.fold(
-      (_) => emit(AuthAuthenticatedAfterRegistration(hasVerifiedOtp: true)),
-      (failure) => emit(AuthOtpVerify(
-          message: failure.message,
+      emit(AuthAuthenticatedAfterRegistration(hasVerifiedOtp: true));
+    } catch (e) {
+      emit(AuthOtpVerify(
+          message: e.toString(),
           otpAuthUrl: event.otpAuthUrl,
-          otpBase32: event.otpBase32)),
-    );
+          otpBase32: event.otpBase32));
+    }
   }
 
   void _onLoginRequested(
       AuthLoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final loginResult = await loginUseCase.call(event.username, event.password);
+    try {
+      final userOrUserId =
+          await loginUseCase.call(event.username, event.password);
 
-    await loginResult.fold(
-      (userOrUserId) async {
-        await userOrUserId.fold(
-          (userToken) async {
-            // Store tokens securely after successful login
-            await TokenStorage().saveTokens(
-              userToken.accessToken,
-              userToken.refreshToken,
-              userToken.expiresIn,
-            );
+      await userOrUserId.fold(
+        (userToken) async {
+          // Store tokens securely after successful login
+          await TokenStorage().saveTokens(
+            userToken.accessToken,
+            userToken.refreshToken,
+            userToken.expiresIn,
+          );
 
-            emit(AuthAuthenticatedAfterLogin(
-              hasValidatedOtp: false,
-            ));
-          },
-          (userId) {
-            emit(AuthOtpValidate(userId: userId));
-          },
-        );
-      },
-      (failure) {
-        emit(AuthFailure(message: failure.message));
-      },
-    );
+          emit(AuthAuthenticatedAfterLogin(
+            hasValidatedOtp: false,
+          ));
+        },
+        (userId) {
+          emit(AuthOtpValidate(userId: userId));
+        },
+      );
+    } catch (e) {
+      emit(AuthFailure(message: e.toString()));
+    }
   }
 
   void _onOtpValidationRequested(
       AuthOtpValidationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await validateOtpUsecase.call(event.userId, event.code);
+    try {
+      await validateOtpUsecase.call(event.userId, event.code);
 
-    result.fold(
-      (userTokenModel) =>
-          emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true)),
-      (failure) =>
-          emit(AuthOtpValidate(message: failure.message, userId: event.userId)),
-    );
+      emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
+    } catch (e) {
+      emit(AuthOtpValidate(message: e.toString(), userId: event.userId));
+    }
   }
 
   void _onLogoutRequested(

@@ -1,8 +1,5 @@
-import 'package:dartz/dartz.dart';
-import 'package:reallystick/core/constants/errors.dart';
 import 'package:reallystick/features/auth/data/storage/token_storage.dart';
 import 'package:reallystick/features/profile/domain/entities/user.dart';
-import 'package:reallystick/features/profile/domain/errors/failures.dart';
 import 'package:reallystick/features/profile/domain/repositories/profile_repository.dart';
 
 class GetProfileUsecase {
@@ -10,19 +7,11 @@ class GetProfileUsecase {
 
   GetProfileUsecase(this.profileRepository);
 
-  Future<Either<User, Failure>> call() async {
+  Future<User> call() async {
     final accessToken = await TokenStorage().getAccessToken();
+    final result = await profileRepository.getProfileInformation(accessToken!);
 
-    try {
-      final result =
-          await profileRepository.getProfileInformation(accessToken!);
-
-      return Left(User(
-          username: result.username,
-          locale: result.locale,
-          theme: result.theme));
-    } catch (e) {
-      return Right(ProfileFailure(message: e.toString()));
-    }
+    return User(
+        username: result.username, locale: result.locale, theme: result.theme);
   }
 }
