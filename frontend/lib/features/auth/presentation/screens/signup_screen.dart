@@ -4,10 +4,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/core/messages/message_mapper.dart';
-import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
-import 'package:flutteractixapp/core/widgets/text_button.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
@@ -49,7 +48,7 @@ class SignupScreenState extends State<SignupScreen>
               SizedBox(height: 40),
               Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
+                    color: context.colors.background,
                     border: Border.all(width: 1.0, color: Colors.blue.shade200),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -74,12 +73,11 @@ class SignupScreenState extends State<SignupScreen>
                     })),
                   )),
               SizedBox(height: 16),
-              Button(
+              ElevatedButton(
                 onPressed: () {
                   context.go('/');
                 },
-                text: AppLocalizations.of(context)!.comeBack,
-                isPrimary: false,
+                child: Text(AppLocalizations.of(context)!.comeBack),
               ),
             ]),
       SuccessfulLoginAnimation(
@@ -143,8 +141,8 @@ class SignupScreenState extends State<SignupScreen>
           errorText: displayPasswordErrorMessage,
         ),
         SizedBox(height: 24),
-        Button(
-          text: AppLocalizations.of(context)!.signUp,
+        ElevatedButton(
+          child: Text(AppLocalizations.of(context)!.signUp),
           onPressed: () {
             BlocProvider.of<AuthBloc>(context).add(
               AuthSignupEvent(
@@ -153,14 +151,13 @@ class SignupScreenState extends State<SignupScreen>
                   theme: themeData),
             );
           },
-          isPrimary: true,
         ),
         SizedBox(height: 16),
-        CustomTextButton(
+        TextButton(
           onPressed: () {
             context.go('/login');
           },
-          text: AppLocalizations.of(context)!.alreadyAnAccountLogin,
+          child: Text(AppLocalizations.of(context)!.alreadyAnAccountLogin),
         ),
       ],
     );

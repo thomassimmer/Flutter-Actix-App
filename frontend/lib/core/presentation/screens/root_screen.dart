@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/core/constants/app_colors.dart';
-import 'package:flutteractixapp/core/themes/app_theme.dart';
-import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/core/widgets/icon_with_warning.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
@@ -76,26 +73,22 @@ class RootScreen extends StatelessWidget {
                 title: Row(children: [
                   Text(
                     'Flutter',
-                    style: TextStyle(color: AppColors.primaryVariant),
+                    style: TextStyle(color: context.colors.text),
                   ),
                   Text(
                     'Actix',
-                    style: TextStyle(color: AppColors.secondary),
+                    style: TextStyle(color: context.colors.hint),
                   ),
                   Spacer(),
-                  Button(
-                    text: AppLocalizations.of(context)!.logout,
+                  ElevatedButton(
+                    child: Text(AppLocalizations.of(context)!.logout),
                     onPressed: () {
                       BlocProvider.of<AuthBloc>(context).add(AuthLogoutEvent());
                     },
-                    isPrimary: false,
-                    size: ButtonSize.small,
+                    style: context.styles.buttonSmall,
                   ),
                 ]),
-                backgroundColor: AppTheme.lightTheme.primaryColor,
-                systemOverlayStyle: SystemUiOverlayStyle(
-                  systemNavigationBarColor: Colors.green,
-                ),
+                backgroundColor: context.colors.primary,
               ),
               body: Row(
                 children: [
@@ -104,8 +97,8 @@ class RootScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.blue.shade200,
-                              Colors.blue.shade900
+                              context.colors.primary,
+                              context.colors.secondary
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -182,8 +175,8 @@ class RootScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Colors.blue.shade200,
-                                Colors.blue.shade900
+                                context.colors.primary,
+                                context.colors.secondary
                               ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
-import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
@@ -33,7 +33,7 @@ class RecoveryCodesScreen extends StatelessWidget {
               SizedBox(height: 40),
               Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
+                    color: context.colors.background,
                     border: Border.all(width: 1.0, color: Colors.blue.shade200),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -72,14 +72,12 @@ class RecoveryCodesScreen extends StatelessWidget {
                         ),
                       ))),
               SizedBox(height: 16),
-              Button(
-                onPressed: () {
-                  context.go('/');
-                },
-                text: AppLocalizations.of(context)!.home,
-                isPrimary: true,
-                size: ButtonSize.small,
-              )
+              ElevatedButton(
+                  onPressed: () {
+                    context.go('/');
+                  },
+                  child: Text(AppLocalizations.of(context)!.home),
+                  style: context.styles.buttonSmall)
             ]),
       ]),
     );
@@ -146,16 +144,14 @@ class RecoveryCodesScreen extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 16),
-          Button(
-            text: AppLocalizations.of(context)!.goToTwoFASetup,
-            onPressed: () {
-              BlocProvider.of<AuthBloc>(context).add(
-                AuthGenerateTwoFactorAuthenticationConfigEvent(),
-              );
-            },
-            size: ButtonSize.small,
-            isPrimary: true,
-          ),
+          ElevatedButton(
+              child: Text(AppLocalizations.of(context)!.goToTwoFASetup),
+              onPressed: () {
+                BlocProvider.of<AuthBloc>(context).add(
+                  AuthGenerateTwoFactorAuthenticationConfigEvent(),
+                );
+              },
+              style: context.styles.buttonSmall),
         ],
       );
     }
@@ -184,20 +180,18 @@ class RecoveryCodesScreen extends StatelessWidget {
           obscureText: true,
         ),
         SizedBox(height: 24),
-        Button(
-          text: AppLocalizations.of(context)!.signUp,
-          onPressed: () {
-            BlocProvider.of<AuthBloc>(context).add(
-              AuthVerifyOneTimePasswordEvent(
-                otpBase32: state.otpBase32,
-                otpAuthUrl: state.otpAuthUrl,
-                code: _otpController.text,
-              ),
-            );
-          },
-          isPrimary: true,
-          size: ButtonSize.small,
-        ),
+        ElevatedButton(
+            child: Text(AppLocalizations.of(context)!.signUp),
+            onPressed: () {
+              BlocProvider.of<AuthBloc>(context).add(
+                AuthVerifyOneTimePasswordEvent(
+                  otpBase32: state.otpBase32,
+                  otpAuthUrl: state.otpAuthUrl,
+                  code: _otpController.text,
+                ),
+              );
+            },
+            style: context.styles.buttonSmall),
       ],
     );
   }

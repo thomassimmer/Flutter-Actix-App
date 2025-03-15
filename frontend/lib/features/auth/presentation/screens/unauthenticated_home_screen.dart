@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
-import 'package:flutteractixapp/core/widgets/button.dart';
 import 'package:go_router/go_router.dart';
 
 class UnauthenticatedHomeScreen extends StatelessWidget {
@@ -75,21 +75,21 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 40),
-        Button(
+        ElevatedButton(
           onPressed: () {
             context.go('/login');
           },
-          text: AppLocalizations.of(context)!.logIn,
-          isPrimary: true,
+          child: Text(AppLocalizations.of(context)!.logIn),
         ),
         SizedBox(height: 16),
-        Button(
-          onPressed: () {
-            context.go('/signup');
-          },
-          text: AppLocalizations.of(context)!.signUp,
-          isPrimary: false,
-        ),
+        ElevatedButton(
+            onPressed: () {
+              context.go('/signup');
+            },
+            child: Text(AppLocalizations.of(context)!.signUp),
+            style: ButtonStyle(
+                backgroundColor:
+                    WidgetStatePropertyAll(context.colors.secondary))),
       ],
     );
   }
