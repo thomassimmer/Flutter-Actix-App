@@ -114,7 +114,7 @@ pub async fn register_user(
         otp_auth_url: None,
         created_at: now(),
         updated_at: now(),
-        recovery_codes: hashed_recovery_codes.join(","),
+        recovery_codes: hashed_recovery_codes.join(";"),
     };
 
     // Insert the new user into the database

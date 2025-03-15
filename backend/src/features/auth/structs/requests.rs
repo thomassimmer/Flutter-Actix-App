@@ -40,3 +40,9 @@ pub struct DisableOTPRequest {
 pub struct RefreshTokenRequest {
     pub refresh_token: String,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct RecoverAccountRequest {
+    pub username: String,
+    pub recovery_code: String,
+}

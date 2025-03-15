@@ -68,9 +68,9 @@ pub async fn get_profile_information(
             }
         }
 
-        Err(e) => HttpResponse::Unauthorized().json(GenericResponse {
+        Err(_) => HttpResponse::Unauthorized().json(GenericResponse {
             status: "fail".to_string(),
-            message: e.to_string(),
+            message: "Invalid access token".to_string(),
         }),
     }
 }
@@ -172,9 +172,9 @@ pub async fn post_profile_information(
             }
         }
 
-        Err(e) => HttpResponse::Unauthorized().json(GenericResponse {
+        Err(_) => HttpResponse::Unauthorized().json(GenericResponse {
             status: "fail".to_string(),
-            message: e.to_string(),
+            message: "Invalid access token".to_string(),
         }),
     }
 }

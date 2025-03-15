@@ -11,6 +11,7 @@ pub mod features {
         pub mod routes {
             pub mod login;
             pub mod otp;
+            pub mod recovery;
             pub mod signup;
             pub mod token;
         }

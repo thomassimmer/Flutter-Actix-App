@@ -1,23 +1,23 @@
-use crate::core::helpers::mock_now::now;
-use crate::core::structs::responses::GenericResponse;
-use crate::features::auth::helpers::token::generate_tokens;
-use crate::features::auth::structs::models::UserToken;
-use crate::features::profile::structs::models::User;
 use crate::{
-    features::auth::structs::requests::UserLoginRequest,
-    features::auth::structs::responses::{UserLoginResponse, UserLoginWhenOtpEnabledResponse},
+    core::{helpers::mock_now::now, structs::responses::GenericResponse},
+    features::{
+        auth::{
+            helpers::token::generate_tokens,
+            structs::{
+                models::UserToken, requests::RecoverAccountRequest, responses::UserLoginResponse,
+            },
+        },
+        profile::structs::models::User,
+    },
 };
 use actix_web::{post, web, HttpResponse, Responder};
-use argon2::{
-    password_hash::{PasswordHash, PasswordVerifier},
-    Argon2,
-};
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-#[post("/login")]
-pub async fn log_user_in(
-    body: web::Json<UserLoginRequest>,
+#[post("/recover")]
+pub async fn recover_account(
+    body: web::Json<RecoverAccountRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
 ) -> impl Responder {
@@ -38,10 +38,10 @@ pub async fn log_user_in(
     let existing_user = sqlx::query_as!(
         User,
         r#"
-        SELECT *
-        FROM users
-        WHERE username = $1
-        "#,
+            SELECT *
+            FROM users
+            WHERE username = $1
+            "#,
         username_lower,
     )
     .fetch_optional(&mut *transaction)
@@ -54,7 +54,7 @@ pub async fn log_user_in(
             } else {
                 return HttpResponse::BadRequest().json(GenericResponse {
                     status: "fail".to_string(),
-                    message: "Invalid username or password".to_string(),
+                    message: "Invalid username or recovery code".to_string(),
                 });
             }
         }
@@ -66,32 +66,61 @@ pub async fn log_user_in(
         }
     };
 
-    let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&user.password) {
-        parsed_hash
-    } else {
-        return HttpResponse::BadRequest().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Failed to retrieve hashed password".to_string(),
-        });
-    };
+    let mut is_valid = false;
 
-    let argon2 = Argon2::default();
+    for recovery_code in user.recovery_codes.split(";") {
+        let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(recovery_code) {
+            parsed_hash
+        } else {
+            return HttpResponse::BadRequest().json(GenericResponse {
+                status: "fail".to_string(),
+                message: "Failed to retrieve hashed password".to_string(),
+            });
+        };
 
-    let is_valid = argon2
-        .verify_password(body.password.as_bytes(), &parsed_hash)
-        .is_ok();
+        let argon2 = Argon2::default();
+
+        is_valid = argon2
+            .verify_password(body.recovery_code.as_bytes(), &parsed_hash)
+            .is_ok();
+
+        if is_valid {
+            // Remove recovery code in db
+            let mut new_recovery_codes = Vec::<String>::new();
+
+            for rcode in user.recovery_codes.split(";") {
+                if rcode != recovery_code {
+                    new_recovery_codes.push(rcode.to_string());
+                }
+            }
+
+            let updated_user_result = sqlx::query!(
+                r#"
+                UPDATE users
+                SET recovery_codes = $1
+                WHERE id = $2
+                "#,
+                new_recovery_codes.join(";"),
+                user.id
+            )
+            .fetch_optional(&mut *transaction)
+            .await;
+
+            if updated_user_result.is_err() {
+                return HttpResponse::InternalServerError().json(GenericResponse {
+                    status: "error".to_string(),
+                    message: "Failed to update user".to_string(),
+                });
+            }
+
+            break;
+        }
+    }
 
     if !is_valid {
         return HttpResponse::BadRequest().json(GenericResponse {
             status: "fail".to_string(),
-            message: "Invalid username or password".to_string(),
-        });
-    }
-
-    if user.otp_verified {
-        return HttpResponse::Ok().json(UserLoginWhenOtpEnabledResponse {
-            status: "success".to_string(),
-            user_id: user.id.to_string(),
+            message: "Invalid username or recovery code".to_string(),
         });
     }
 

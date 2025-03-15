@@ -23,8 +23,8 @@ pub struct UserData {
 #[derive(Debug, Deserialize, Serialize, Clone, FromRow)]
 pub struct User {
     pub id: uuid::Uuid,
-    pub username: String,
-    pub password: String,
+    pub username: String, // lowercase
+    pub password: String, // case sensitive
     pub locale: String,
     pub theme: String,
 
@@ -35,7 +35,7 @@ pub struct User {
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub updated_at: chrono::DateTime<chrono::Utc>,
 
-    pub recovery_codes: String,
+    pub recovery_codes: String, // case sensitive
 }
 
 impl User {
