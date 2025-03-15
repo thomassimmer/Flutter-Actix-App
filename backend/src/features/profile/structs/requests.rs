@@ -6,3 +6,8 @@ pub struct UserUpdateRequest {
     pub locale: String,
     pub theme: String,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct IsOtpEnabledRequest {
+    pub username: String,
+}
