@@ -3,8 +3,8 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
-use reallystick::core::structs::responses::GenericResponse;
-use reallystick::features::auth::structs::responses::{
+use flutteractixapp::core::structs::responses::GenericResponse;
+use flutteractixapp::features::auth::structs::responses::{
     DisableOtpResponse, GenerateOtpResponse, UserLoginResponse, UserLoginWhenOtpEnabledResponse,
     VerifyOtpResponse,
 };

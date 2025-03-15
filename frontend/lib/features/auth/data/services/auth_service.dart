@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:reallystick/features/auth/data/errors/data_error.dart';
-import 'package:reallystick/features/auth/data/storage/token_storage.dart';
+import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
+import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 
 class AuthService {
   final String baseUrl;

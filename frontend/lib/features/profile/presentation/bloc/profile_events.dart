@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:reallystick/features/profile/domain/entities/user.dart';
+import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 
 abstract class ProfileEvent extends Equatable {
   const ProfileEvent();

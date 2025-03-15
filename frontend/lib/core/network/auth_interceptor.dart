@@ -1,6 +1,6 @@
 import 'package:http_interceptor/http_interceptor.dart';
-import 'package:reallystick/features/auth/data/services/auth_service.dart';
-import 'package:reallystick/features/auth/data/storage/token_storage.dart';
+import 'package:flutteractixapp/features/auth/data/services/auth_service.dart';
+import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 
 class AuthInterceptor extends InterceptorContract {
   final AuthService authService;

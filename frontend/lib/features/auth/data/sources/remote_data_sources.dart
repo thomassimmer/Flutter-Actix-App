@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:dartz/dartz.dart';
+import 'package:flutteractixapp/core/errors/data_error.dart';
+import 'package:flutteractixapp/features/auth/data/models/otp_generation_model.dart';
+import 'package:flutteractixapp/features/auth/data/models/user_token_model.dart';
+import 'package:flutteractixapp/features/auth/data/models/user_token_request_model.dart';
 import 'package:http_interceptor/http_interceptor.dart';
-import 'package:reallystick/core/errors/data_error.dart';
-import 'package:reallystick/features/auth/data/models/otp_generation_model.dart';
-import 'package:reallystick/features/auth/data/models/user_token_model.dart';
-import 'package:reallystick/features/auth/data/models/user_token_request_model.dart';
 
 class AuthRemoteDataSource {
   final InterceptedClient apiClient;
@@ -67,7 +67,7 @@ class AuthRemoteDataSource {
 
   Future<OtpGenerationModel> generateOtpConfig(String accessToken) async {
     final url = Uri.parse('$baseUrl/auth/otp/generate');
-    final response = await apiClient.post(
+    final response = await apiClient.get(
       url,
     );
 

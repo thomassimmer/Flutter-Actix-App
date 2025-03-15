@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
-import 'package:reallystick/features/profile/domain/usecases/get_profile_usecase.dart';
-import 'package:reallystick/features/profile/domain/usecases/post_profile_usecase.dart';
-import 'package:reallystick/features/profile/presentation/bloc/profile_events.dart';
-import 'package:reallystick/features/profile/presentation/bloc/profile_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
+import 'package:flutteractixapp/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:flutteractixapp/features/profile/domain/usecases/post_profile_usecase.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile_events.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final AuthBloc authBloc;

@@ -1,4 +1,4 @@
-import 'package:reallystick/core/errors/data_error.dart';
+import 'package:flutteractixapp/core/errors/data_error.dart';
 
 class UnauthorizedError extends DataError {
   UnauthorizedError([String message = 'You are not authenticated']) : super();

@@ -1,5 +1,5 @@
 application:
-  host: "reallystick.com"
+  host: "flutteractixapp.com"
 database:
   host: "db"
   require_ssl: true

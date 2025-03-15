@@ -1,5 +1,5 @@
 use actix_web::test;
-use reallystick::core::structs::responses::GenericResponse;
+use flutteractixapp::core::structs::responses::GenericResponse;
 
 use crate::helpers::spawn_app;
 

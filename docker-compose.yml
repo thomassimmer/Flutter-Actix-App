@@ -1,7 +1,7 @@
 services:
   frontend:
-    container_name: reallystick_frontend
-    image: reallystick_frontend
+    container_name: flutteractixapp_frontend
+    image: flutteractixapp_frontend
     logging:
       driver: "json-file"
       options:
@@ -21,8 +21,8 @@ services:
       - FLUTTER_WEB_PORT=3000
 
   backend:
-    container_name: reallystick_backend
-    image: reallystick_backend
+    container_name: flutteractixapp_backend
+    image: flutteractixapp_backend
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -36,7 +36,7 @@ services:
       - app-network
 
   db:
-    image: reallystick_db
+    image: flutteractixapp_db
     build:
       context: ./db
       dockerfile: Dockerfile

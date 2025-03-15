@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:reallystick/core/themes/app_theme.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_events.dart';
-import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
-import 'package:reallystick/features/auth/presentation/widgets/button.dart';
-import 'package:reallystick/features/profile/presentation/bloc/profile_bloc.dart';
-import 'package:reallystick/features/profile/presentation/bloc/profile_states.dart';
+import 'package:flutteractixapp/core/themes/app_theme.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
+import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
 
 class RootScreen extends StatelessWidget {
   final Widget child;
@@ -74,11 +74,11 @@ class RootScreen extends StatelessWidget {
             appBar: AppBar(
               title: Row(children: [
                 Text(
-                  'Really',
+                  'Flutter',
                   style: TextStyle(color: Colors.white),
                 ),
                 Text(
-                  'Stick',
+                  'Actix',
                   style: TextStyle(color: Colors.grey),
                 ),
                 Spacer(),

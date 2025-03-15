@@ -5,7 +5,7 @@ application:
 database:
   host: "127.0.0.1"
   port: 5432
-  username: "reallystick"
+  username: "flutteractixapp"
   password: "password"
-  database_name: "reallystick"
+  database_name: "flutteractixapp"
   require_ssl: false

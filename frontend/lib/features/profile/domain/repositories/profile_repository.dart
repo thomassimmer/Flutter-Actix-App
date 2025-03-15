@@ -2,7 +2,7 @@
 
 import 'dart:async';
 
-import 'package:reallystick/features/profile/domain/entities/user.dart';
+import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 
 abstract class ProfileRepository {
   Future<User> getProfileInformation(String accessToken);

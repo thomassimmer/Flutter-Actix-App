@@ -1,5 +1,5 @@
-import 'package:reallystick/features/auth/data/storage/token_storage.dart';
-import 'package:reallystick/features/auth/domain/repositories/auth_repository.dart';
+import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
+import 'package:flutteractixapp/features/auth/domain/repositories/auth_repository.dart';
 
 class DisableOtpUseCase {
   final AuthRepository authRepository;

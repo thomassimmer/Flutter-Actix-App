@@ -6,14 +6,14 @@ use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::{self, ContentType};
 use actix_web::{test, Error};
 use chrono::Utc;
-use reallystick::features::auth::structs::responses::RefreshTokenResponse;
-use reallystick::core::helpers::mock_now::override_now;
-use reallystick::core::structs::responses::GenericResponse;
+use flutteractixapp::core::helpers::mock_now::override_now;
+use flutteractixapp::core::structs::responses::GenericResponse;
+use flutteractixapp::features::auth::structs::responses::RefreshTokenResponse;
 
 use crate::auth::login::user_logs_in;
 use crate::auth::signup::user_signs_up;
-use crate::profile::profile::user_has_access_to_protected_route;
 use crate::helpers::spawn_app;
+use crate::profile::profile::user_has_access_to_protected_route;
 
 pub async fn user_refreshes_token(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,

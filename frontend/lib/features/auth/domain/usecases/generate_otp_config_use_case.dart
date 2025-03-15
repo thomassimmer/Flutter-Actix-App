@@ -1,6 +1,6 @@
-import 'package:reallystick/features/auth/data/storage/token_storage.dart';
-import 'package:reallystick/features/auth/domain/entities/otp_generation.dart';
-import 'package:reallystick/features/auth/domain/repositories/auth_repository.dart';
+import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
+import 'package:flutteractixapp/features/auth/domain/entities/otp_generation.dart';
+import 'package:flutteractixapp/features/auth/domain/repositories/auth_repository.dart';
 
 class GenerateOtpConfigUseCase {
   final AuthRepository authRepository;

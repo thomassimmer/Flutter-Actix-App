@@ -875,6 +875,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "flutteractixapp"
+version = "0.1.0"
+dependencies = [
+ "actix-cors",
+ "actix-http",
+ "actix-rt",
+ "actix-web",
+ "argon2",
+ "base32 0.5.1",
+ "chrono",
+ "config",
+ "dotenv",
+ "env_logger",
+ "jsonwebtoken",
+ "lazy_static",
+ "rand",
+ "reqwest",
+ "secrecy",
+ "serde",
+ "serde-aux",
+ "serde_json",
+ "sha2",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tokio-postgres",
+ "totp-rs",
+ "uuid",
+]
+
+[[package]]
 name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1913,37 +1944,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
-]
-
-[[package]]
-name = "reallystick"
-version = "0.1.0"
-dependencies = [
- "actix-cors",
- "actix-http",
- "actix-rt",
- "actix-web",
- "argon2",
- "base32 0.5.1",
- "chrono",
- "config",
- "dotenv",
- "env_logger",
- "jsonwebtoken",
- "lazy_static",
- "rand",
- "reqwest",
- "secrecy",
- "serde",
- "serde-aux",
- "serde_json",
- "sha2",
- "sqlx",
- "thiserror",
- "tokio",
- "tokio-postgres",
- "totp-rs",
- "uuid",
 ]
 
 [[package]]
