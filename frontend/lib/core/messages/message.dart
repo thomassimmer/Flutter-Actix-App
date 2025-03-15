@@ -1,5 +1,3 @@
-// lib/core/messages/message.dart
-
 abstract class Message {}
 
 class ErrorMessage extends Message {

@@ -1,4 +1,3 @@
-// Base class for handling failures in the app.
 abstract class DataError implements Exception {}
 
 class ParsingError extends DataError {}

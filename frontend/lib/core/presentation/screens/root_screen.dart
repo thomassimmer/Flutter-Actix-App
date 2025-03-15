@@ -71,14 +71,20 @@ class RootScreen extends StatelessWidget {
           return Scaffold(
               appBar: AppBar(
                 title: Row(children: [
-                  Text('Flutter',
-                      style: context.typographies.headingSmall
-                          .copyWith(color: context.colors.background)),
-                  Text(
-                    'Actix',
-                    style: context.typographies.headingSmall
-                        .copyWith(color: context.colors.hint),
-                  ),
+                  TextButton(
+                      onPressed: () {
+                        context.go('/');
+                      },
+                      child: Row(children: [
+                        Text('Flutter',
+                            style: context.typographies.headingSmall
+                                .copyWith(color: context.colors.background)),
+                        Text(
+                          'Actix',
+                          style: context.typographies.headingSmall
+                              .copyWith(color: context.colors.hint),
+                        ),
+                      ])),
                   Spacer(),
                   ElevatedButton(
                     child: Text(AppLocalizations.of(context)!.logout),
