@@ -22,63 +22,27 @@ final router = GoRouter(
   initialLocation: '/',
   errorBuilder: (context, state) => ErrorScreen(error: state.error),
   routes: [
-    GoRoute(
-      path: '/',
-      name: 'home',
-      builder: (context, state) {
+    // ShellRoute for authenticated users
+    ShellRoute(
+      builder: (context, state, child) {
+        return RootScreen(child: child); // Main screen for authenticated users
+      },
+      redirect: (context, state) {
         final authState = context.read<AuthBloc>().state;
 
-        if (authState is AuthAuthenticatedState) {
-          return RootScreen(child: HabitsScreen());
-        } else {
-          return UnauthenticatedHomeScreen();
+        if (authState is AuthUnauthenticatedState) {
+          return '/welcome'; // Redirect unauthenticated users to welcome
         }
-      },
-    ),
-    GoRoute(
-      path: '/login',
-      name: 'login',
-      builder: (context, state) => LoginScreen(),
-      redirect: (context, state) {
-        final authState = context.read<AuthBloc>().state;
-        if (authState is AuthAuthenticatedState) {
-          return '/home';
-        }
+
         return null;
       },
-    ),
-    GoRoute(
-      path: '/signup',
-      name: 'signup',
-      builder: (context, state) => SignupScreen(),
-      redirect: (context, state) {
-        final authState = context.read<AuthBloc>().state;
-        if (authState is AuthAuthenticatedState) {
-          return '/home';
-        }
-        return null;
-      },
-    ),
-    GoRoute(
-      path: '/recovery-codes',
-      name: 'recovery-codes',
-      builder: (context, state) => RecoveryCodesScreen(),
-    ),
-    GoRoute(
-      path: '/recover-account',
-      name: 'recover-account',
-      builder: (context, state) => RecoverAccountScreen(),
-      redirect: (context, state) {
-        final authState = context.read<AuthBloc>().state;
-        if (authState is AuthAuthenticatedState) {
-          return '/home';
-        }
-        return null;
-      },
-    ),
-    ShellRoute(
-      builder: (context, state, child) => RootScreen(child: child),
       routes: [
+        GoRoute(
+          path: '/',
+          name: 'home',
+          builder: (context, state) =>
+              HabitsScreen(), // Authenticated user's home
+        ),
         GoRoute(
           path: '/habits',
           name: 'habits',
@@ -122,14 +86,63 @@ final router = GoRouter(
           ],
         ),
       ],
+    ),
+
+    // Welcome route for unauthenticated users
+    GoRoute(
+      path: '/welcome',
+      name: 'welcome',
+      builder: (context, state) =>
+          UnauthenticatedHomeScreen(), // Welcome screen for unauthenticated users
       redirect: (context, state) {
         final authState = context.read<AuthBloc>().state;
-
         if (authState is AuthAuthenticatedState) {
-          return null;
-        } else {
-          return '/';
+          return '/'; // Redirect authenticated users to home
         }
+        return null;
+      },
+    ),
+
+    // Auth routes
+    GoRoute(
+      path: '/login',
+      name: 'login',
+      builder: (context, state) => LoginScreen(),
+      redirect: (context, state) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticatedState) {
+          return '/'; // Redirect authenticated users to home
+        }
+        return null;
+      },
+    ),
+    GoRoute(
+      path: '/signup',
+      name: 'signup',
+      builder: (context, state) => SignupScreen(),
+      redirect: (context, state) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticatedState) {
+          return '/'; // Redirect authenticated users to home
+        }
+        return null;
+      },
+    ),
+    GoRoute(
+      path: '/recovery-codes',
+      name: 'recovery-codes',
+      builder: (context, state) => RecoveryCodesScreen(),
+    ),
+    GoRoute(
+      path: '/recover-account',
+      name: 'recover-account',
+      builder: (context, state) => RecoverAccountScreen(),
+      redirect: (context, state) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticatedState) {
+          return '/'; // Redirect authenticated users to home
+        }
+        return null;
       },
     ),
   ],

@@ -9,7 +9,7 @@ class Background extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [context.colors.primarySwatch, context.colors.primary],
+          colors: [context.colors.primary, context.colors.secondary],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
