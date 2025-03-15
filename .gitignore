@@ -47,3 +47,5 @@ target/
 
 # environment variable
 .env
+
+postgres_data/
