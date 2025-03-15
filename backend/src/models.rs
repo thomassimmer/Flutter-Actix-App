@@ -54,8 +54,13 @@ pub struct GenerateOTPSchema {
 
 #[derive(Debug, Deserialize)]
 pub struct VerifyOTPSchema {
-    pub user_id: String,
     pub token: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ValidateOTPSchema {
+    pub token: String,
+    pub user_id: String,
 }
 
 #[derive(Debug, Deserialize)]

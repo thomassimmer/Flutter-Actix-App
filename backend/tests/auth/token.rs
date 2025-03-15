@@ -7,7 +7,7 @@ use crate::helpers::{spawn_app, TestApp};
 
 pub async fn user_refreshes_token(app: &TestApp, client: Client, refresh_token: String) -> String {
     let response = client
-        .post(&format!("{}/auth/refresh-token", &app.address))
+        .post(&format!("{}/api/auth/refresh-token", &app.address))
         .json(&serde_json::json!({
             "refresh_token": refresh_token,
         }))

@@ -1,6 +1,7 @@
 use std::net::TcpListener;
 
 use crate::auth::routes::login::log_user_in;
+use crate::auth::routes::otp::{disable, generate, validate, verify};
 use crate::auth::routes::profile::get_profile_information;
 use crate::auth::routes::signup::register_user;
 use crate::auth::routes::token::refresh_token;
@@ -29,12 +30,25 @@ pub fn run(listener: TcpListener, configuration: Settings) -> Result<Server, std
 
     let server = HttpServer::new(move || {
         App::new()
+            .service(
+                web::scope("/api")
+                    .service(health_check)
+                    .service(
+                        web::scope("/auth")
+                            .service(register_user)
+                            .service(log_user_in)
+                            .service(refresh_token)
+                            .service(
+                                web::scope("/otp")
+                                    .service(generate)
+                                    .service(verify)
+                                    .service(validate)
+                                    .service(disable),
+                            ),
+                    )
+                    .service(web::scope("/users").service(get_profile_information)),
+            )
             // .wrap(cors)
-            .route("/health_check", web::get().to(health_check))
-            .route("/auth/register", web::post().to(register_user))
-            .route("/auth/login", web::post().to(log_user_in))
-            .route("/auth/refresh-token", web::post().to(refresh_token))
-            .route("/users/me", web::get().to(get_profile_information))
             .app_data(web::Data::new(connection_pool.clone()))
             .app_data(web::Data::new(secret.clone()))
     })

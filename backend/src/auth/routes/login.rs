@@ -1,28 +1,34 @@
 use crate::auth::helpers::token::generate_tokens;
 use crate::models::UserToken;
+use crate::response::GenericResponse;
 use crate::{
     models::{User, UserLoginSchema},
-    response::{UserLoginWhenOtpDisabledResponse, UserLoginWhenOtpEnabledResponse},
+    response::{UserLoginResponse, UserLoginWhenOtpEnabledResponse},
 };
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{post, web, HttpResponse, Responder};
 use argon2::{
     password_hash::{PasswordHash, PasswordVerifier},
     Argon2,
 };
 use chrono::{DateTime, Utc};
-use serde_json::json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
+#[post("/login")]
 pub async fn log_user_in(
     body: web::Json<UserLoginSchema>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
 ) -> impl Responder {
-    let mut transaction = pool
-        .begin()
-        .await
-        .expect("Failed to acquire a Postgres connection from the pool");
+    let mut transaction = match pool.begin().await {
+        Ok(t) => t,
+        Err(_) => {
+            return HttpResponse::InternalServerError().json(GenericResponse {
+                status: "error".to_string(),
+                message: "Failed to get a transaction".to_string(),
+            })
+        }
+    };
 
     let body = body.into_inner();
     let username_lower = body.username.to_lowercase();
@@ -45,21 +51,27 @@ pub async fn log_user_in(
             if let Some(user) = existing_user {
                 user
             } else {
-                return HttpResponse::BadRequest()
-                    .json(json!({"status": "fail", "message": "Invalid email or password"}));
+                return HttpResponse::BadRequest().json(GenericResponse {
+                    status: "fail".to_string(),
+                    message: "Invalid email or password".to_string(),
+                });
             }
         }
         Err(_) => {
-            return HttpResponse::InternalServerError()
-                .json(json!({"status": "error", "message": "Database query error"}))
+            return HttpResponse::InternalServerError().json(GenericResponse {
+                status: "error".to_string(),
+                message: "Database query error".to_string(),
+            })
         }
     };
 
     let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&user.password) {
         parsed_hash
     } else {
-        return HttpResponse::BadRequest()
-            .json(json!({"status": "fail", "message": "Failed to retrieve hashed password"}));
+        return HttpResponse::BadRequest().json(GenericResponse {
+            status: "fail".to_string(),
+            message: "Failed to retrieve hashed password".to_string(),
+        });
     };
 
     let argon2 = Argon2::default();
@@ -69,8 +81,10 @@ pub async fn log_user_in(
         .is_ok();
 
     if !is_valid {
-        return HttpResponse::BadRequest()
-            .json(json!({"status": "fail", "message": "Invalid username or password"}));
+        return HttpResponse::BadRequest().json(GenericResponse {
+            status: "fail".to_string(),
+            message: "Invalid username or password".to_string(),
+        });
     }
 
     if user.otp_enabled {
@@ -101,17 +115,25 @@ pub async fn log_user_in(
         new_token.token_id,
         new_token.expires_at,
     )
-    .execute(pool.get_ref())
+    .execute(&mut *transaction)
     .await;
+
+    if let Err(_) = transaction.commit().await {
+        return HttpResponse::InternalServerError().json(GenericResponse {
+            status: "error".to_string(),
+            message: "Failed to commit transaction".to_string(),
+        });
+    }
 
     if let Err(e) = insert_result {
         println!("{:?}", e);
-        return HttpResponse::InternalServerError().json(
-            serde_json::json!({"status": "error", "message": "Failed to insert user token into the database"}),
-        );
+        return HttpResponse::InternalServerError().json(GenericResponse {
+            status: "error".to_string(),
+            message: "Failed to insert user token into the database".to_string(),
+        });
     }
 
-    return HttpResponse::Ok().json(UserLoginWhenOtpDisabledResponse {
+    return HttpResponse::Ok().json(UserLoginResponse {
         status: "success".to_string(),
         access_token,
         refresh_token,

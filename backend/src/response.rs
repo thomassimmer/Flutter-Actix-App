@@ -41,7 +41,7 @@ pub struct UserLoginWhenOtpEnabledResponse {
 }
 
 #[derive(Serialize, Debug)]
-pub struct UserLoginWhenOtpDisabledResponse {
+pub struct UserLoginResponse {
     pub status: String,
     pub access_token: String,
     pub refresh_token: String,
@@ -59,6 +59,25 @@ pub struct RefreshTokenResponse {
 pub struct UserResponse {
     pub status: String,
     pub user: UserData,
+}
+
+#[derive(Serialize)]
+pub struct GenerateOtpResponse {
+    pub status: String,
+    pub otp_base32: String,
+    pub otp_auth_url: String,
+}
+
+#[derive(Serialize)]
+pub struct VerifyOtpResponse {
+    pub status: String,
+    pub otp_verified: bool,
+}
+
+#[derive(Serialize)]
+pub struct DisableOtpResponse {
+    pub status: String,
+    pub otp_enabled: bool,
 }
 
 pub fn user_to_response(user: &User) -> UserData {
