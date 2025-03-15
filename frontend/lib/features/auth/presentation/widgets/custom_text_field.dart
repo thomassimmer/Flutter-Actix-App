@@ -19,20 +19,39 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      maxLength: maxLength,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.0),
+    return SizedBox(
+      width: 300.0,
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        maxLength: maxLength,
+        decoration: InputDecoration(
+          labelText: label,
+          floatingLabelStyle: TextStyle(
+            color: Colors.blue.shade200, // Set the floating label color to white
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+              EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          counterText: '',
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: BorderSide(
+              color: Colors.blue.shade900,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: BorderSide(
+              color: Colors.blue.shade200,
+              width: 2.0,
+            ),
+          ),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        counterText: '',
+        validator: validator,
       ),
-      validator: validator,
     );
   }
 }

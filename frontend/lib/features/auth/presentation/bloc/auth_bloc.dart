@@ -19,6 +19,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignupRequested>(_onSignupRequested);
     on<AuthOTPRequested>(_onOTPRequested);
     on<AuthOTPVerified>(_onOTPVerified);
+    on<AuthLogoutRequested>(_onLogoutRequested);
   }
 
   void _onLoginRequested(
@@ -37,6 +38,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
       },
     );
+  }
+
+  void _onLogoutRequested(
+      AuthLogoutRequested event, Emitter<AuthState> emit) async {
+    emit(AuthUnauthenticated());
   }
 
   void _onSignupRequested(

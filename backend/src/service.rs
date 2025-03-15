@@ -138,7 +138,7 @@ async fn login_user_handler(
             .json(json!({"status": "fail", "message": "Invalid username or password"}));
     }
 
-    if !user.otp_enabled {
+    if user.otp_enabled {
         return HttpResponse::Ok().json(UserLoginWhenOtpEnabledResponse {
             status: "success".to_string(),
             user_id: user.id,

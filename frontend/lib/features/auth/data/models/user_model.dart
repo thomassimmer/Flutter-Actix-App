@@ -33,7 +33,9 @@ class UserModel extends Equatable {
         otpAuthUrl: json['otp_auth_url'] as String?,
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
-        recoveryCodes: List<String>.from(json['recovery_codes'] as List));
+        recoveryCodes: json.containsKey('recovery_codes')
+            ? List<String>.from(json['recovery_codes'] as List)
+            : null);
   }
 
   Map<String, dynamic> toJson() {
