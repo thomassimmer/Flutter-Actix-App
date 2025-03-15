@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 pub struct UserUpdateRequest {
@@ -21,4 +22,9 @@ pub struct SetUserPasswordRequest {
 pub struct UpdateUserPasswordRequest {
     pub current_password: String,
     pub new_password: String,
+}
+
+#[derive(Deserialize)]
+pub struct DeleteDeviceParams {
+    pub token_id: Uuid,
 }

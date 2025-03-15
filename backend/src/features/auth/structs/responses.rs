@@ -25,6 +25,7 @@ pub struct UserLoginResponse {
 pub struct RefreshTokenResponse {
     pub code: String,
     pub access_token: String,
+    pub refresh_token: String,
 }
 
 #[derive(Serialize, Deserialize)]

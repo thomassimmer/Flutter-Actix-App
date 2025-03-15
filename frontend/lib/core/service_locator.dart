@@ -10,6 +10,7 @@ import 'package:flutteractixapp/features/auth/domain/usecases/check_if_account_h
 import 'package:flutteractixapp/features/auth/domain/usecases/disable_two_factor_authentication_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/generate_two_factor_authentication_config_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/login_usecase.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_two_factor_authentication_and_one_time_password_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_two_factor_authentication_and_password_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_without_two_factor_authentication_enabled_use_case.dart';
@@ -19,6 +20,8 @@ import 'package:flutteractixapp/features/auth/domain/usecases/verify_one_time_pa
 import 'package:flutteractixapp/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:flutteractixapp/features/profile/data/sources/remote_data_sources.dart';
 import 'package:flutteractixapp/features/profile/domain/repositories/profile_repository.dart';
+import 'package:flutteractixapp/features/profile/domain/usecases/delete_device.dart';
+import 'package:flutteractixapp/features/profile/domain/usecases/get_devices.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/post_profile_usecase.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/set_password_use_case.dart';
@@ -55,6 +58,7 @@ void setupServiceLocator() {
 
   // Use cases
   sl.registerSingleton<LoginUseCase>(LoginUseCase(sl<AuthRepository>()));
+  sl.registerSingleton<LogoutUseCase>(LogoutUseCase(sl<AuthRepository>()));
   sl.registerSingleton<SignupUseCase>(SignupUseCase(sl<AuthRepository>()));
   sl.registerSingleton<VerifyOneTimePasswordUseCase>(
       VerifyOneTimePasswordUseCase(sl<AuthRepository>()));
@@ -87,4 +91,8 @@ void setupServiceLocator() {
       SetPasswordUseCase(sl<ProfileRepository>()));
   sl.registerSingleton<UpdatePasswordUseCase>(
       UpdatePasswordUseCase(sl<ProfileRepository>()));
+  sl.registerSingleton<GetDevicesUsecase>(
+      GetDevicesUsecase(sl<ProfileRepository>()));
+  sl.registerSingleton<DeleteDeviceUseCase>(
+      DeleteDeviceUseCase(sl<ProfileRepository>()));
 }

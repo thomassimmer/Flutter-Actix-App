@@ -12,6 +12,7 @@ import 'package:flutteractixapp/features/challenges/presentation/challenges_scre
 import 'package:flutteractixapp/features/habits/presentation/habits_screen.dart';
 import 'package:flutteractixapp/features/messages/presentation/messages_screen.dart';
 import 'package:flutteractixapp/features/profile/presentation/screens/about_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screens/device_screen.dart';
 import 'package:flutteractixapp/features/profile/presentation/screens/language_selection_screen.dart';
 import 'package:flutteractixapp/features/profile/presentation/screens/password_screen.dart';
 import 'package:flutteractixapp/features/profile/presentation/screens/profile_screen.dart';
@@ -88,6 +89,11 @@ final router = GoRouter(
               path: 'about',
               name: 'about',
               builder: (context, state) => AboutScreen(),
+            ),
+            GoRoute(
+              path: 'devices',
+              name: 'devices',
+              builder: (context, state) => DeviceScreen(),
             ),
           ],
         ),

@@ -144,7 +144,8 @@ class AuthRemoteDataSource {
   }
 
   Future<bool> verifyOneTimePassword(
-      VerifyOneTimePasswordRequestModel verifyOneTimePasswordRequestModel) async {
+      VerifyOneTimePasswordRequestModel
+          verifyOneTimePasswordRequestModel) async {
     final url = Uri.parse('$baseUrl/auth/otp/verify');
     final response = await apiClient.post(
       url,
@@ -181,7 +182,8 @@ class AuthRemoteDataSource {
   }
 
   Future<UserTokenModel> validateOneTimePassword(
-      ValidateOneTimePasswordRequestModel validateOneTimePasswordRequestModel) async {
+      ValidateOneTimePasswordRequestModel
+          validateOneTimePasswordRequestModel) async {
     final url = Uri.parse('$baseUrl/auth/otp/validate');
     final response = await apiClient.post(
       url,
@@ -257,7 +259,9 @@ class AuthRemoteDataSource {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: json.encode(checkIfAccountHasTwoFactorAuthenticationEnabledRequestModel.toJson()));
+        body: json.encode(
+            checkIfAccountHasTwoFactorAuthenticationEnabledRequestModel
+                .toJson()));
 
     final jsonBody = json.decode(response.body);
 
@@ -331,8 +335,9 @@ class AuthRemoteDataSource {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: json
-          .encode(recoverAccountWithRecoveryCodeAndOneTimePasswordRequestModel.toJson()),
+      body: json.encode(
+          recoverAccountWithRecoveryCodeAndOneTimePasswordRequestModel
+              .toJson()),
     );
 
     final jsonBody = json.decode(response.body);
@@ -395,6 +400,27 @@ class AuthRemoteDataSource {
         throw InvalidUsernameOrRecoveryCodeError();
       }
 
+      throw UnauthorizedError();
+    }
+
+    if (response.statusCode == 500) {
+      throw InternalServerError();
+    }
+
+    throw UnknownError();
+  }
+
+  Future<void> logout() async {
+    final url = Uri.parse('$baseUrl/auth/logout');
+    final response = await apiClient.get(
+      url,
+    );
+
+    if (response.statusCode == 200) {
+      return;
+    }
+
+    if (response.statusCode == 401) {
       throw UnauthorizedError();
     }
 

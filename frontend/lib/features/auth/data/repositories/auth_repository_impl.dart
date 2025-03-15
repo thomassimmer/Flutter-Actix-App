@@ -370,4 +370,28 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(UnknownDomainError());
     }
   }
+
+  @override
+  Future<Either<DomainError, void>> logout() async {
+    try {
+      final result = await remoteDataSource.logout();
+
+      return Right(result);
+    } on ParsingError {
+      logger.e('ParsingError occurred.');
+      return Left(InvalidResponseDomainError());
+    } on ForbiddenError {
+      logger.e('ForbiddenError occured.');
+      return Left(ForbiddenDomainError());
+    } on UnauthorizedError {
+      logger.e('UnauthorizedError occurred.');
+      return Left(UnauthorizedDomainError());
+    } on InternalServerError {
+      logger.e('InternalServerError occured.');
+      return Left(InternalServerDomainError());
+    } catch (e) {
+      logger.e('Data error occurred: ${e.toString()}');
+      return Left(UnknownDomainError());
+    }
+  }
 }

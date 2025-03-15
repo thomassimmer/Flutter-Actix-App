@@ -1,32 +1,21 @@
 use crate::core::constants::errors::AppError;
 use crate::core::helpers::mock_now::now;
-use crate::features::auth::helpers::token::retrieve_claims_for_token;
-use crate::features::profile::structs::models::User;
+use crate::features::auth::helpers::token::{get_user_token, retrieve_claims_for_token};
+use crate::features::auth::structs::models::TokenCache;
 use actix_web::body::EitherBody;
+use actix_web::web::Data;
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     Error,
 };
 use actix_web::{HttpMessage, HttpResponse};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use futures_util::future::LocalBoxFuture;
 use sqlx::PgPool;
 use std::future::{ready, Ready};
 use std::rc::Rc;
 
-pub struct TokenValidator {
-    pub secret: Rc<String>,
-    pub pool: Rc<PgPool>,
-}
-
-impl TokenValidator {
-    pub fn new(secret: String, pool: PgPool) -> Self {
-        TokenValidator {
-            secret: Rc::new(secret),
-            pool: Rc::new(pool),
-        }
-    }
-}
+pub struct TokenValidator {}
 
 impl<S, B> Transform<S, ServiceRequest> for TokenValidator
 where
@@ -43,16 +32,12 @@ where
     fn new_transform(&self, service: S) -> Self::Future {
         ready(Ok(TokenValidatorMiddleware {
             service: Rc::new(service),
-            secret: Rc::new(self.secret.to_string()),
-            pool: self.pool.clone(),
         }))
     }
 }
 
 pub struct TokenValidatorMiddleware<S> {
     service: Rc<S>,
-    secret: Rc<String>,
-    pool: Rc<PgPool>,
 }
 
 impl<S, B> Service<ServiceRequest> for TokenValidatorMiddleware<S>
@@ -69,11 +54,13 @@ where
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
         let service = Rc::clone(&self.service);
-        let secret = Rc::clone(&self.secret);
-        let pool = Rc::clone(&self.pool);
+
+        let secret = req.app_data::<Data<String>>().unwrap().to_string();
+        let pool = req.app_data::<Data<PgPool>>().unwrap().clone();
+        let cached_tokens = req.app_data::<Data<TokenCache>>().unwrap().clone();
 
         Box::pin(async move {
-            match retrieve_claims_for_token(req.request().clone(), secret.to_string()) {
+            match retrieve_claims_for_token(req.request().clone(), secret) {
                 Ok(claims) => {
                     if now() > DateTime::<Utc>::from_timestamp(claims.exp, 0).unwrap() {
                         return Ok(req.into_response(
@@ -83,54 +70,58 @@ where
                         ));
                     }
 
-                    let mut transaction = match pool.begin().await {
-                        Ok(t) => t,
-                        Err(_) => {
-                            return Ok(req.into_response(
-                                HttpResponse::InternalServerError()
-                                    .json(AppError::DatabaseConnection.to_response())
-                                    .map_into_right_body(),
-                            ));
-                        }
-                    };
+                    let last_activity_for_this_token =
+                        cached_tokens.get_value_for_key(claims.jti).await;
 
-                    // Check if user already exists
-                    let existing_user = sqlx::query_as!(
-                        User,
-                        r#"
-                        SELECT u.*
-                        FROM users u
-                        JOIN user_tokens ut ON u.id = ut.user_id
-                        WHERE ut.token_id = $1
-                        "#,
-                        claims.jti,
-                    )
-                    .fetch_optional(&mut *transaction)
-                    .await;
-
-                    let user = match existing_user {
-                        Ok(existing_user) => {
-                            if let Some(user) = existing_user {
-                                user
-                            } else {
-                                return Ok(req.into_response(
-                                    HttpResponse::Unauthorized()
-                                        .json(AppError::InvalidAccessToken.to_response())
-                                        .map_into_right_body(),
-                                ));
+                    match last_activity_for_this_token {
+                        Some(last_activity) => {
+                            // Update only if last activity is more than 5 minutes ago
+                            // To not update too often
+                            if now() - Duration::minutes(5) > last_activity {
+                                cached_tokens.update_or_insert_key(claims.jti, now()).await;
                             }
                         }
-                        Err(_) => {
-                            return Ok(req.into_response(
-                                HttpResponse::InternalServerError()
-                                    .json(AppError::DatabaseQuery.to_response())
-                                    .map_into_right_body(),
-                            ));
-                        }
-                    };
+                        None => {
+                            let mut transaction = match pool.begin().await {
+                                Ok(t) => t,
+                                Err(_) => {
+                                    return Ok(req.into_response(
+                                        HttpResponse::InternalServerError()
+                                            .json(AppError::DatabaseConnection.to_response())
+                                            .map_into_right_body(),
+                                    ));
+                                }
+                            };
 
-                    // Store user in request extensions
-                    req.extensions_mut().insert(user);
+                            // Check if token still exists (it could have been revoked)
+                            let existing_token =
+                                get_user_token(claims.user_id, claims.jti, &mut transaction).await;
+
+                            match existing_token {
+                                Ok(r) => {
+                                    if r.is_none() {
+                                        return Ok(req.into_response(
+                                            HttpResponse::Unauthorized()
+                                                .json(AppError::InvalidAccessToken.to_response())
+                                                .map_into_right_body(),
+                                        ));
+                                    }
+                                }
+                                Err(_) => {
+                                    return Ok(req.into_response(
+                                        HttpResponse::InternalServerError()
+                                            .json(AppError::DatabaseQuery.to_response())
+                                            .map_into_right_body(),
+                                    ));
+                                }
+                            };
+
+                            cached_tokens.update_or_insert_key(claims.jti, now()).await;
+                        }
+                    }
+
+                    // Store claims in request extensions
+                    req.extensions_mut().insert(claims);
                     let res = service.call(req).await?;
                     Ok(res.map_into_left_body())
                 }

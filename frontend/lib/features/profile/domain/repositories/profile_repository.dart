@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
+import 'package:flutteractixapp/features/profile/domain/entities/device.dart';
 import 'package:flutteractixapp/features/profile/domain/entities/profile.dart';
 
 abstract class ProfileRepository {
@@ -12,4 +13,6 @@ abstract class ProfileRepository {
   Future<Either<DomainError, Profile>> setPassword(String newPassword);
   Future<Either<DomainError, Profile>> updatePassword(
       String currentPassword, String newPassword);
+  Future<Either<DomainError, List<Device>>> getDevices();
+  Future<Either<DomainError, void>> deleteDevice(String deviceId);
 }

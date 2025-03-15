@@ -5,6 +5,7 @@ import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/check_if_account_has_two_factor_authentication_enabled_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/generate_two_factor_authentication_config_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/login_usecase.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_two_factor_authentication_and_one_time_password_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_two_factor_authentication_and_password_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_without_two_factor_authentication_enabled_use_case.dart';
@@ -18,6 +19,7 @@ import 'package:universal_io/io.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase = GetIt.instance<LoginUseCase>();
+  final LogoutUseCase logoutUseCase = GetIt.instance<LogoutUseCase>();
   final SignupUseCase signupUseCase = GetIt.instance<SignupUseCase>();
   final GenerateTwoFactorAuthenticationConfigUseCase
       generateTwoFactorAuthenticationConfigUseCase =
@@ -70,9 +72,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (result == null) {
       emit(AuthUnauthenticatedState());
     } else {
-      emit(AuthAuthenticatedAfterLoginState(
-        hasValidatedOtp: false,
-      ));
+      emit(
+        AuthAuthenticatedAfterLoginState(hasValidatedOtp: false),
+      );
     }
   }
 
@@ -81,15 +83,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     // We use the device locale by default on signup
     final result = await signupUseCase.call(
-        event.username, event.password, Platform.localeName, event.theme);
+      event.username,
+      event.password,
+      Platform.localeName,
+      event.theme,
+    );
 
     result.fold(
-        (error) => emit(
-            AuthUnauthenticatedState(message: ErrorMessage(error.messageKey))),
-        (userToken) async {
-      emit(AuthAuthenticatedAfterRegistrationState(
-          recoveryCodes: userToken.recoveryCodes, hasVerifiedOtp: false));
-    });
+      (error) => emit(
+        AuthUnauthenticatedState(
+          message: ErrorMessage(error.messageKey),
+        ),
+      ),
+      (userToken) {
+        emit(AuthAuthenticatedAfterRegistrationState(
+          recoveryCodes: userToken.recoveryCodes,
+          hasVerifiedOtp: false,
+        ));
+      },
+    );
   }
 
   void _generateTwoFactorAuthenticationConfig(
@@ -99,18 +111,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     final result = await generateTwoFactorAuthenticationConfigUseCase.call();
 
-    result.fold((error) {
-      if (error is ShouldLogoutError) {
-        add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
-      } else {
-        emit(AuthUnauthenticatedState(message: ErrorMessage(error.messageKey)));
-      }
-    },
-        (twoFactorAuthenticationConfig) => {
-              emit(AuthVerifyOneTimePasswordState(
-                  otpAuthUrl: twoFactorAuthenticationConfig.otpAuthUrl,
-                  otpBase32: twoFactorAuthenticationConfig.otpBase32))
-            });
+    result.fold(
+      (error) {
+        if (error is ShouldLogoutError) {
+          add(
+            AuthLogoutEvent(
+              message: ErrorMessage(error.messageKey),
+            ),
+          );
+        } else {
+          emit(
+            AuthUnauthenticatedState(
+              message: ErrorMessage(error.messageKey),
+            ),
+          );
+        }
+      },
+      (twoFactorAuthenticationConfig) => {
+        emit(
+          AuthVerifyOneTimePasswordState(
+            otpAuthUrl: twoFactorAuthenticationConfig.otpAuthUrl,
+            otpBase32: twoFactorAuthenticationConfig.otpBase32,
+          ),
+        )
+      },
+    );
   }
 
   void _verifyOneTimePassword(
@@ -121,17 +146,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
-        add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
+        add(
+          AuthLogoutEvent(
+            message: ErrorMessage(error.messageKey),
+          ),
+        );
       } else {
-        emit(AuthVerifyOneTimePasswordState(
+        emit(
+          AuthVerifyOneTimePasswordState(
             otpAuthUrl: event.otpAuthUrl,
             otpBase32: event.otpBase32,
-            message: ErrorMessage(error.messageKey)));
+            message: ErrorMessage(error.messageKey),
+          ),
+        );
       }
     }, (_) {
-      emit(AuthAuthenticatedAfterRegistrationState(
+      emit(
+        AuthAuthenticatedAfterRegistrationState(
           hasVerifiedOtp: true,
-          message: SuccessMessage("validationCodeCorrect")));
+          message: SuccessMessage("validationCodeCorrect"),
+        ),
+      );
     });
   }
 
@@ -141,48 +176,93 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await loginUseCase.call(event.username, event.password);
 
     result.fold(
-        (error) => emit(
-            AuthUnauthenticatedState(message: ErrorMessage(error.messageKey))),
-        (userTokenOrUserId) {
-      userTokenOrUserId.fold((userToken) {
-        emit(AuthAuthenticatedAfterLoginState(
-            hasValidatedOtp: false,
-            message: SuccessMessage("loginSuccessful")));
-      }, (userId) => emit(AuthValidateOneTimePasswordState(userId: userId)));
-    });
+      (error) => emit(
+        AuthUnauthenticatedState(
+          message: ErrorMessage(error.messageKey),
+        ),
+      ),
+      (userTokenOrUserId) {
+        userTokenOrUserId.fold(
+          (userToken) {
+            emit(
+              AuthAuthenticatedAfterLoginState(
+                hasValidatedOtp: false,
+                message: SuccessMessage("loginSuccessful"),
+              ),
+            );
+          },
+          (userId) => emit(
+            AuthValidateOneTimePasswordState(userId: userId),
+          ),
+        );
+      },
+    );
   }
 
   void _validateOneTimePassword(
       AuthValidateOneTimePasswordEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoadingState());
 
-    final result =
-        await validateOneTimePasswordUseCase.call(event.userId, event.code);
+    final result = await validateOneTimePasswordUseCase.call(
+      event.userId,
+      event.code,
+    );
 
     result.fold(
-        (error) => emit(AuthValidateOneTimePasswordState(
-            message: ErrorMessage(error.messageKey),
-            userId: event.userId)), (userToken) async {
-      emit(AuthAuthenticatedAfterLoginState(
-          hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
-    });
+      (error) => emit(
+        AuthValidateOneTimePasswordState(
+          message: ErrorMessage(error.messageKey),
+          userId: event.userId,
+        ),
+      ),
+      (userToken) async {
+        emit(
+          AuthAuthenticatedAfterLoginState(
+            hasValidatedOtp: true,
+            message: SuccessMessage("loginSuccessful"),
+          ),
+        );
+      },
+    );
   }
 
   void _logout(AuthLogoutEvent event, Emitter<AuthState> emit) async {
-    await TokenStorage().deleteTokens();
+    final result = await logoutUseCase.call();
 
-    if (event.message == null) {
-      emit(AuthUnauthenticatedState(
-          message: SuccessMessage('logoutSuccessful')));
-    } else {
-      emit(AuthUnauthenticatedState(message: event.message));
-    }
+    await result.fold(
+      (error) async {
+        emit(
+          AuthUnauthenticatedState(
+            message: ErrorMessage(error.messageKey),
+          ),
+        );
+      },
+      (_) async {
+        await TokenStorage().deleteTokens();
+
+        if (event.message == null) {
+          emit(
+            AuthUnauthenticatedState(
+              message: SuccessMessage('logoutSuccessful'),
+            ),
+          );
+        } else {
+          emit(
+            AuthUnauthenticatedState(message: event.message),
+          );
+        }
+      },
+    );
   }
 
   void _recoverAccountForUsername(
       AuthRecoverAccountForUsernameEvent event, Emitter<AuthState> emit) async {
-    emit(AuthRecoverAccountUsernameStepState(
-        username: event.username, passwordForgotten: event.passwordForgotten));
+    emit(
+      AuthRecoverAccountUsernameStepState(
+        username: event.username,
+        passwordForgotten: event.passwordForgotten,
+      ),
+    );
   }
 
   void _checkIfAccountHasTwoFactorAuthenticationEnabled(
@@ -195,31 +275,39 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         .call(event.username);
 
     result.fold(
-        (error) => emit(AuthRecoverAccountUsernameStepState(
-            username: event.username,
-            passwordForgotten: event.passwordForgotten,
-            message: ErrorMessage(error.messageKey))),
-        (isTwoFactorAuthenticationEnabled) async {
-      if (currentState is AuthRecoverAccountUsernameStepState) {
-        if (isTwoFactorAuthenticationEnabled) {
-          if (currentState.passwordForgotten) {
-            emit(
+      (error) => emit(
+        AuthRecoverAccountUsernameStepState(
+          username: event.username,
+          passwordForgotten: event.passwordForgotten,
+          message: ErrorMessage(error.messageKey),
+        ),
+      ),
+      (isTwoFactorAuthenticationEnabled) async {
+        if (currentState is AuthRecoverAccountUsernameStepState) {
+          if (isTwoFactorAuthenticationEnabled) {
+            if (currentState.passwordForgotten) {
+              emit(
                 AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState(
                     username: event.username,
-                    passwordForgotten: currentState.passwordForgotten));
-          } else {
-            emit(
+                    passwordForgotten: currentState.passwordForgotten),
+              );
+            } else {
+              emit(
                 AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndPasswordState(
                     username: event.username,
-                    passwordForgotten: currentState.passwordForgotten));
+                    passwordForgotten: currentState.passwordForgotten),
+              );
+            }
+          } else {
+            emit(
+              AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState(
+                  username: event.username,
+                  passwordForgotten: currentState.passwordForgotten),
+            );
           }
-        } else {
-          emit(AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState(
-              username: event.username,
-              passwordForgotten: currentState.passwordForgotten));
         }
-      }
-    });
+      },
+    );
   }
 
   void _recoverAccountWithTwoFactorAuthenticationAndPassword(
@@ -229,17 +317,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     final result =
         await recoverAccountWithTwoFactorAuthenticationAndPasswordUseCase.call(
-            username: event.username,
-            password: event.password,
-            recoveryCode: event.recoveryCode);
+      username: event.username,
+      password: event.password,
+      recoveryCode: event.recoveryCode,
+    );
 
     result.fold(
-        (error) => emit(
-            AuthUnauthenticatedState(message: ErrorMessage(error.messageKey))),
-        (userToken) async {
-      emit(AuthAuthenticatedAfterLoginState(
-          hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
-    });
+      (error) => emit(
+        AuthUnauthenticatedState(
+          message: ErrorMessage(error.messageKey),
+        ),
+      ),
+      (userToken) async {
+        emit(
+          AuthAuthenticatedAfterLoginState(
+            hasValidatedOtp: true,
+            message: SuccessMessage("loginSuccessful"),
+          ),
+        );
+      },
+    );
   }
 
   void _recoverAccountWithTwoFactorAuthenticationAndOneTimePassword(
@@ -251,17 +348,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result =
         await recoverAccountWithTwoFactorAuthenticationAndOneTimePasswordUseCase
             .call(
-                username: event.username,
-                code: event.code,
-                recoveryCode: event.recoveryCode);
+      username: event.username,
+      code: event.code,
+      recoveryCode: event.recoveryCode,
+    );
 
     result.fold(
-        (error) => emit(
-            AuthUnauthenticatedState(message: ErrorMessage(error.messageKey))),
-        (userToken) async {
-      emit(AuthAuthenticatedAfterLoginState(
-          hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
-    });
+      (error) => emit(
+        AuthUnauthenticatedState(
+          message: ErrorMessage(error.messageKey),
+        ),
+      ),
+      (userToken) async {
+        emit(
+          AuthAuthenticatedAfterLoginState(
+            hasValidatedOtp: true,
+            message: SuccessMessage("loginSuccessful"),
+          ),
+        );
+      },
+    );
   }
 
   void _recoverAccountWithoutTwoFactorAuthenticationEnabled(
@@ -271,14 +377,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     final result =
         await recoverAccountWithoutTwoFactorAuthenticationEnabledUseCase.call(
-            username: event.username, recoveryCode: event.recoveryCode);
+      username: event.username,
+      recoveryCode: event.recoveryCode,
+    );
 
     result.fold(
-        (error) => emit(
-            AuthUnauthenticatedState(message: ErrorMessage(error.messageKey))),
-        (userToken) async {
-      emit(AuthAuthenticatedAfterLoginState(
-          hasValidatedOtp: true, message: SuccessMessage("loginSuccessful")));
-    });
+      (error) => emit(
+        AuthUnauthenticatedState(
+          message: ErrorMessage(error.messageKey),
+        ),
+      ),
+      (userToken) async {
+        emit(
+          AuthAuthenticatedAfterLoginState(
+            hasValidatedOtp: true,
+            message: SuccessMessage("loginSuccessful"),
+          ),
+        );
+      },
+    );
   }
 }

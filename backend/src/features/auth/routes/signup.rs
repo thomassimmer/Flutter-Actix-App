@@ -1,4 +1,4 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use rand::{distributions::Alphanumeric, rngs::OsRng, Rng};
 use sqlx::PgPool;
@@ -10,15 +10,18 @@ use crate::{
     },
     features::{
         auth::{
-            helpers::{password::is_password_valid, token::generate_tokens, username::is_username_valid},
+            helpers::{
+                password::is_password_valid, token::generate_tokens, username::is_username_valid,
+            },
             structs::{requests::UserRegisterRequest, responses::UserSignupResponse},
         },
-        profile::structs::models::User,
+        profile::{helpers::device_info::get_user_agent, structs::models::User},
     },
 };
 
 #[post("/signup")]
 pub async fn register_user(
+    req: HttpRequest,
     body: web::Json<UserRegisterRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
@@ -120,6 +123,7 @@ pub async fn register_user(
         updated_at: now(),
         recovery_codes: hashed_recovery_codes.join(";"),
         password_is_expired: false,
+        is_admin: false,
     };
 
     // Insert the new user into the database
@@ -135,9 +139,10 @@ pub async fn register_user(
             created_at,
             updated_at,
             recovery_codes,
-            password_is_expired
+            password_is_expired,
+            is_admin
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         "#,
         new_user.id,
         new_user.username,
@@ -148,7 +153,8 @@ pub async fn register_user(
         new_user.created_at,
         new_user.updated_at,
         new_user.recovery_codes,
-        new_user.password_is_expired
+        new_user.password_is_expired,
+        new_user.is_admin,
     )
     .execute(&mut *transaction)
     .await;
@@ -160,14 +166,23 @@ pub async fn register_user(
         });
     }
 
-    let (access_token, refresh_token) =
-        match generate_tokens(secret.as_bytes(), new_user.id, &mut transaction).await {
-            Ok((access_token, refresh_token)) => (access_token, refresh_token),
-            Err(_) => {
-                return HttpResponse::InternalServerError()
-                    .json(AppError::TokenGeneration.to_response());
-            }
-        };
+    let parsed_device_info = get_user_agent(req).await;
+
+    let (access_token, refresh_token) = match generate_tokens(
+        secret.as_bytes(),
+        new_user.id,
+        new_user.is_admin,
+        parsed_device_info,
+        &mut transaction,
+    )
+    .await
+    {
+        Ok((access_token, refresh_token)) => (access_token, refresh_token),
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(AppError::TokenGeneration.to_response());
+        }
+    };
 
     if (transaction.commit().await).is_err() {
         return HttpResponse::InternalServerError()

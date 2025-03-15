@@ -1,23 +1,41 @@
 use crate::{
     core::constants::errors::AppError,
-    features::profile::structs::{
-        models::User, requests::UserUpdateRequest, responses::UserResponse,
+    features::{
+        auth::structs::models::Claims,
+        profile::{
+            helpers::profile::get_user,
+            structs::{requests::UserUpdateRequest, responses::UserResponse},
+        },
     },
 };
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{
+    post,
+    web::{self, ReqData},
+    HttpResponse, Responder,
+};
 use sqlx::PgPool;
 
 #[post("/me")]
 pub async fn post_profile_information(
     body: web::Json<UserUpdateRequest>,
     pool: web::Data<PgPool>,
-    mut request_user: User,
+    request_claims: ReqData<Claims>,
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
             return HttpResponse::InternalServerError()
                 .json(AppError::DatabaseConnection.to_response())
+        }
+    };
+
+    let mut request_user = match get_user(request_claims.user_id, &mut transaction).await {
+        Ok(user) => match user {
+            Some(user) => user,
+            None => return HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
+        },
+        Err(_) => {
+            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
         }
     };
 

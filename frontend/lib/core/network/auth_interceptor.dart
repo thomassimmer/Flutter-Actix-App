@@ -1,3 +1,4 @@
+import 'package:flutteractixapp/core/utils/user_agent.dart';
 import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 import 'package:http_interceptor/http_interceptor.dart';
 
@@ -14,6 +15,9 @@ class AuthInterceptor extends InterceptorContract {
     if (accessToken != null) {
       request.headers['Authorization'] = 'Bearer $accessToken';
     }
+
+    final userAgent = await getUserAgent();
+    request.headers['X-User-Agent'] = userAgent;
 
     return request;
   }

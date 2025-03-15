@@ -37,11 +37,12 @@ pub mod features {
             pub mod disable_otp;
             pub mod generate_otp;
             pub mod log_user_in;
+            pub mod log_user_out;
             pub mod recover_account_using_2fa;
             pub mod recover_account_using_password;
             pub mod recover_account_without_2fa_enabled;
+            pub mod refresh_token;
             pub mod signup;
-            pub mod token;
             pub mod validate_otp;
             pub mod verify_otp;
         }
@@ -55,11 +56,18 @@ pub mod features {
 
     pub mod profile {
         pub mod routes {
+            pub mod delete_device;
+            pub mod get_devices;
             pub mod get_profile_information;
             pub mod is_otp_enabled;
             pub mod post_profile_information;
             pub mod set_password;
             pub mod update_password;
+        }
+
+        pub mod helpers {
+            pub mod device_info;
+            pub mod profile;
         }
 
         pub mod structs {

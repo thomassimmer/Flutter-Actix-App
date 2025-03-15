@@ -1,8 +1,12 @@
-use crate::core::constants::errors::AppError;
 use crate::features::auth::structs::responses::GenerateOtpResponse;
-use crate::features::profile::structs::models::User;
+use crate::features::profile::helpers::profile::get_user;
+use crate::{core::constants::errors::AppError, features::auth::structs::models::Claims};
 
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{
+    get,
+    web::{self, ReqData},
+    HttpResponse, Responder,
+};
 
 use base32;
 use rand::Rng;
@@ -10,12 +14,22 @@ use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
 
 #[get("/generate")]
-pub async fn generate(pool: web::Data<PgPool>, mut request_user: User) -> impl Responder {
+pub async fn generate(pool: web::Data<PgPool>, request_claims: ReqData<Claims>) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
             return HttpResponse::InternalServerError()
                 .json(AppError::DatabaseConnection.to_response())
+        }
+    };
+
+    let mut request_user = match get_user(request_claims.user_id, &mut transaction).await {
+        Ok(user) => match user {
+            Some(user) => user,
+            None => return HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
+        },
+        Err(_) => {
+            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
         }
     };
 
