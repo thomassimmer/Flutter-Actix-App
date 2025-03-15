@@ -8,10 +8,17 @@ actix-cors = "0.7.0"
 actix-web = "4.9.0"
 argon2 = "0.5.3"
 base32 = "0.5.1"
+bb8 = "0.8.5"
+bb8-postgres = "0.8.1"
 chrono = { version = "0.4.38", features = ["serde"] }
+diesel = { version = "2.2.2", features = ["postgres", "chrono", "uuid"] }
+diesel-async = { version = "0.5.0", features = ["postgres", "bb8"] }
+diesel_migrations = "2.2.0"
+dotenv = "0.15.0"
 env_logger = "0.11.5"
 rand = "0.8.5"
 serde = { version = "1.0.208", features = ["derive"] }
 serde_json = "1.0.125"
+tokio-postgres = "0.7.11"
 totp-rs = "5.6.0"
-uuid = { version = "1.10.0", features = ["v4"] }
+uuid = { version = "1.10.0", features = ["v4", "serde"] }

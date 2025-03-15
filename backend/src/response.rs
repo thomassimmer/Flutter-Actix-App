@@ -1,5 +1,6 @@
 use chrono::prelude::*;
 use serde::Serialize;
+use uuid::Uuid;
 
 #[derive(Serialize)]
 pub struct GenericResponse {
@@ -10,7 +11,7 @@ pub struct GenericResponse {
 #[allow(non_snake_case)]
 #[derive(Serialize, Debug)]
 pub struct UserData {
-    pub id: String,
+    pub id: Uuid,
     pub username: String,
 
     pub otp_enabled: bool,

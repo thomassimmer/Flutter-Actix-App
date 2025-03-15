@@ -1,11 +1,12 @@
-mod model;
+mod models;
 mod response;
 mod service;
+mod schema;
 
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{http::header, web, App, HttpServer};
-use model::AppState;
+use models::AppState;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -14,7 +15,7 @@ async fn main() -> std::io::Result<()> {
     }
     env_logger::init();
 
-    let db = AppState::init();
+    let db = AppState::init().await;
     let app_data = web::Data::new(db);
 
     println!("🚀 Server started successfully");
