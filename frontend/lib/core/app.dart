@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/router.dart';
+import 'package:flutteractixapp/core/themes/app_theme.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_login/auth_login_bloc.dart';
@@ -26,14 +27,14 @@ class FlutterActixApp extends StatelessWidget {
           final Brightness brightness =
               MediaQuery.of(context).platformBrightness;
           ThemeData themeData = brightness == Brightness.dark
-              ? ThemeData.dark()
-              : ThemeData.light();
+              ? AppTheme.darkTheme
+              : AppTheme.lightTheme;
 
           if (state.profile != null) {
             locale = Locale(state.profile!.locale);
             themeData = state.profile!.theme == 'dark'
-                ? ThemeData.dark()
-                : ThemeData.light();
+                ? AppTheme.darkTheme
+                : AppTheme.lightTheme;
           }
 
           return MaterialApp.router(

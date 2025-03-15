@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutteractixapp/core/constants/app_colors.dart';
 
 class Background extends StatelessWidget {
   const Background({Key? key}) : super(key: key);
@@ -8,7 +9,7 @@ class Background extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.blue.shade200, Colors.blue.shade900],
+          colors: [AppColors.primary, AppColors.primaryVariant],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),

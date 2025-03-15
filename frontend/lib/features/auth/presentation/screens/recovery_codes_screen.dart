@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
+import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -33,7 +33,7 @@ class RecoveryCodesScreen extends StatelessWidget {
               SizedBox(height: 40),
               Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     border: Border.all(width: 1.0, color: Colors.blue.shade200),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -61,7 +61,8 @@ class RecoveryCodesScreen extends StatelessWidget {
                               return _buildRecoveryCodesView(context, state);
                             } else if (state
                                 is AuthGenerateTwoFactorAuthenticationConfigState) {
-                              return _buildTwoFactorAuthenticationSetupView(context, state);
+                              return _buildTwoFactorAuthenticationSetupView(
+                                  context, state);
                             } else if (state is AuthLoadingState) {
                               return _buildLoadingScreen(context, state);
                             } else {

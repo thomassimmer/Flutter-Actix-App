@@ -4,15 +4,16 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/core/messages/message_mapper.dart';
+import 'package:flutteractixapp/core/widgets/button.dart';
+import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
+import 'package:flutteractixapp/core/widgets/text_button.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_login/auth_login_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_login/auth_login_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/successful_login_animation.dart';
 import 'package:go_router/go_router.dart';
 
@@ -48,7 +49,7 @@ class _SignupScreenState extends State<SignupScreen>
               SizedBox(height: 40),
               Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     border: Border.all(width: 1.0, color: Colors.blue.shade200),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -121,7 +122,7 @@ class _SignupScreenState extends State<SignupScreen>
       children: [
         Text(
           AppLocalizations.of(context)!.signUp,
-          style: TextStyle(color: Colors.grey, fontSize: 20),
+          style: TextStyle(fontSize: 20),
         ),
         SizedBox(height: 16),
         CustomTextField(
@@ -155,13 +156,11 @@ class _SignupScreenState extends State<SignupScreen>
           isPrimary: true,
         ),
         SizedBox(height: 16),
-        TextButton(
+        CustomTextButton(
           onPressed: () {
             context.go('/login');
           },
-          child: Text(
-            AppLocalizations.of(context)!.alreadyAnAccountLogin,
-          ),
+          text: AppLocalizations.of(context)!.alreadyAnAccountLogin,
         ),
       ],
     );

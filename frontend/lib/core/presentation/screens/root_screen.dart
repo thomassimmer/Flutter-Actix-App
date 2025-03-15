@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutteractixapp/core/constants/app_colors.dart';
 import 'package:flutteractixapp/core/themes/app_theme.dart';
+import 'package:flutteractixapp/core/widgets/button.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/core/widgets/icon_with_warning.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
-import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
 import 'package:go_router/go_router.dart';
@@ -75,11 +76,11 @@ class RootScreen extends StatelessWidget {
                 title: Row(children: [
                   Text(
                     'Flutter',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppColors.primaryVariant),
                   ),
                   Text(
                     'Actix',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: AppColors.secondary),
                   ),
                   Spacer(),
                   Button(
@@ -87,7 +88,7 @@ class RootScreen extends StatelessWidget {
                     onPressed: () {
                       BlocProvider.of<AuthBloc>(context).add(AuthLogoutEvent());
                     },
-                    isPrimary: true,
+                    isPrimary: false,
                     size: ButtonSize.small,
                   ),
                 ]),
