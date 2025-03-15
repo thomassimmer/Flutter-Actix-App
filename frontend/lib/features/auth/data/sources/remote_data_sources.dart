@@ -43,6 +43,12 @@ class AuthRemoteDataSource {
       if (responseCode == 'PASSWORD_TOO_WEAK') {
         throw PasswordNotComplexEnoughError();
       }
+      if (responseCode == 'USERNAME_WRONG_SIZE') {
+        throw UsernameWrongSizeError();
+      }
+      if (responseCode == 'USERNAME_NOT_RESPECTING_RULES') {
+        throw UsernameNotRespectingRulesError();
+      }
     }
 
     if (response.statusCode == 409) {

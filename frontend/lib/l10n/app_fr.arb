@@ -79,5 +79,7 @@
   "userAlreadyExistingError": "Un utilisateur avec ce nom d'utilisateur existe déjà. Veuillez en choisir un autre.",
   "passwordNotExpiredError": "Votre mot de passe n'est pas expiré. Vous ne pouvez pas le définir ainsi.",
   "passwordNotComplexEnough": "Votre mot de passe doit contenir au moins une lettre, un chiffre et un caractère spécial.",
-  "passwordTooShortError": "Votre mot de passe doit contenir plus de 8 caractères."
+  "passwordTooShortError": "Votre mot de passe doit contenir plus de 8 caractères.",
+  "usernameWrongSizeError": "La longueur de votre nom d'utilisateur doit être comprise entre 3 et 20 caractères.",
+  "usernameNotRespectingRulesError": "Votre nom d'utilisateur doit respecter ces règles :\n - commencer et finir par une lettre ou un chiffre\n - les caractères spéciaux autorisés sont . _ -\n - pas de caractères spéciaux à la suite"
 }

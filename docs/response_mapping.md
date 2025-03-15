@@ -26,6 +26,8 @@
 | 401         | REFRESH_TOKEN_EXPIRED                         | RefreshTokenExpiredError                     | RefreshTokenExpiredDomainError                     |
 | 401         | PASSWORD_TOO_SHORT                            | PasswordTooShortError                        | PasswordTooShortError                              |
 | 401         | PASSWORD_TOO_WEAK                             | PasswordNotComplexEnoughError                | PasswordNotComplexEnoughError                      |
+| 401         | USERNAME_NOT_RESPECTING_RULES                 | UsernameNotRespectingRulesError              | UsernameNotRespectingRulesError                    |
+| 401         | USERNAME_WRONG_SIZE                           | UsernameWrongSizeError                       | UsernameWrongSizeError                             |
 | 403         | PASSWORD_MUST_BE_CHANGED                      | PasswordMustBeChangedError                   | PasswordMustBeChangedDomainError                   |
 | 403         | PASSWORD_NOT_EXPIRED                          | PasswordNotExpiredError                      | PasswordNotExpiredDomainError                      |
 | 403         | TWO_FACTOR_AUTHENTICATION_NOT_ENABLED         | TwoFactorAuthenticationNotEnabledError       | TwoFactorAuthenticationNotEnabledDomainError       |

@@ -51,6 +51,12 @@ class AuthRepositoryImpl implements AuthRepository {
     } on PasswordNotComplexEnoughError {
       logger.e('PasswordNotComplexEnoughError occured.');
       throw PasswordNotComplexEnoughError();
+    } on UsernameWrongSizeError {
+      logger.e('UsernameWrongSizeError occured.');
+      throw UsernameWrongSizeError();
+    } on UsernameNotRespectingRulesError {
+      logger.e('UsernameNotRespectingRulesError occured.');
+      throw UsernameNotRespectingRulesError();
     } on InternalServerError {
       logger.e('InternalServerError occured.');
       throw InternalServerDomainError();
