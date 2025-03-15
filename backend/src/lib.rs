@@ -1,11 +1,10 @@
 pub mod configuration;
-pub mod models;
-pub mod response;
 pub mod startup;
 
 pub mod auth {
     pub mod helpers {
-        pub mod errors;
+        pub mod error;
+        pub mod serializer;
         pub mod token;
     }
 
@@ -16,6 +15,12 @@ pub mod auth {
         pub mod signup;
         pub mod token;
     }
+
+    pub mod structs {
+        pub mod model;
+        pub mod request;
+        pub mod response;
+    }
 }
 
 pub mod core {
@@ -25,5 +30,9 @@ pub mod core {
 
     pub mod helpers {
         pub mod mock_now;
+    }
+
+    pub mod structs {
+        pub mod response;
     }
 }

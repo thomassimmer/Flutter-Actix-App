@@ -5,15 +5,20 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    auth::helpers::token::generate_tokens,
-    core::helpers::mock_now::now,
-    models::{User, UserRegisterSchema, UserToken},
-    response::{GenericResponse, UserSignupResponse},
+    auth::{
+        helpers::token::generate_tokens,
+        structs::{
+            model::{User, UserToken},
+            request::UserRegisterRequest,
+            response::UserSignupResponse,
+        },
+    },
+    core::{helpers::mock_now::now, structs::response::GenericResponse},
 };
 
 #[post("/register")]
 pub async fn register_user(
-    body: web::Json<UserRegisterSchema>,
+    body: web::Json<UserRegisterRequest>,
     pool: web::Data<PgPool>,
     secret: web::Data<String>,
 ) -> impl Responder {

@@ -3,7 +3,7 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
-use reallystick::response::UserLoginResponse;
+use reallystick::auth::structs::response::UserLoginResponse;
 
 use crate::auth::signup::user_signs_up;
 use crate::helpers::spawn_app;

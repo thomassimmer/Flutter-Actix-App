@@ -2,9 +2,9 @@ use actix_web::HttpRequest;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use sha2::{Digest, Sha256};
 
-use crate::{core::helpers::mock_now::now, models::Claims};
+use crate::{auth::structs::model::Claims, core::helpers::mock_now::now};
 
-use super::errors::AuthError;
+use super::error::AuthError;
 
 pub fn hash_token(token: &str) -> String {
     let mut hasher = Sha256::new();
