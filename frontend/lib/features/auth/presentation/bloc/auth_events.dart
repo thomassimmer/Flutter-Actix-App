@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:reallystick/features/auth/domain/entities/user_entity.dart';
 
 abstract class AuthEvent extends Equatable {
   const AuthEvent();
@@ -35,14 +36,27 @@ class AuthSignupRequested extends AuthEvent {
   List<Object> get props => [username, password];
 }
 
-class AuthOTPRequested extends AuthEvent {
-  final String userId;
+class AuthOtpRequested extends AuthEvent {
+  final UserEntity user;
   final String username;
 
-  const AuthOTPRequested({required this.userId, required this.username});
+  const AuthOtpRequested({required this.user, required this.username});
 
   @override
-  List<Object> get props => [userId, username];
+  List<Object> get props => [user, username];
+}
+
+class AuthOtpFirstTimeVerified extends AuthEvent {
+  final UserEntity user;
+  final String code;
+
+  const AuthOtpFirstTimeVerified({
+    required this.user,
+    required this.code,
+  });
+
+  @override
+  List<Object> get props => [user, code];
 }
 
 class AuthOTPVerified extends AuthEvent {

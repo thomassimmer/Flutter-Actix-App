@@ -17,7 +17,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }) : super(AuthInitial()) {
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthSignupRequested>(_onSignupRequested);
-    on<AuthOTPRequested>(_onOTPRequested);
+    on<AuthOtpRequested>(_onOTPRequested);
+    on<AuthOtpFirstTimeVerified>(_onOTPFirstTimeVerified);
     on<AuthOTPVerified>(_onOTPVerified);
     on<AuthLogoutRequested>(_onLogoutRequested);
   }
@@ -30,7 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     result.fold((failure) => emit(AuthFailure(message: failure.message)),
         (userOrUserId) {
-      userOrUserId.fold((userId) => emit(AuthOTPRequired(userId: userId)),
+      userOrUserId.fold((userId) => emit(AuthOtpRequired(userId: userId)),
           (user) => emit(AuthAuthenticated(user: user)));
     });
   }
@@ -52,14 +53,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  void _onOTPRequested(AuthOTPRequested event, Emitter<AuthState> emit) async {
+  void _onOTPRequested(AuthOtpRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await otpUseCase.generateOTP(event.userId, event.username);
+    final result = await otpUseCase.generateOTP(event.user.id, event.username);
 
     result.fold(
       (failure) => emit(AuthFailure(message: failure.message)),
-      (otp) => emit(AuthOTPRequired(userId: event.userId, otp: otp)),
+      (otp) => emit(AuthOtpFirstTimeRequired(user: event.user, otp: otp)),
+    );
+  }
+
+  void _onOTPFirstTimeVerified(
+      AuthOtpFirstTimeVerified event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+
+    final result = await otpUseCase.verifyOTP(event.user.id, event.code);
+
+    result.fold(
+      (failure) => emit(
+          AuthOtpFirstTimeFailure(message: failure.message, user: event.user)),
+      (user) => emit(AuthAuthenticated(user: user)),
     );
   }
 
@@ -69,7 +83,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await otpUseCase.verifyOTP(event.userId, event.otp);
 
     result.fold(
-      (failure) => emit(AuthFailure(message: failure.message)),
+      (failure) =>
+          emit(AuthOtpFailure(message: failure.message, userId: event.userId)),
       (user) => emit(AuthAuthenticated(user: user)),
     );
   }

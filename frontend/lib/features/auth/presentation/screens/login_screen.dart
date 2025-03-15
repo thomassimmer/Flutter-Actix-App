@@ -28,7 +28,7 @@ class LoginScreen extends StatelessWidget {
                   SnackBar(content: Text('Your validation code was correct!')),
                 );
               }
-            } else if (state is AuthFailure) {
+            } else if (state is AuthOtpFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.message)),
               );
@@ -38,7 +38,15 @@ class LoginScreen extends StatelessWidget {
               return Center(
                 child: CircularProgressIndicator(color: Colors.white),
               );
-            } else if (state is AuthOTPRequired) {
+            } else if (state is AuthOtpRequired || state is AuthOtpFailure) {
+              String userId;
+
+              if (state is AuthOtpRequired) {
+                userId = state.userId;
+              } else {
+                userId = (state as AuthOtpFailure).userId;
+              }
+
               return Column(
                 children: [
                   SizedBox(height: 40),
@@ -73,7 +81,7 @@ class LoginScreen extends StatelessWidget {
                               onPressed: () {
                                 BlocProvider.of<AuthBloc>(context).add(
                                   AuthOTPVerified(
-                                    userId: state.userId,
+                                    userId: userId,
                                     otp: _otpController.text,
                                   ),
                                 );

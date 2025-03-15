@@ -37,24 +37,27 @@ class RecoveryCodesScreen extends StatelessWidget {
                       } else {
                         context.go('/recovery-codes');
                       }
-                    } else if (state is AuthFailure) {
+                    } else if (state is AuthOtpFirstTimeFailure) {
+                      _otpController.text = '';
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(state.message)),
                       );
-                      // TODO: Make this work so that if the validation code was wrong, user can try again
-                      // BlocProvider.of<AuthBloc>(context).add(
-                      // AuthOTPRequested(
-                      //   userId: user.id,
-                      //   username: user.username,
-                      // ),
-                      // );
+
+                      // if the validation code was wrong, user can try again
+                      BlocProvider.of<AuthBloc>(context).add(
+                        AuthOtpRequested(
+                          user: state.user,
+                          username: state.user.username,
+                        ),
+                      );
                     }
                   },
                   child: BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
                       if (state is AuthAuthenticated) {
                         return _buildRecoveryCodesView(context, state.user);
-                      } else if (state is AuthOTPRequired) {
+                      } else if (state is AuthOtpFirstTimeRequired) {
                         return _buildOTPSetupView(context, state);
                       } else if (state is AuthLoading) {
                         return Center(child: CircularProgressIndicator());
@@ -129,8 +132,8 @@ class RecoveryCodesScreen extends StatelessWidget {
             text: 'Set up two-factor authentication',
             onPressed: () {
               BlocProvider.of<AuthBloc>(context).add(
-                AuthOTPRequested(
-                  userId: user.id,
+                AuthOtpRequested(
+                  user: user,
                   username: user.username,
                 ),
               );
@@ -143,7 +146,8 @@ class RecoveryCodesScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildOTPSetupView(BuildContext context, AuthOTPRequired state) {
+  Widget _buildOTPSetupView(
+      BuildContext context, AuthOtpFirstTimeRequired state) {
     return Column(
       children: [
         Text(
@@ -183,9 +187,9 @@ class RecoveryCodesScreen extends StatelessWidget {
                     text: 'Sign Up',
                     onPressed: () {
                       BlocProvider.of<AuthBloc>(context).add(
-                        AuthOTPVerified(
-                          userId: state.userId,
-                          otp: _otpController.text,
+                        AuthOtpFirstTimeVerified(
+                          user: state.user,
+                          code: _otpController.text,
                         ),
                       );
                     },

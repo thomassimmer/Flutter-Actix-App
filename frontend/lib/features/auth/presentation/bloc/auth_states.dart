@@ -24,11 +24,21 @@ class AuthAuthenticated extends AuthState {
 
 class AuthUnauthenticated extends AuthState {}
 
-class AuthOTPRequired extends AuthState {
+class AuthOtpFirstTimeRequired extends AuthState {
+  final UserEntity user;
+  final OtpEntity? otp;
+
+  const AuthOtpFirstTimeRequired({required this.user, this.otp});
+
+  @override
+  List<Object?> get props => [user, otp];
+}
+
+class AuthOtpRequired extends AuthState {
   final String userId;
   final OtpEntity? otp;
 
-  const AuthOTPRequired({required this.userId, this.otp});
+  const AuthOtpRequired({required this.userId, this.otp});
 
   @override
   List<Object?> get props => [userId, otp];
@@ -41,4 +51,24 @@ class AuthFailure extends AuthState {
 
   @override
   List<Object> get props => [message];
+}
+
+class AuthOtpFirstTimeFailure extends AuthState {
+  final String message;
+  final UserEntity user;
+
+  const AuthOtpFirstTimeFailure({required this.message, required this.user});
+
+  @override
+  List<Object> get props => [message, user];
+}
+
+class AuthOtpFailure extends AuthState {
+  final String message;
+  final String userId;
+
+  const AuthOtpFailure({required this.message, required this.userId});
+
+  @override
+  List<Object> get props => [message, userId];
 }
