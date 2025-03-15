@@ -38,7 +38,6 @@ class AuthRepositoryImpl implements AuthRepository {
       return UserToken(
           accessToken: userTokenModel.accessToken,
           refreshToken: userTokenModel.refreshToken,
-          expiresIn: userTokenModel.expiresIn,
           recoveryCodes: userTokenModel.recoveryCodes);
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
@@ -66,9 +65,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return result.fold(
           (userTokenModel) => Left(UserToken(
-              accessToken: userTokenModel.accessToken,
-              refreshToken: userTokenModel.refreshToken,
-              expiresIn: userTokenModel.expiresIn)),
+                accessToken: userTokenModel.accessToken,
+                refreshToken: userTokenModel.refreshToken,
+              )),
           (string) => Right(string));
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
@@ -145,9 +144,9 @@ class AuthRepositoryImpl implements AuthRepository {
           .validateOtp(ValidateOtpRequestModel(userId: userId, code: code));
 
       return UserToken(
-          accessToken: userTokenModel.accessToken,
-          refreshToken: userTokenModel.refreshToken,
-          expiresIn: userTokenModel.expiresIn);
+        accessToken: userTokenModel.accessToken,
+        refreshToken: userTokenModel.refreshToken,
+      );
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
       throw NetworkDomainError(
@@ -223,9 +222,9 @@ class AuthRepositoryImpl implements AuthRepository {
                   recoveryCode: recoveryCode));
 
       return UserToken(
-          accessToken: userTokenModel.accessToken,
-          refreshToken: userTokenModel.refreshToken,
-          expiresIn: userTokenModel.expiresIn);
+        accessToken: userTokenModel.accessToken,
+        refreshToken: userTokenModel.refreshToken,
+      );
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
       throw NetworkDomainError(
@@ -255,9 +254,9 @@ class AuthRepositoryImpl implements AuthRepository {
                   code: code, username: username, recoveryCode: recoveryCode));
 
       return UserToken(
-          accessToken: userTokenModel.accessToken,
-          refreshToken: userTokenModel.refreshToken,
-          expiresIn: userTokenModel.expiresIn);
+        accessToken: userTokenModel.accessToken,
+        refreshToken: userTokenModel.refreshToken,
+      );
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
       throw NetworkDomainError(
@@ -286,9 +285,9 @@ class AuthRepositoryImpl implements AuthRepository {
                   username: username, recoveryCode: recoveryCode));
 
       return UserToken(
-          accessToken: userTokenModel.accessToken,
-          refreshToken: userTokenModel.refreshToken,
-          expiresIn: userTokenModel.expiresIn);
+        accessToken: userTokenModel.accessToken,
+        refreshToken: userTokenModel.refreshToken,
+      );
     } on NetworkError catch (e) {
       logger.e('Network error occurred: ${e.message}');
       throw NetworkDomainError(

@@ -1,7 +1,7 @@
 use crate::{
     core::{helpers::mock_now::now, structs::responses::GenericResponse},
     features::auth::{
-        helpers::token::generate_tokens,
+        helpers::token::generate_access_token,
         structs::{models::Claims, requests::RefreshTokenRequest, responses::RefreshTokenResponse},
     },
 };
@@ -76,11 +76,10 @@ pub async fn refresh_token(
     };
 
     // Generate a new access token
-    let (new_access_token, _, new_claims) = generate_tokens(secret.as_bytes(), claims.jti);
+    let (new_access_token, _) = generate_access_token(secret.as_bytes(), &claims.jti);
 
     HttpResponse::Ok().json(RefreshTokenResponse {
         status: "success".to_string(),
         access_token: new_access_token,
-        expires_in: new_claims.exp,
     })
 }

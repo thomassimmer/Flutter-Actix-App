@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
 import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
+import 'package:http/http.dart' as http;
 
 class AuthService {
   final String baseUrl;
@@ -28,9 +28,8 @@ class AuthService {
       final jsonBody = json.decode(response.body);
       final newAccessToken = jsonBody['accessToken'] as String;
       final newRefreshToken = jsonBody['refreshToken'] as String;
-      final expiresIn = jsonBody['expiresIn'] as int;
 
-      await tokenStorage.saveTokens(newAccessToken, newRefreshToken, expiresIn);
+      await tokenStorage.saveTokens(newAccessToken, newRefreshToken);
       return;
     }
 
