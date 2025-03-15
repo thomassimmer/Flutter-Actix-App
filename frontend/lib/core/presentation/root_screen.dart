@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/core/errors/mapper.dart';
 import 'package:flutteractixapp/core/themes/app_theme.dart';
 import 'package:flutteractixapp/core/widgets/icon_with_warning.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
@@ -65,14 +64,10 @@ class RootScreen extends StatelessWidget {
             }
           }),
           BlocListener<ProfileBloc, ProfileState>(listener: (context, state) {
-            final errorMapper = ErrorMapper(context);
-
             if (state is ProfileUnauthenticated) {
               if (state.error != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content:
-                          Text(errorMapper.mapFailureToMessage(state.error!))),
+                  SnackBar(content: Text(state.error!.display(context))),
                 );
               }
             }

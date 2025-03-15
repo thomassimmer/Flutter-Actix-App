@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutteractixapp/core/errors/domain_error.dart';
 
 abstract class AuthState extends Equatable {
-  final Exception? error;
+  final DomainError? error;
 
   const AuthState({this.error});
 

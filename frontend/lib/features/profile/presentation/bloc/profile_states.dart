@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutteractixapp/core/errors/domain_error.dart';
 import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 
 abstract class ProfileState extends Equatable {
-  final Exception? error;
+  final DomainError? error;
   final User? profile;
 
   const ProfileState({this.error, this.profile});

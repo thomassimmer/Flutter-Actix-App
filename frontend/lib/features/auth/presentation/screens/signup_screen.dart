@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/core/errors/mapper.dart';
+import 'package:flutteractixapp/core/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
@@ -40,8 +40,6 @@ class SignupScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(30.0),
                   child: BlocListener<AuthBloc, AuthState>(
                       listener: (context, state) {
-                    final errorMapper = ErrorMapper(context);
-
                     if (state is AuthAuthenticatedAfterRegistration) {
                       if (state.recoveryCodes != null) {
                         context.go('/recovery-codes');
@@ -52,8 +50,7 @@ class SignupScreen extends StatelessWidget {
                     if (state is AuthUnauthenticated) {
                       if (state.error != null) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(errorMapper
-                                .mapFailureToMessage(state.error!))));
+                            content: Text(state.error!.display(context))));
                       }
                     }
                   }, child: BlocBuilder<AuthBloc, AuthState>(
@@ -86,15 +83,15 @@ class SignupScreen extends StatelessWidget {
     final displayUsernameError = context.select(
       (LoginCubit cubit) => cubit.state.username.displayError,
     );
-    final displayUsernameErrorMessage = displayUsernameError is Exception
-        ? ErrorMapper(context).mapFailureToMessage(displayUsernameError)
+    final displayUsernameErrorMessage = displayUsernameError is DomainError
+        ? displayUsernameError.display(context)
         : null;
 
     final displayPasswordError = context.select(
       (LoginCubit cubit) => cubit.state.password.displayError,
     );
-    final displayPasswordErrorMessage = displayPasswordError is Exception
-        ? ErrorMapper(context).mapFailureToMessage(displayPasswordError)
+    final displayPasswordErrorMessage = displayPasswordError is DomainError
+        ? displayPasswordError.display(context)
         : null;
 
     return Column(

@@ -66,7 +66,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         authBloc.add(AuthLogoutRequested());
       } else {
         emit(ProfileUnauthenticated(
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       }
     }
   }
@@ -93,11 +93,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
-          error: error is Exception ? error : UnknownDomainError(),
+          error: error is DomainError ? error : UnknownDomainError(),
         ));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       }
     }
   }
@@ -128,10 +128,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       }
     }
   }
@@ -162,10 +162,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       }
     }
   }
@@ -194,11 +194,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
-          error: error is Exception ? error : UnknownDomainError(),
+          error: error is DomainError ? error : UnknownDomainError(),
         ));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       }
     }
   }
@@ -221,10 +221,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       }
     }
   }
@@ -248,10 +248,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       } else if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
             profile: currentState.profile,
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       } else {
         emit(ProfileUnauthenticated(
-            error: error is Exception ? error : UnknownDomainError()));
+            error: error is DomainError ? error : UnknownDomainError()));
       }
     }
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/core/errors/mapper.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
@@ -22,13 +21,9 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: BlocListener<ProfileBloc, ProfileState>(
               listener: (context, state) {
-            ErrorMapper errorMapper = ErrorMapper(context);
-
             if (state.error != null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text(errorMapper.mapFailureToMessage(state.error!))),
+                SnackBar(content: Text(state.error!.display(context))),
               );
             }
           }, child: BlocBuilder<ProfileBloc, ProfileState>(
