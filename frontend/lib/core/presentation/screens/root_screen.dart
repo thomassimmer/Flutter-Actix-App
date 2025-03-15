@@ -112,21 +112,27 @@ class RootScreen extends StatelessWidget {
                         ),
                         child: NavigationRail(
                           backgroundColor: Colors.transparent,
-                          unselectedLabelTextStyle:
-                              TextStyle(color: Colors.white),
-                          selectedLabelTextStyle:
-                              TextStyle(color: Colors.white),
-                          selectedIconTheme: IconThemeData(color: Colors.blue),
-                          unselectedIconTheme:
-                              IconThemeData(color: Colors.white),
-                          groupAlignment: 0.0,
+                          indicatorColor: context.colors.background,
+                          useIndicator: true,
+                          unselectedLabelTextStyle: TextStyle(
+                            color: context.colors.textOnPrimary,
+                          ),
+                          selectedLabelTextStyle: TextStyle(
+                            color: context.colors.textOnPrimary,
+                          ),
+                          selectedIconTheme:
+                              IconThemeData(color: context.colors.primary),
+                          unselectedIconTheme: IconThemeData(
+                              color: context.colors.textOnPrimary),
                           selectedIndex: _calculateSelectedIndex(context),
                           onDestinationSelected: onItemTapped,
                           labelType: NavigationRailLabelType.all,
                           destinations: <NavigationRailDestination>[
                             NavigationRailDestination(
                               icon: Icon(Icons.check_circle_outline),
-                              selectedIcon: Icon(Icons.check_circle),
+                              selectedIcon: Icon(
+                                Icons.check_circle,
+                              ),
                               label: Text(AppLocalizations.of(context)!.habits),
                             ),
                             NavigationRailDestination(
@@ -168,13 +174,14 @@ class RootScreen extends StatelessWidget {
                             WidgetStateProperty.resolveWith<IconThemeData>(
                           (Set<WidgetState> states) =>
                               states.contains(WidgetState.selected)
-                                  ? const IconThemeData(color: Colors.blue)
-                                  : const IconThemeData(color: Colors.white),
+                                  ? IconThemeData(color: context.colors.primary)
+                                  : IconThemeData(
+                                      color: context.colors.textOnPrimary),
                         ),
                         labelTextStyle:
                             WidgetStateProperty.resolveWith<TextStyle>(
                           (Set<WidgetState> states) =>
-                              const TextStyle(color: Colors.white),
+                              TextStyle(color: context.colors.textOnPrimary),
                         ),
                       ),
                       child: Container(
@@ -190,7 +197,7 @@ class RootScreen extends StatelessWidget {
                           ),
                           child: NavigationBar(
                             backgroundColor: Colors.transparent,
-                            indicatorColor: Colors.white,
+                            indicatorColor: context.colors.background,
                             selectedIndex: _calculateSelectedIndex(context),
                             onDestinationSelected: onItemTapped,
                             destinations: <NavigationDestination>[

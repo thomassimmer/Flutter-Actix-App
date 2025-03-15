@@ -55,19 +55,15 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
         SizedBox(height: 40),
         Text(
           AppLocalizations.of(context)!.welcome,
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
           textAlign: TextAlign.center,
+          style: context.typographies.headingLarge,
         ),
         SizedBox(height: 16),
         Text(
           AppLocalizations.of(context)!.pleaseLoginOrSignUp,
           style: TextStyle(
             fontSize: 18,
-            color: Colors.white70,
+            color: context.colors.hint,
           ),
           textAlign: TextAlign.center,
         ),

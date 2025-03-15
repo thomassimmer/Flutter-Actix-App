@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -37,27 +38,25 @@ class CustomTextField extends StatelessWidget {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
             borderSide: BorderSide(
-              color: Colors.blue.shade900,
+              color: context.colors.secondary,
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
             borderSide: BorderSide(
-              color: Colors.blue.shade200,
-              width: 2.0,
+              color: context.colors.primary,
             ),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
             borderSide: BorderSide(
-              color: Colors.red.shade200,
-              width: 2.0,
+              color: context.colors.alert,
             ),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
             borderSide: BorderSide(
-              color: Colors.red.shade900,
+              color: context.colors.error,
             ),
           ),
           errorText: errorText,

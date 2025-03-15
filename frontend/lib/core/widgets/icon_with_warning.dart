@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutteractixapp/core/ui/extensions.dart';
 
 class IconWithWarning extends StatelessWidget {
   final IconData iconData;
@@ -24,14 +25,14 @@ class IconWithWarning extends StatelessWidget {
               width: 16.0,
               height: 16.0,
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: context.colors.error,
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Text(
                   '!',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: context.colors.textOnPrimary,
                     fontSize: 12.0,
                     fontWeight: FontWeight.bold,
                   ),
