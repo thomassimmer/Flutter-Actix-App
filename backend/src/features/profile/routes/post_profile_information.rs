@@ -14,6 +14,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use sqlx::PgPool;
+use tracing::error;
 
 #[post("/me")]
 pub async fn post_profile_information(
@@ -23,9 +24,10 @@ pub async fn post_profile_information(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
@@ -34,8 +36,9 @@ pub async fn post_profile_information(
             Some(user) => user,
             None => return HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
         },
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
+        Err(e) => {
+            error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response());
         }
     };
 
@@ -57,7 +60,8 @@ pub async fn post_profile_information(
     .fetch_optional(&mut *transaction)
     .await;
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }
@@ -67,6 +71,9 @@ pub async fn post_profile_information(
             code: "PROFILE_UPDATED".to_string(),
             user: request_user.to_user_data(),
         }),
-        Err(_) => HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response()),
+        Err(e) => {
+            error!("Error: {}", e);
+            HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
+        }
     }
 }

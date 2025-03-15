@@ -10,6 +10,7 @@ use crate::{
 };
 use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 use sqlx::PgPool;
+use tracing::error;
 
 #[post("/login")]
 pub async fn log_user_in(
@@ -20,7 +21,8 @@ pub async fn log_user_in(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
                 .json(AppError::DatabaseConnection.to_response())
         }
@@ -51,7 +53,8 @@ pub async fn log_user_in(
                     .json(AppError::InvalidUsernameOrPassword.to_response());
             }
         }
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
         }
     };
@@ -87,13 +90,15 @@ pub async fn log_user_in(
     .await
     {
         Ok((access_token, refresh_token)) => (access_token, refresh_token),
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
                 .json(AppError::TokenGeneration.to_response());
         }
     };
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }

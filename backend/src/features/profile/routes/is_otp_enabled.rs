@@ -6,6 +6,7 @@ use crate::{
 };
 use actix_web::{post, web, HttpResponse, Responder};
 use sqlx::PgPool;
+use tracing::error;
 
 #[post("/is-otp-enabled")]
 pub async fn is_otp_enabled(
@@ -14,9 +15,10 @@ pub async fn is_otp_enabled(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
@@ -45,6 +47,9 @@ pub async fn is_otp_enabled(
                 otp_enabled: false,
             }),
         },
-        Err(_) => HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response()),
+        Err(e) => {
+            error!("Error: {}", e);
+            HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
+        }
     }
 }

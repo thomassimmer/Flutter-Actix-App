@@ -14,6 +14,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use sqlx::PgPool;
+use tracing::error;
 
 #[delete("/{token_id}")]
 pub async fn delete_device(
@@ -24,9 +25,10 @@ pub async fn delete_device(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
@@ -39,20 +41,23 @@ pub async fn delete_device(
                     .json(AppError::DatabaseQuery.to_response());
             }
         }
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
+        Err(e) => {
+            error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response());
         }
     };
 
     let result_delete_token = delete_token(params.token_id, &mut transaction).await;
 
-    if result_delete_token.is_err() {
+    if let Err(e) = result_delete_token {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response());
     }
 
     cached_tokens.remove_key(claims.jti).await;
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }

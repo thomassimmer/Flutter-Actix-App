@@ -9,14 +9,16 @@ use actix_web::{
 };
 
 use sqlx::PgPool;
+use tracing::error;
 
 #[get("/disable")]
 async fn disable(pool: web::Data<PgPool>, request_claims: ReqData<Claims>) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
@@ -25,8 +27,9 @@ async fn disable(pool: web::Data<PgPool>, request_claims: ReqData<Claims>) -> im
             Some(user) => user,
             None => return HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
         },
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
+        Err(e) => {
+            error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response());
         }
     };
 
@@ -48,7 +51,8 @@ async fn disable(pool: web::Data<PgPool>, request_claims: ReqData<Claims>) -> im
     .fetch_optional(&mut *transaction)
     .await;
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }
@@ -58,6 +62,9 @@ async fn disable(pool: web::Data<PgPool>, request_claims: ReqData<Claims>) -> im
             code: "OTP_DISABLED".to_string(),
             two_fa_enabled: false,
         }),
-        Err(_) => HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response()),
+        Err(e) => {
+            error!("Error: {}", e);
+            HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
+        }
     }
 }

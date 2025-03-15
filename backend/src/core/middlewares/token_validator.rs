@@ -14,6 +14,7 @@ use futures_util::future::LocalBoxFuture;
 use sqlx::PgPool;
 use std::future::{ready, Ready};
 use std::rc::Rc;
+use tracing::error;
 
 pub struct TokenValidator {}
 
@@ -84,7 +85,8 @@ where
                         None => {
                             let mut transaction = match pool.begin().await {
                                 Ok(t) => t,
-                                Err(_) => {
+                                Err(e) => {
+                                    error!("Error: {}", e);
                                     return Ok(req.into_response(
                                         HttpResponse::InternalServerError()
                                             .json(AppError::DatabaseConnection.to_response())
@@ -107,7 +109,8 @@ where
                                         ));
                                     }
                                 }
-                                Err(_) => {
+                                Err(e) => {
+                                    error!("Error: {}", e);
                                     return Ok(req.into_response(
                                         HttpResponse::InternalServerError()
                                             .json(AppError::DatabaseQuery.to_response())
@@ -125,11 +128,14 @@ where
                     let res = service.call(req).await?;
                     Ok(res.map_into_left_body())
                 }
-                Err(_) => Ok(req.into_response(
-                    HttpResponse::Unauthorized()
-                        .json(AppError::InvalidAccessToken.to_response())
-                        .map_into_right_body(),
-                )),
+                Err(e) => {
+                    error!("Error: {}", e);
+                    Ok(req.into_response(
+                        HttpResponse::Unauthorized()
+                            .json(AppError::InvalidAccessToken.to_response())
+                            .map_into_right_body(),
+                    ))
+                }
             }
         })
     }

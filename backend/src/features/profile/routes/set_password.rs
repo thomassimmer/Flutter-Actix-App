@@ -6,6 +6,7 @@ use actix_web::{
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use rand::rngs::OsRng;
 use sqlx::PgPool;
+use tracing::error;
 
 use crate::{
     core::{constants::errors::AppError, structs::responses::GenericResponse},
@@ -29,9 +30,10 @@ pub async fn set_password(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
@@ -40,8 +42,9 @@ pub async fn set_password(
             Some(user) => user,
             None => return HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
         },
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
+        Err(e) => {
+            error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response());
         }
     };
 
@@ -73,8 +76,9 @@ pub async fn set_password(
     let argon2 = Argon2::default();
     let password_hash = match argon2.hash_password(body.new_password.as_bytes(), &salt) {
         Ok(hash) => hash.to_string(),
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(AppError::PasswordHash.to_response())
+        Err(e) => {
+            error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json(AppError::PasswordHash.to_response());
         }
     };
 
@@ -94,7 +98,8 @@ pub async fn set_password(
     .fetch_optional(&mut *transaction)
     .await;
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }
@@ -104,6 +109,9 @@ pub async fn set_password(
             code: "PASSWORD_CHANGED".to_string(),
             user: request_user.to_user_data(),
         }),
-        Err(_) => HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response()),
+        Err(e) => {
+            error!("Error: {}", e);
+            HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
+        }
     }
 }

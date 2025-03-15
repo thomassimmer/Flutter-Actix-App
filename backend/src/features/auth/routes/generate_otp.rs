@@ -12,14 +12,16 @@ use base32;
 use rand::Rng;
 use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
+use tracing::error;
 
 #[get("/generate")]
 pub async fn generate(pool: web::Data<PgPool>, request_claims: ReqData<Claims>) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
@@ -28,8 +30,9 @@ pub async fn generate(pool: web::Data<PgPool>, request_claims: ReqData<Claims>) 
             Some(user) => user,
             None => return HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
         },
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
+        Err(e) => {
+            error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response());
         }
     };
 
@@ -73,7 +76,8 @@ pub async fn generate(pool: web::Data<PgPool>, request_claims: ReqData<Claims>) 
     .fetch_optional(&mut *transaction)
     .await;
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }
@@ -84,6 +88,9 @@ pub async fn generate(pool: web::Data<PgPool>, request_claims: ReqData<Claims>) 
             otp_base32: otp_base32.to_owned(),
             otp_auth_url: otp_auth_url.to_owned(),
         }),
-        Err(_) => HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response()),
+        Err(e) => {
+            error!("Error: {}", e);
+            HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
+        }
     }
 }

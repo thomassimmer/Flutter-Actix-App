@@ -17,6 +17,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use sqlx::PgPool;
+use tracing::error;
 
 #[get("/")]
 pub async fn get_devices(
@@ -26,26 +27,29 @@ pub async fn get_devices(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
-    let tokens = get_user_tokens(claims.user_id, &mut transaction).await;
+    let get_tokens_result = get_user_tokens(claims.user_id, &mut transaction).await;
 
-    if tokens.is_err() {
+    if let Err(e) = get_tokens_result {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response());
     }
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }
 
     let mut devices = Vec::new();
 
-    for token in tokens.unwrap() {
+    for token in get_tokens_result.unwrap() {
         devices.push(DeviceData {
             token_id: token.token_id,
             parsed_device_info: ParsedDeviceInfo {
@@ -53,7 +57,7 @@ pub async fn get_devices(
                 is_mobile: token.is_mobile,
                 browser: token.browser,
                 app_version: token.app_version,
-                model: token.model
+                model: token.model,
             },
             last_activity_date: cached_tokens.get_value_for_key(token.token_id).await,
         });

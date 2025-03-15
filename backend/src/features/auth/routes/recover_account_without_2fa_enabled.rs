@@ -13,6 +13,7 @@ use crate::{
 use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use sqlx::PgPool;
+use tracing::error;
 
 #[post("/recover")]
 pub async fn recover_account_without_2fa_enabled(
@@ -23,7 +24,8 @@ pub async fn recover_account_without_2fa_enabled(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
                 .json(AppError::DatabaseConnection.to_response())
         }
@@ -54,7 +56,8 @@ pub async fn recover_account_without_2fa_enabled(
                     .json(AppError::InvalidUsernameOrRecoveryCode.to_response());
             }
         }
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
         }
     };
@@ -96,7 +99,8 @@ pub async fn recover_account_without_2fa_enabled(
             .fetch_optional(&mut *transaction)
             .await;
 
-            if updated_user_result.is_err() {
+            if let Err(e) = updated_user_result {
+                error!("Error: {}", e);
                 return HttpResponse::InternalServerError()
                     .json(AppError::UserUpdate.to_response());
             }
@@ -120,7 +124,8 @@ pub async fn recover_account_without_2fa_enabled(
     .execute(&mut *transaction)
     .await;
 
-    if delete_result.is_err() {
+    if let Err(e) = delete_result {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError().json(AppError::UserTokenDeletion.to_response());
     }
 
@@ -136,7 +141,8 @@ pub async fn recover_account_without_2fa_enabled(
     .await
     {
         Ok((access_token, refresh_token)) => (access_token, refresh_token),
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
                 .json(AppError::TokenGeneration.to_response());
         }
@@ -156,11 +162,13 @@ pub async fn recover_account_without_2fa_enabled(
     .fetch_optional(&mut *transaction)
     .await;
 
-    if updated_user_result.is_err() {
+    if let Err(e) = updated_user_result {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response());
     }
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }

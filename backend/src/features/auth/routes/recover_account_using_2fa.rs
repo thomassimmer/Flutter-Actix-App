@@ -12,6 +12,7 @@ use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
+use tracing::error;
 
 #[post("/recover-using-2fa")]
 pub async fn recover_account_using_2fa(
@@ -22,9 +23,10 @@ pub async fn recover_account_using_2fa(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
@@ -53,8 +55,9 @@ pub async fn recover_account_using_2fa(
                     .json(AppError::InvalidUsernameOrCodeOrRecoveryCode.to_response());
             }
         }
-        Err(_) => {
-            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
+        Err(e) => {
+            error!("Error: {}", e);
+            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response());
         }
     };
 
@@ -120,7 +123,8 @@ pub async fn recover_account_using_2fa(
             .fetch_optional(&mut *transaction)
             .await;
 
-            if updated_user_result.is_err() {
+            if let Err(e) = updated_user_result {
+                error!("Error: {}", e);
                 return HttpResponse::InternalServerError()
                     .json(AppError::UserUpdate.to_response());
             }
@@ -144,7 +148,8 @@ pub async fn recover_account_using_2fa(
     .execute(&mut *transaction)
     .await;
 
-    if delete_result.is_err() {
+    if let Err(e) = delete_result {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError().json(AppError::UserTokenDeletion.to_response());
     }
 
@@ -160,7 +165,8 @@ pub async fn recover_account_using_2fa(
     .await
     {
         Ok((access_token, refresh_token)) => (access_token, refresh_token),
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
                 .json(AppError::TokenGeneration.to_response());
         }
@@ -180,11 +186,13 @@ pub async fn recover_account_using_2fa(
     .fetch_optional(&mut *transaction)
     .await;
 
-    if updated_user_result.is_err() {
+    if let Err(e) = updated_user_result {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response());
     }
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }

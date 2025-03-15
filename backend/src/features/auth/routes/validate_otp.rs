@@ -9,6 +9,7 @@ use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 
 use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
+use tracing::error;
 
 #[post("/validate")]
 async fn validate(
@@ -19,7 +20,8 @@ async fn validate(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
                 .json(AppError::DatabaseConnection.to_response())
         }
@@ -52,7 +54,8 @@ async fn validate(
                 });
             }
         }
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response())
         }
     };
@@ -91,13 +94,15 @@ async fn validate(
     .await
     {
         Ok((access_token, refresh_token)) => (access_token, refresh_token),
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
                 .json(AppError::TokenGeneration.to_response());
         }
     };
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }

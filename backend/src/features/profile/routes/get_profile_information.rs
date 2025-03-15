@@ -11,6 +11,7 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use sqlx::PgPool;
+use tracing::error;
 
 #[get("/me")]
 pub async fn get_profile_information(
@@ -19,7 +20,8 @@ pub async fn get_profile_information(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
                 .json(AppError::DatabaseTransaction.to_response());
         }
@@ -35,6 +37,9 @@ pub async fn get_profile_information(
             }),
             None => HttpResponse::NotFound().json(AppError::UserNotFound.to_response()),
         },
-        Err(_) => HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response()),
+        Err(e) => {
+            error!("Error: {}", e);
+            HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response())
+        }
     }
 }

@@ -19,6 +19,7 @@ use crate::{
 use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use sqlx::PgPool;
+use tracing::error;
 use uuid::Uuid;
 
 #[post("/refresh-token")]
@@ -31,9 +32,10 @@ pub async fn refresh_token(
 ) -> impl Responder {
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
-        Err(_) => {
+        Err(e) => {
+            error!("Error: {}", e);
             return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+                .json(AppError::DatabaseConnection.to_response());
         }
     };
 
@@ -42,7 +44,8 @@ pub async fn refresh_token(
     let decoding_key = DecodingKey::from_secret(secret.as_bytes());
     let token_data = decode::<Claims>(&refresh_token, &decoding_key, &Validation::default());
 
-    if token_data.is_err() {
+    if let Err(e) = token_data {
+        error!("Error: {}", e);
         return HttpResponse::Unauthorized().json(AppError::InvalidRefreshToken.to_response());
     }
 
@@ -65,7 +68,7 @@ pub async fn refresh_token(
             if now() > expires_at {
                 // Remove user session / token
                 if let Err(e) = delete_token(claims.jti, &mut transaction).await {
-                    eprintln!("Error: {}", e);
+                    error!("Error: {}", e);
                     return HttpResponse::InternalServerError()
                         .json(AppError::DatabaseTransaction.to_response());
                 }
@@ -83,7 +86,8 @@ pub async fn refresh_token(
 
     // Remove token and create a new one so the user never has to
     // connect again, unless after 7 days of inactivity.
-    if (delete_token(claims.jti, &mut transaction).await).is_err() {
+    if let Err(e) = delete_token(claims.jti, &mut transaction).await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }
@@ -98,23 +102,24 @@ pub async fn refresh_token(
         generate_refresh_token(secret.as_bytes(), new_jti, claims.user_id, claims.is_admin);
     let parsed_device_info = get_user_agent(req).await;
 
-    if (save_tokens(
+    if let Err(e) = save_tokens(
         claims.user_id,
         new_jti,
         refresh_token_expires_at,
         parsed_device_info,
         &mut transaction,
     )
-    .await)
-        .is_err()
+    .await
     {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }
 
     cached_tokens.update_or_insert_key(new_jti, now()).await;
 
-    if (transaction.commit().await).is_err() {
+    if let Err(e) = transaction.commit().await {
+        error!("Error: {}", e);
         return HttpResponse::InternalServerError()
             .json(AppError::DatabaseTransaction.to_response());
     }
