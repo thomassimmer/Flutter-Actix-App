@@ -15,7 +15,7 @@ class ValidateOneTimePasswordUseCase {
     final result = await authRepository.validateOneTimePassword(
         userId: userId, code: code);
 
-    result.fold((_) => {}, (userToken) async {
+    await result.fold((_) async {}, (userToken) async {
       // Store tokens securely after successful login
       await TokenStorage().saveTokens(
         userToken.accessToken,
