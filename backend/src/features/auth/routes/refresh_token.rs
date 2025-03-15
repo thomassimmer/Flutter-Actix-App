@@ -63,6 +63,13 @@ pub async fn refresh_token(
     match stored_token {
         Ok(Some(expires_at)) => {
             if now() > expires_at {
+                // Remove user session / token
+                if let Err(e) = delete_token(claims.jti, &mut transaction).await {
+                    eprintln!("Error: {}", e);
+                    return HttpResponse::InternalServerError()
+                        .json(AppError::DatabaseTransaction.to_response());
+                }
+
                 return HttpResponse::Unauthorized().json(GenericResponse {
                     code: "REFRESH_TOKEN_EXPIRED".to_string(),
                     message: "Refresh token expired".to_string(),
