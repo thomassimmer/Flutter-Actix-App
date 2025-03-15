@@ -53,7 +53,7 @@ class AppTheme extends ThemeExtension<AppTheme> {
         ),
         tabBarTheme: TabBarTheme(
           labelColor: colors.text,
-          unselectedLabelColor: colors.text.withOpacity(0.4),
+          unselectedLabelColor: colors.text.withValues(alpha: 0.4),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: styles.buttonLarge.copyWith(
@@ -121,7 +121,7 @@ class AppTheme extends ThemeExtension<AppTheme> {
           labelStyle: typographies.bodySmall.copyWith(color: colors.text),
           hintStyle: typographies.bodySmall.copyWith(
             fontWeight: FontWeight.w500,
-            color: colors.text.withOpacity(0.4),
+            color: colors.text.withValues(alpha: 0.4),
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(100),

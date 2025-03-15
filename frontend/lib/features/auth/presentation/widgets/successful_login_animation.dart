@@ -98,7 +98,7 @@ class SuccessfulLoginAnimationState extends State<SuccessfulLoginAnimation>
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          context.colors.primary.withOpacity(0.2),
+                          context.colors.primary.withValues(alpha: 0.2),
                           Colors.transparent
                         ],
                         stops: [0.6, 1.0],
