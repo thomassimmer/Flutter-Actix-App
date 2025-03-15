@@ -23,3 +23,7 @@ class PasswordMustBeChangedDomainError extends DomainError {}
 class UserAlreadyExistingDomainError extends DomainError {}
 
 class PasswordNotExpiredDomainError extends DomainError {}
+
+class InvalidRefreshTokenDomainError extends DomainError {}
+
+class RefreshTokenNotFoundDomainError extends DomainError {}

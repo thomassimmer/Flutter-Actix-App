@@ -15,7 +15,7 @@ class ProfileRemoteDataSource {
 
   ProfileRemoteDataSource({required this.apiClient, required this.baseUrl});
 
-  Future<UserModel> getProfileInformation(String accessToken) async {
+  Future<UserModel> getProfileInformation() async {
     final url = Uri.parse('$baseUrl/users/me');
     final response = await apiClient.get(
       url,
@@ -43,7 +43,7 @@ class ProfileRemoteDataSource {
   }
 
   Future<UserModel> postProfileInformation(
-      String accessToken, UpdateUserRequestModel profile) async {
+      UpdateUserRequestModel profile) async {
     final url = Uri.parse('$baseUrl/users/me');
     final response = await apiClient.post(
       url,
@@ -74,7 +74,7 @@ class ProfileRemoteDataSource {
     throw UnknownError();
   }
 
-  Future<UserModel> setPassword(String accessToken,
+  Future<UserModel> setPassword(
       SetPasswordRequestModel setPasswordRequestModel) async {
     final url = Uri.parse('$baseUrl/users/set-password');
     final response = await apiClient.post(
@@ -115,7 +115,7 @@ class ProfileRemoteDataSource {
     throw UnknownError();
   }
 
-  Future<UserModel> updatePassword(String accessToken,
+  Future<UserModel> updatePassword(
       UpdatePasswordRequestModel updatePasswordRequestModel) async {
     final url = Uri.parse('$baseUrl/users/update-password');
     final response = await apiClient.post(

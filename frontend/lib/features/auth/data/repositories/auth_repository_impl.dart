@@ -108,6 +108,12 @@ class AuthRepositoryImpl implements AuthRepository {
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InvalidRefreshTokenError {
+      logger.e('InvalidRefreshTokenError occured.');
+      throw InvalidRefreshTokenDomainError();
+    } on RefreshTokenNotFoundError {
+      logger.e('RefreshTokenNotFoundError occured.');
+      throw RefreshTokenNotFoundDomainError();
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
       throw RefreshTokenExpiredDomainError();
@@ -134,6 +140,12 @@ class AuthRepositoryImpl implements AuthRepository {
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InvalidRefreshTokenError {
+      logger.e('InvalidRefreshTokenError occured.');
+      throw InvalidRefreshTokenDomainError();
+    } on RefreshTokenNotFoundError {
+      logger.e('RefreshTokenNotFoundError occured.');
+      throw RefreshTokenNotFoundDomainError();
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
       throw RefreshTokenExpiredDomainError();
@@ -194,6 +206,12 @@ class AuthRepositoryImpl implements AuthRepository {
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InvalidRefreshTokenError {
+      logger.e('InvalidRefreshTokenError occured.');
+      throw InvalidRefreshTokenDomainError();
+    } on RefreshTokenNotFoundError {
+      logger.e('RefreshTokenNotFoundError occured.');
+      throw RefreshTokenNotFoundDomainError();
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
       throw RefreshTokenExpiredDomainError();

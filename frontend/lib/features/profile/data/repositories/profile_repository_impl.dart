@@ -19,10 +19,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
   ProfileRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<User> getProfileInformation(String accessToken) async {
+  Future<User> getProfileInformation() async {
     try {
-      final userModel =
-          await remoteDataSource.getProfileInformation(accessToken);
+      final userModel = await remoteDataSource.getProfileInformation();
 
       return User(
           username: userModel.username,
@@ -38,6 +37,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InvalidRefreshTokenError {
+      logger.e('InvalidRefreshTokenError occured.');
+      throw InvalidRefreshTokenDomainError();
+    } on RefreshTokenNotFoundError {
+      logger.e('RefreshTokenNotFoundError occured.');
+      throw RefreshTokenNotFoundDomainError();
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
       throw RefreshTokenExpiredDomainError();
@@ -51,10 +56,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<User> postProfileInformation(String accessToken, User profile) async {
+  Future<User> postProfileInformation(User profile) async {
     try {
       final userModel = await remoteDataSource.postProfileInformation(
-          accessToken,
           UpdateUserRequestModel(
               username: profile.username,
               locale: profile.locale,
@@ -74,6 +78,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InvalidRefreshTokenError {
+      logger.e('InvalidRefreshTokenError occured.');
+      throw InvalidRefreshTokenDomainError();
+    } on RefreshTokenNotFoundError {
+      logger.e('RefreshTokenNotFoundError occured.');
+      throw RefreshTokenNotFoundDomainError();
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
       throw RefreshTokenExpiredDomainError();
@@ -87,10 +97,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<User> setPassword(String accessToken, String newPassword) async {
+  Future<User> setPassword(String newPassword) async {
     try {
-      final userModel = await remoteDataSource.setPassword(
-          accessToken, SetPasswordRequestModel(newPassword: newPassword));
+      final userModel = await remoteDataSource
+          .setPassword(SetPasswordRequestModel(newPassword: newPassword));
 
       return User(
           username: userModel.username,
@@ -109,6 +119,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on PasswordNotExpiredError {
       logger.e('PasswordNotExpiredError occured.');
       throw PasswordNotExpiredDomainError();
+    } on RefreshTokenNotFoundError {
+      logger.e('RefreshTokenNotFoundError occured.');
+      throw RefreshTokenNotFoundDomainError();
+    } on InvalidRefreshTokenError {
+      logger.e('InvalidRefreshTokenError occured.');
+      throw InvalidRefreshTokenDomainError();
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
       throw RefreshTokenExpiredDomainError();
@@ -123,10 +139,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<User> updatePassword(
-      String accessToken, String currentPassword, String newPassword) async {
+      String currentPassword, String newPassword) async {
     try {
       final userModel = await remoteDataSource.updatePassword(
-          accessToken,
           UpdatePasswordRequestModel(
               currentPassword: currentPassword, newPassword: newPassword));
 
@@ -147,6 +162,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on UnauthorizedError {
       logger.e('UnauthorizedError occurred.');
       throw UnauthorizedDomainError();
+    } on InvalidRefreshTokenError {
+      logger.e('InvalidRefreshTokenError occured.');
+      throw InvalidRefreshTokenDomainError();
+    } on RefreshTokenNotFoundError {
+      logger.e('RefreshTokenNotFoundError occured.');
+      throw RefreshTokenNotFoundDomainError();
     } on RefreshTokenExpiredError {
       logger.e('RefreshTokenExpiredError occured.');
       throw RefreshTokenExpiredDomainError();
