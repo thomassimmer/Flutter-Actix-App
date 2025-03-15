@@ -1,8 +1,8 @@
 class UserTokenEntity {
   final String accessToken;
   final String refreshToken;
-  final String expiresIn;
-  final String? recoveryCodes;
+  final int expiresIn;
+  final List<String>? recoveryCodes;
 
   const UserTokenEntity(
       {required this.accessToken,

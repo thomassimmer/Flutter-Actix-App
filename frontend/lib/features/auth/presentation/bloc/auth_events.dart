@@ -22,17 +22,23 @@ class AuthSignupRequested extends AuthEvent {
   List<Object> get props => [username, password];
 }
 
-class AuthLoginRequested extends AuthSignupRequested {
+class AuthLoginRequested extends AuthEvent {
+  final String username;
+  final String password;
+
   const AuthLoginRequested({
-    required super.username,
-    required super.password,
+    required this.username,
+    required this.password,
   });
+
+  @override
+  List<Object> get props => [username, password];
 }
 
 class AuthOtpGenerationRequested extends AuthEvent {
   final String accessToken;
   final String refreshToken;
-  final String expiresIn;
+  final int expiresIn;
 
   const AuthOtpGenerationRequested(
       {required this.accessToken,
@@ -43,15 +49,18 @@ class AuthOtpGenerationRequested extends AuthEvent {
   List<Object> get props => [accessToken, refreshToken, expiresIn];
 }
 
-class AuthOtpVerificationRequested extends AuthOtpGenerationRequested {
+class AuthOtpVerificationRequested extends AuthEvent {
+  final String accessToken;
+  final String refreshToken;
+  final int expiresIn;
   final String otpBase32;
   final String otpAuthUrl;
   final String code;
 
   const AuthOtpVerificationRequested(
-      {required super.accessToken,
-      required super.refreshToken,
-      required super.expiresIn,
+      {required this.accessToken,
+      required this.refreshToken,
+      required this.expiresIn,
       required this.otpBase32,
       required this.otpAuthUrl,
       required this.code});

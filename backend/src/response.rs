@@ -31,7 +31,7 @@ pub struct UserSignupResponse {
     pub recovery_codes: Vec<String>,
     pub access_token: String,
     pub refresh_token: String,
-    pub expires_in: DateTime<Utc>,
+    pub expires_in: u64,
 }
 
 #[derive(Serialize, Debug)]

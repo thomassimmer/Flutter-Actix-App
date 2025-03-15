@@ -34,8 +34,6 @@ services:
       - ./backend:/app
     networks:
       - app-network
-    environment:
-      - RUST_LOG=info
 
   db:
     image: reallystick_db

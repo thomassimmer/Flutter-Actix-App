@@ -14,7 +14,7 @@ class AuthLoading extends AuthState {}
 class AuthAuthenticated extends AuthState {
   final String accessToken;
   final String refreshToken;
-  final String expiresIn;
+  final int expiresIn;
 
   const AuthAuthenticated({
     required this.accessToken,
@@ -31,7 +31,7 @@ class AuthAuthenticated extends AuthState {
 }
 
 class AuthAuthenticatedAfterRegistration extends AuthAuthenticated {
-  final String? recoveryCodes;
+  final List<String>? recoveryCodes;
   final bool hasVerifiedOtp;
 
   const AuthAuthenticatedAfterRegistration(

@@ -10,12 +10,14 @@ use crate::core::routes::health_check::health_check;
 use actix_cors::Cors;
 use actix_web::dev::Server;
 use actix_web::http::header;
+use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 
 pub fn run(listener: TcpListener, configuration: Settings) -> Result<Server, std::io::Error> {
     // Wrap the pool using web::Data, which boils down to an Arc smart pointer
+    println!("{:?}", &configuration.database.host);
     let connection_pool = get_connection_pool(&configuration.database);
     let secret = configuration.application.secret;
 
@@ -51,11 +53,13 @@ pub fn run(listener: TcpListener, configuration: Settings) -> Result<Server, std
                     .service(web::scope("/users").service(get_profile_information)),
             )
             .wrap(cors)
+            .wrap(Logger::default())
             .app_data(web::Data::new(connection_pool.clone()))
             .app_data(web::Data::new(secret.clone()))
     })
     .listen(listener)?
     .run();
+
     Ok(server)
 }
 

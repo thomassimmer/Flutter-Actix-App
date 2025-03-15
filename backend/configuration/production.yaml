@@ -1,6 +1,5 @@
 application:
-  host: 0.0.0.0
+  host: "reallystick.com"
 database:
+  host: "db"
   require_ssl: true
-email_client:
-  base_url: "https://reallystick.com"
