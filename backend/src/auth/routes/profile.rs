@@ -1,10 +1,11 @@
 use crate::{
     auth::helpers::token::retrieve_claims_for_token,
+    core::helpers::mock_now::now,
     models::User,
     response::{user_to_response, GenericResponse, UserResponse},
 };
 use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
-use chrono::{offset, DateTime, Utc};
+use chrono::{DateTime, Utc};
 use sqlx::PgPool;
 
 #[get("/me")]
@@ -15,7 +16,7 @@ pub async fn get_profile_information(
 ) -> impl Responder {
     match retrieve_claims_for_token(req, secret.to_string()) {
         Ok(claims) => {
-            if offset::Utc::now() > DateTime::<Utc>::from_timestamp(claims.exp as i64, 0).unwrap() {
+            if now() > DateTime::<Utc>::from_timestamp(claims.exp as i64, 0).unwrap() {
                 return HttpResponse::Unauthorized().json(GenericResponse {
                     status: "error".to_string(),
                     message: "Token expired".to_string(),

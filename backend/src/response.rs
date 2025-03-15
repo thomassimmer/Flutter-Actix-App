@@ -1,17 +1,17 @@
 use chrono::prelude::*;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::models::User;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct GenericResponse {
     pub status: String,
     pub message: String,
 }
 
 #[allow(non_snake_case)]
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Deserialize)]
 pub struct UserData {
     pub id: Uuid,
     pub username: String,
@@ -25,7 +25,7 @@ pub struct UserData {
     pub updatedAt: DateTime<Utc>,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Deserialize)]
 pub struct UserSignupResponse {
     pub status: String,
     pub recovery_codes: Vec<String>,
@@ -34,13 +34,13 @@ pub struct UserSignupResponse {
     pub expires_in: u64,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Deserialize)]
 pub struct UserLoginWhenOtpEnabledResponse {
     pub status: String,
     pub user_id: String,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Deserialize)]
 pub struct UserLoginResponse {
     pub status: String,
     pub access_token: String,
@@ -48,33 +48,33 @@ pub struct UserLoginResponse {
     pub expires_in: u64,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Deserialize)]
 pub struct RefreshTokenResponse {
     pub status: String,
     pub access_token: String,
     pub expires_in: u64,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct UserResponse {
     pub status: String,
     pub user: UserData,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct GenerateOtpResponse {
     pub status: String,
     pub otp_base32: String,
     pub otp_auth_url: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct VerifyOtpResponse {
     pub status: String,
     pub otp_verified: bool,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct DisableOtpResponse {
     pub status: String,
     pub otp_enabled: bool,

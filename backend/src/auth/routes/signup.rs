@@ -1,12 +1,12 @@
 use actix_web::{post, web, HttpResponse, Responder};
 use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
-use chrono::{DateTime, Utc};
 use rand::{distributions::Alphanumeric, rngs::OsRng, Rng};
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
     auth::helpers::token::generate_tokens,
+    core::helpers::mock_now::now,
     models::{User, UserRegisterSchema, UserToken},
     response::{GenericResponse, UserSignupResponse},
 };
@@ -107,8 +107,8 @@ pub async fn register_user(
         otp_verified: false,
         otp_base32: None,
         otp_auth_url: None,
-        created_at: Utc::now(),
-        updated_at: Utc::now(),
+        created_at: now(),
+        updated_at: now(),
         recovery_codes: hashed_recovery_codes.join(","),
     };
 
@@ -141,12 +141,15 @@ pub async fn register_user(
 
     let jti = Uuid::new_v4().to_string();
     let (access_token, refresh_token, claim) = generate_tokens(secret.as_bytes(), jti);
+    let refresh_token_expires_at = now()
+        .checked_add_signed(chrono::Duration::days(7)) // Access token expires in 15 minutes
+        .expect("invalid timestamp");
 
     let new_token = UserToken {
         id: Uuid::new_v4(),
         user_id: new_user.id,
         token_id: claim.jti,
-        expires_at: DateTime::<Utc>::from_timestamp(claim.exp as i64, 0).unwrap(),
+        expires_at: refresh_token_expires_at,
     };
 
     // Insert the new user token into the database

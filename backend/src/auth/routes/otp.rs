@@ -1,4 +1,5 @@
 use crate::auth::helpers::token::{generate_tokens, retrieve_claims_for_token};
+use crate::core::helpers::mock_now::now;
 use crate::models::{UserToken, ValidateOTPSchema};
 use crate::response::{
     DisableOtpResponse, GenerateOtpResponse, UserLoginResponse, VerifyOtpResponse,
@@ -10,7 +11,6 @@ use crate::{
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 
 use base32;
-use chrono::{DateTime, Utc};
 use rand::Rng;
 use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
@@ -330,11 +330,15 @@ async fn validate(
     let jti = Uuid::new_v4().to_string();
     let (access_token, refresh_token, claim) = generate_tokens(secret.as_bytes(), jti);
 
+    let refresh_token_expires_at = now()
+        .checked_add_signed(chrono::Duration::days(7)) // Access token expires in 15 minutes
+        .expect("invalid timestamp");
+
     let new_token = UserToken {
         id: Uuid::new_v4(),
         user_id: user.id,
         token_id: claim.jti,
-        expires_at: DateTime::<Utc>::from_timestamp(claim.exp as i64, 0).unwrap(),
+        expires_at: refresh_token_expires_at,
     };
 
     // Insert the new user token into the database

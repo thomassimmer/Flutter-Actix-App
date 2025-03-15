@@ -1,4 +1,5 @@
 use crate::auth::helpers::token::generate_tokens;
+use crate::core::helpers::mock_now::now;
 use crate::models::UserToken;
 use crate::response::GenericResponse;
 use crate::{
@@ -10,7 +11,6 @@ use argon2::{
     password_hash::{PasswordHash, PasswordVerifier},
     Argon2,
 };
-use chrono::{DateTime, Utc};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -97,11 +97,15 @@ pub async fn log_user_in(
     let jti = Uuid::new_v4().to_string();
     let (access_token, refresh_token, claim) = generate_tokens(secret.as_bytes(), jti);
 
+    let refresh_token_expires_at = now()
+        .checked_add_signed(chrono::Duration::days(7)) // Access token expires in 15 minutes
+        .expect("invalid timestamp");
+
     let new_token = UserToken {
         id: Uuid::new_v4(),
         user_id: user.id,
         token_id: claim.jti,
-        expires_at: DateTime::<Utc>::from_timestamp(claim.exp as i64, 0).unwrap(),
+        expires_at: refresh_token_expires_at,
     };
 
     // Insert the new user token into the database
