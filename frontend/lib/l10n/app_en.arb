@@ -93,5 +93,7 @@
   "forbiddenError": "You are not authorized to perform this action",
   "passwordMustBeChangedError": "Your password must be changed to be able to login.",
   "userAlreadyExistingError": "A user with this username already exists. Please choose another one.",
-  "passwordNotExpiredError": "Your password is not expired. You cannot set it like this."
+  "passwordNotExpiredError": "Your password is not expired. You cannot set it like this.",
+  "passwordNotComplexEnough": "Your password must contain at least a letter, a digit and a special symbol.",
+  "passwordTooShortError": "Your password must contain at least 8 characters."
 }

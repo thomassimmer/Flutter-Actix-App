@@ -5,6 +5,7 @@ import 'package:flutteractixapp/core/errors/mapper.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
@@ -82,6 +83,13 @@ class SignupScreen extends StatelessWidget {
     final Brightness brightness = MediaQuery.of(context).platformBrightness;
     final String themeData = brightness == Brightness.dark ? "dark" : "light";
 
+    final displayPasswordError = context.select(
+      (LoginCubit cubit) => cubit.state.password.displayError,
+    );
+    final displayPasswordErrorMessage = displayPasswordError is Exception
+        ? ErrorMapper(context).mapFailureToMessage(displayPasswordError)
+        : null;
+
     return Column(
       children: [
         Text(
@@ -97,8 +105,11 @@ class SignupScreen extends StatelessWidget {
         SizedBox(height: 16),
         CustomTextField(
           controller: _passwordController,
-          label: AppLocalizations.of(context)!.password,
+          onChanged: (password) =>
+              context.read<LoginCubit>().passwordChanged(password),
           obscureText: true,
+          label: AppLocalizations.of(context)!.password,
+          errorText: displayPasswordErrorMessage,
         ),
         SizedBox(height: 24),
         Button(

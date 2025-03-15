@@ -7,6 +7,7 @@ import 'package:flutteractixapp/core/service_locator.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/recover_account_screen.dart';
 import 'package:flutteractixapp/features/auth/presentation/screens/recovery_codes_screen.dart';
@@ -32,13 +33,14 @@ Future<void> main() async {
 
   authBloc.add(AuthInitRequested());
 
-  runApp(
-    BlocProvider<AuthBloc>(
+  runApp(BlocProvider(
+    create: (_) => LoginCubit(),
+    child: BlocProvider<AuthBloc>(
       create: (_) => authBloc,
       child:
           BlocProvider<ProfileBloc>(create: (_) => profileBloc, child: MyApp()),
     ),
-  );
+  ));
 }
 
 final _router = GoRouter(
