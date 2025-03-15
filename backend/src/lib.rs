@@ -4,8 +4,7 @@ pub mod startup;
 pub mod features {
     pub mod auth {
         pub mod helpers {
-            pub mod error;
-            pub mod serializer;
+            pub mod errors;
             pub mod token;
         }
 
@@ -17,9 +16,9 @@ pub mod features {
         }
 
         pub mod structs {
-            pub mod model;
-            pub mod request;
-            pub mod response;
+            pub mod models;
+            pub mod requests;
+            pub mod responses;
         }
     }
 
@@ -29,9 +28,9 @@ pub mod features {
         }
 
         pub mod structs {
-            pub mod model;
-            pub mod request;
-            pub mod response;
+            pub mod models;
+            pub mod requests;
+            pub mod responses;
         }
     }
 }
@@ -46,6 +45,6 @@ pub mod core {
     }
 
     pub mod structs {
-        pub mod response;
+        pub mod responses;
     }
 }

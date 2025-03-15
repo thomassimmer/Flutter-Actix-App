@@ -6,9 +6,9 @@ use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::{self, ContentType};
 use actix_web::{test, Error};
 use chrono::Utc;
-use reallystick::features::auth::structs::response::RefreshTokenResponse;
+use reallystick::features::auth::structs::responses::RefreshTokenResponse;
 use reallystick::core::helpers::mock_now::override_now;
-use reallystick::core::structs::response::GenericResponse;
+use reallystick::core::structs::responses::GenericResponse;
 
 use crate::auth::login::user_logs_in;
 use crate::auth::signup::user_signs_up;

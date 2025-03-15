@@ -1,7 +1,9 @@
 use crate::{
-    core::{helpers::mock_now::now, structs::response::GenericResponse},
-    features::auth::helpers::{serializer::user_to_response, token::retrieve_claims_for_token},
-    features::profile::structs::{model::User, request::UserUpdateRequest, response::UserResponse},
+    core::{helpers::mock_now::now, structs::responses::GenericResponse},
+    features::auth::helpers::token::retrieve_claims_for_token,
+    features::profile::structs::{
+        models::User, requests::UserUpdateRequest, responses::UserResponse,
+    },
 };
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use chrono::{DateTime, Utc};
@@ -52,7 +54,7 @@ pub async fn get_profile_information(
                 Ok(existing_user) => match existing_user {
                     Some(existing_user) => HttpResponse::Ok().json(UserResponse {
                         status: "success".to_string(),
-                        user: user_to_response(&existing_user),
+                        user: &existing_user.to_user_data(),
                     }),
                     None => HttpResponse::InternalServerError().json(GenericResponse {
                         status: "error".to_string(),
@@ -161,7 +163,7 @@ pub async fn post_profile_information(
             match updated_user_result {
                 Ok(_) => HttpResponse::Ok().json(UserResponse {
                     status: "success".to_string(),
-                    user: user_to_response(&user),
+                    user: &user.to_user_data(),
                 }),
                 Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
                     status: "error".to_string(),

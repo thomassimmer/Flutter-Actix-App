@@ -1,8 +1,8 @@
 use crate::{
-    core::{helpers::mock_now::now, structs::response::GenericResponse},
+    core::{helpers::mock_now::now, structs::responses::GenericResponse},
     features::auth::{
         helpers::token::generate_tokens,
-        structs::{model::Claims, request::RefreshTokenRequest, response::RefreshTokenResponse},
+        structs::{models::Claims, requests::RefreshTokenRequest, responses::RefreshTokenResponse},
     },
 };
 use actix_web::{post, web, HttpResponse, Responder};

@@ -1,11 +1,11 @@
 use crate::core::helpers::mock_now::now;
-use crate::core::structs::response::GenericResponse;
+use crate::core::structs::responses::GenericResponse;
 use crate::features::auth::helpers::token::generate_tokens;
-use crate::features::auth::structs::model::UserToken;
-use crate::features::profile::structs::model::User;
+use crate::features::auth::structs::models::UserToken;
+use crate::features::profile::structs::models::User;
 use crate::{
-    features::auth::structs::request::UserLoginRequest,
-    features::auth::structs::response::{UserLoginResponse, UserLoginWhenOtpEnabledResponse},
+    features::auth::structs::requests::UserLoginRequest,
+    features::auth::structs::responses::{UserLoginResponse, UserLoginWhenOtpEnabledResponse},
 };
 use actix_web::{post, web, HttpResponse, Responder};
 use argon2::{

@@ -1,12 +1,12 @@
 use crate::features::auth::helpers::token::{generate_tokens, retrieve_claims_for_token};
-use crate::features::auth::structs::model::UserToken;
-use crate::features::auth::structs::request::{ValidateOtpRequest, VerifyOtpRequest};
-use crate::features::auth::structs::response::{
+use crate::features::auth::structs::models::UserToken;
+use crate::features::auth::structs::requests::{ValidateOtpRequest, VerifyOtpRequest};
+use crate::features::auth::structs::responses::{
     DisableOtpResponse, GenerateOtpResponse, UserLoginResponse, VerifyOtpResponse,
 };
 use crate::core::helpers::mock_now::now;
-use crate::core::structs::response::GenericResponse;
-use crate::features::profile::structs::model::User;
+use crate::core::structs::responses::GenericResponse;
+use crate::features::profile::structs::models::User;
 
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 
