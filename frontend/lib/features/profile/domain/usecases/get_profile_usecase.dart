@@ -13,7 +13,10 @@ class GetProfileUsecase {
     try {
       final result = await profileRepository.getProfileInformation(accessToken);
 
-      return Left(UserEntity(username: result.username, locale: result.locale));
+      return Left(UserEntity(
+          username: result.username,
+          locale: result.locale,
+          theme: result.theme));
     } catch (e) {
       return Right(ProfileFailure(message: e.toString()));
     }

@@ -18,9 +18,14 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine the current brightness (theme) of the app
+    final Brightness brightness = Theme.of(context).brightness;
+    final bool isDarkMode = brightness == Brightness.dark;
+
     EdgeInsets padding;
     double fontSize;
 
+    // Determine the padding and font size based on button size
     switch (size) {
       case ButtonSize.small:
         padding = EdgeInsets.symmetric(horizontal: 24, vertical: 8);
@@ -33,12 +38,21 @@ class Button extends StatelessWidget {
         fontSize = 22;
     }
 
+    // Define colors based on whether the button is primary and the current theme
+    final Color backgroundColor = isPrimary
+        ? (isDarkMode ? Colors.blueGrey.shade700 : Colors.white)
+        : (isDarkMode ? Colors.blue.shade300 : Colors.blue.shade700);
+
+    final Color foregroundColor = isPrimary
+        ? (isDarkMode ? Colors.white : Colors.blue.shade900)
+        : (isDarkMode ? Colors.blueGrey.shade900 : Colors.white);
+
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         padding: padding,
-        backgroundColor: isPrimary ? Colors.white : Colors.blue.shade700,
-        foregroundColor: isPrimary ? Colors.blue.shade900 : Colors.white,
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),

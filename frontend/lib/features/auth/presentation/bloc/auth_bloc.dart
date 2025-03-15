@@ -56,7 +56,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     // We use the device locale by default on signup
     final result = await signupUseCase.signup(
-        event.username, event.password, Platform.localeName);
+        event.username, event.password, Platform.localeName, event.theme);
 
     await result.fold(
       (userTokenEntity) async {

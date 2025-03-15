@@ -10,10 +10,10 @@ class SignupUseCase {
   SignupUseCase(this.authRepository);
 
   Future<Either<UserTokenEntity, Failure>> signup(
-      String username, String password, String locale) async {
+      String username, String password, String locale, String theme) async {
     try {
       final userTokenModel =
-          await authRepository.register(username: username, password: password, locale: locale);
+          await authRepository.register(username: username, password: password, locale: locale, theme: theme);
 
       return Left(UserTokenEntity(
           accessToken: userTokenModel.accessToken,

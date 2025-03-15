@@ -14,6 +14,9 @@ class SignupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Brightness brightness = MediaQuery.of(context).platformBrightness;
+    final String themeData = brightness == Brightness.dark ? "dark" : "light";
+
     return Scaffold(
         body: Stack(fit: StackFit.expand, children: [
       Background(),
@@ -76,9 +79,9 @@ class SignupScreen extends StatelessWidget {
                             onPressed: () {
                               BlocProvider.of<AuthBloc>(context).add(
                                 AuthSignupRequested(
-                                  username: _usernameController.text,
-                                  password: _passwordController.text,
-                                ),
+                                    username: _usernameController.text,
+                                    password: _passwordController.text,
+                                    theme: themeData),
                               );
                             },
                             isPrimary: true,

@@ -41,6 +41,7 @@ class ProfileRepository extends ApiRepository {
       body: json.encode({
         'username': profile.username,
         'locale': profile.locale,
+        'theme': profile.theme
       }),
     );
 

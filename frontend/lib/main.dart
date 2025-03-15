@@ -150,14 +150,22 @@ class MyApp extends StatelessWidget {
     return BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
       Locale locale = Locale(Platform.localeName); // device locale by default
 
+      final Brightness brightness = MediaQuery.of(context).platformBrightness;
+      ThemeData themeData =
+          brightness == Brightness.dark ? ThemeData.dark() : ThemeData.light();
+
       if (state is ProfileAuthenticated) {
         locale = Locale(state.profile.locale);
+        themeData = state.profile.theme == 'dark'
+            ? ThemeData.dark()
+            : ThemeData.light();
       }
 
       return MaterialApp.router(
         debugShowCheckedModeBanner: false,
         routerConfig: _router,
         locale: locale,
+        theme: themeData,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
       );

@@ -15,7 +15,10 @@ class PostProfileUsecase {
       final result =
           await profileRepository.postProfileInformation(accessToken, profile);
 
-      return Left(UserEntity(username: result.username, locale: result.locale));
+      return Left(UserEntity(
+          username: result.username,
+          locale: result.locale,
+          theme: result.theme));
     } catch (e) {
       return Right(ProfileFailure(message: e.toString()));
     }
