@@ -53,9 +53,13 @@ class AuthRepository {
     if (response.statusCode == 200) {
       final jsonBody = json.decode(response.body);
 
+      // If otp is not enabled
       if (jsonBody.containsKey('access_token')) {
         return Left(UserTokenModel.fromJson(jsonBody));
-      } else if (jsonBody.containsKey('user_id')) {
+      }
+
+      // If otp is enabled
+      else if (jsonBody.containsKey('user_id')) {
         return Right(jsonBody['user_id']);
       }
     }

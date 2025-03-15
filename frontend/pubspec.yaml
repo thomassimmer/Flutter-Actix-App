@@ -24,6 +24,7 @@ dependencies:
   flutter_bloc: ^8.1.6
   qr_flutter: ^4.1.0
   flutter_dotenv: ^5.1.0
+  flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:

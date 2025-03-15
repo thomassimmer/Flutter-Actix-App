@@ -6,8 +6,11 @@ import 'package:reallystick/core/presentation/root_screen.dart';
 import 'package:reallystick/features/auth/data/repositories/auth_repository.dart';
 import 'package:reallystick/features/auth/domain/usecases/login_usecase.dart';
 import 'package:reallystick/features/auth/domain/usecases/otp_usecase.dart';
+import 'package:reallystick/features/auth/domain/usecases/read_authentication_use_case.dart';
 import 'package:reallystick/features/auth/domain/usecases/signup_usecase.dart';
+import 'package:reallystick/features/auth/domain/usecases/store_authentication_use_case.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:reallystick/features/auth/presentation/bloc/auth_events.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
 import 'package:reallystick/features/auth/presentation/screens/login_screen.dart';
 import 'package:reallystick/features/auth/presentation/screens/recovery_codes_screen.dart';
@@ -21,7 +24,29 @@ import 'package:reallystick/features/profile/presentation/profile_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
-  runApp(const MyApp());
+
+  // Initialize use cases
+  final AuthRepository authRepository = AuthRepository(
+    baseUrl: '${dotenv.env['API_BASE_URL']}/api',
+  );
+
+  // Create an instance of AuthBloc
+  final authBloc = AuthBloc(
+    loginUseCase: LoginUseCase(authRepository),
+    signupUseCase: SignupUseCase(authRepository),
+    otpUseCase: OtpUseCase(authRepository),
+    storeAuthenticationUseCase: StoreAuthenticationUseCase(),
+    readAuthenticationUseCase: ReadAuthenticationUseCase(),
+  );
+
+  authBloc.add(AuthInitRequested());
+
+  runApp(
+    BlocProvider<AuthBloc>(
+      create: (_) => authBloc,
+      child: MyApp(),
+    ),
+  );
 }
 
 final _router = GoRouter(
@@ -32,6 +57,7 @@ final _router = GoRouter(
       builder: (context, state) => UnauthenticatedHomeScreen(),
       redirect: (context, state) {
         final authState = context.read<AuthBloc>().state;
+
         if (authState is AuthAuthenticated) {
           return '/home';
         }
@@ -90,6 +116,7 @@ final _router = GoRouter(
       ],
       redirect: (context, state) {
         final authState = context.read<AuthBloc>().state;
+
         if (authState is AuthAuthenticated) {
           return null;
         } else {
@@ -105,21 +132,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String apiUrl = dotenv.env['API_BASE_URL'] ?? 'http://localhost:8000';
-
-    final AuthRepository authRepository =
-        AuthRepository(baseUrl: '${apiUrl}/api');
-
-    return BlocProvider(
-      create: (_) => AuthBloc(
-        loginUseCase: LoginUseCase(authRepository),
-        signupUseCase: SignupUseCase(authRepository),
-        otpUseCase: OtpUseCase(authRepository),
-      ),
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        routerConfig: _router,
-      ),
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      routerConfig: _router,
     );
   }
 }
