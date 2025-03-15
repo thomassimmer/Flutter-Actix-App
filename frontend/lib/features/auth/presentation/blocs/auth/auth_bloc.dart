@@ -117,25 +117,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthVerifyOneTimePasswordEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoadingState());
 
-    try {
-      await verifyOneTimePasswordUseCase.call(event.code);
+    final result = await verifyOneTimePasswordUseCase.call(event.code);
 
+    result.fold((error) {
+      if (error is ShouldLogoutError) {
+        add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
+      } else {
+        emit(AuthVerifyOneTimePasswordState(
+            otpAuthUrl: event.otpAuthUrl,
+            otpBase32: event.otpBase32,
+            message: ErrorMessage(error.messageKey)));
+      }
+    }, (_) {
       emit(AuthAuthenticatedAfterRegistrationState(
           hasVerifiedOtp: true,
           message: SuccessMessage("validationCodeCorrect")));
-    } on ShouldLogoutError catch (error) {
-      add(AuthLogoutEvent(message: ErrorMessage(error.messageKey)));
-    } on DomainError catch (error) {
-      emit(AuthVerifyOneTimePasswordState(
-          otpAuthUrl: event.otpAuthUrl,
-          otpBase32: event.otpBase32,
-          message: ErrorMessage(error.messageKey)));
-    } catch (error) {
-      emit(AuthVerifyOneTimePasswordState(
-          otpAuthUrl: event.otpAuthUrl,
-          otpBase32: event.otpBase32,
-          message: ErrorMessage('')));
-    }
+    });
   }
 
   Future<void> _login(AuthLoginEvent event, Emitter<AuthState> emit) async {
