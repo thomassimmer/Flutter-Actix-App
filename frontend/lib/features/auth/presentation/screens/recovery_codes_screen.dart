@@ -46,9 +46,9 @@ class RecoveryCodesScreen extends StatelessWidget {
                           if (state
                               is AuthAuthenticatedAfterRegistrationState) {
                             if (state.hasVerifiedOtp) {
-                              context.go('/home');
+                              context.goNamed('home');
                             } else {
-                              context.go('/recovery-codes');
+                              context.goNamed('recovery-codes');
                             }
                           } else if (state is AuthVerifyOneTimePasswordState) {
                             _otpController.text = '';
@@ -74,7 +74,7 @@ class RecoveryCodesScreen extends StatelessWidget {
               SizedBox(height: 16),
               ElevatedButton(
                   onPressed: () {
-                    context.go('/');
+                    context.goNamed('home');
                   },
                   child: Text(AppLocalizations.of(context)!.home),
                   style: context.styles.buttonSmall)

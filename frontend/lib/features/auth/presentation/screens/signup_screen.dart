@@ -75,7 +75,7 @@ class SignupScreenState extends State<SignupScreen>
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  context.go('/');
+                  context.goNamed('home');
                 },
                 child: Text(AppLocalizations.of(context)!.comeBack),
               ),
@@ -84,7 +84,7 @@ class SignupScreenState extends State<SignupScreen>
         isVisible: _isAuthenticated,
         onAnimationComplete: () {
           GlobalSnackBar.show(context, authMessage);
-          context.go('/recovery-codes');
+          context.goNamed('recovery-codes');
         },
       ),
     ]));
@@ -155,7 +155,7 @@ class SignupScreenState extends State<SignupScreen>
         SizedBox(height: 16),
         TextButton(
           onPressed: () {
-            context.go('/login');
+            context.goNamed('login');
           },
           child: Text(AppLocalizations.of(context)!.alreadyAnAccountLogin),
         ),

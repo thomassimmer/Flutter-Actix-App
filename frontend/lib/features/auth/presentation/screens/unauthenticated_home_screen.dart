@@ -23,7 +23,7 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
                   GlobalSnackBar.show(context, state.message);
 
                   if (state is AuthAuthenticatedAfterLoginState) {
-                    context.go('/home');
+                    context.goNamed('home');
                   }
                 },
                 child:
@@ -77,14 +77,14 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
         SizedBox(height: 40),
         ElevatedButton(
           onPressed: () {
-            context.go('/login');
+            context.goNamed('login');
           },
           child: Text(AppLocalizations.of(context)!.logIn),
         ),
         SizedBox(height: 16),
         ElevatedButton(
             onPressed: () {
-              context.go('/signup');
+              context.goNamed('signup');
             },
             child: Text(AppLocalizations.of(context)!.signUp),
             style: ButtonStyle(

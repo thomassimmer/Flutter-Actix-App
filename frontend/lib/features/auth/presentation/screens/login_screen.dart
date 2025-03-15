@@ -85,7 +85,7 @@ class LoginScreenState extends State<LoginScreen>
                   ElevatedButton(
                     child: Text(AppLocalizations.of(context)!.comeBack),
                     onPressed: () {
-                      context.go('/');
+                      context.goNamed('home');
                     },
                   ),
                 ],
@@ -95,7 +95,7 @@ class LoginScreenState extends State<LoginScreen>
             isVisible: _isAuthenticated,
             onAnimationComplete: () {
               GlobalSnackBar.show(context, authMessage);
-              context.go('/home');
+              context.goNamed('home');
             },
           ),
         ],
@@ -166,7 +166,7 @@ class LoginScreenState extends State<LoginScreen>
           BlocProvider.of<AuthBloc>(context).add(
               AuthRecoverAccountForUsernameEvent(
                   username: _usernameController.text, passwordForgotten: true));
-          context.go('/recover-account');
+          context.goNamed('recover-account');
         },
         child: Text(AppLocalizations.of(context)!.passwordForgotten),
       ),
@@ -184,7 +184,7 @@ class LoginScreenState extends State<LoginScreen>
       ),
       TextButton(
         onPressed: () {
-          context.go('/signup');
+          context.goNamed('signup');
         },
         child: Text(AppLocalizations.of(context)!.noAccountCreateOne),
       ),
