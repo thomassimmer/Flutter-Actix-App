@@ -4,7 +4,11 @@ import 'package:flutteractixapp/core/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 
 class ErrorMapper {
-  static String mapFailureToMessage(BuildContext context, Exception error) {
+  final BuildContext context;
+
+  ErrorMapper(this.context);
+
+  String mapFailureToMessage(Exception error) {
     final localizations = AppLocalizations.of(context)!;
 
     switch (error.runtimeType) {

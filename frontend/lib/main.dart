@@ -142,9 +142,9 @@ class MyApp extends StatelessWidget {
       ThemeData themeData =
           brightness == Brightness.dark ? ThemeData.dark() : ThemeData.light();
 
-      if (state is ProfileAuthenticated) {
-        locale = Locale(state.profile.locale);
-        themeData = state.profile.theme == 'dark'
+      if (state.profile != null) {
+        locale = Locale(state.profile!.locale);
+        themeData = state.profile!.theme == 'dark'
             ? ThemeData.dark()
             : ThemeData.light();
       }

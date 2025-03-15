@@ -65,12 +65,14 @@ class RootScreen extends StatelessWidget {
             }
           }),
           BlocListener<ProfileBloc, ProfileState>(listener: (context, state) {
+            final errorMapper = ErrorMapper(context);
+
             if (state is ProfileUnauthenticated) {
               if (state.error != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                      content: Text(ErrorMapper.mapFailureToMessage(
-                          context, state.error!))),
+                      content:
+                          Text(errorMapper.mapFailureToMessage(state.error!))),
                 );
               }
             }

@@ -3,14 +3,22 @@ import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 
 abstract class ProfileState extends Equatable {
   final Exception? error;
+  final User? profile;
 
-  const ProfileState({this.error});
+  const ProfileState({this.error, this.profile});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [error, profile];
 }
 
-class ProfileLoading extends ProfileState {}
+class ProfileLoading extends ProfileState {
+  const ProfileLoading(
+      {super.profile, // Keep profile here to not switch language / theme when loading something
+      super.error});
+
+  @override
+  List<Object?> get props => [profile, error];
+}
 
 class ProfileUnauthenticated extends ProfileState {
   const ProfileUnauthenticated({super.error});

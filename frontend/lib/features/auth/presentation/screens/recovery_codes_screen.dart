@@ -40,6 +40,8 @@ class RecoveryCodesScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(30.0),
                       child: BlocListener<AuthBloc, AuthState>(
                         listener: (context, state) {
+                          final errorMapper = ErrorMapper(context);
+
                           if (state is AuthAuthenticatedAfterRegistration) {
                             if (state.hasVerifiedOtp) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -56,11 +58,9 @@ class RecoveryCodesScreen extends StatelessWidget {
 
                             if (state.error != null) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        ErrorMapper.mapFailureToMessage(
-                                            context, state.error!))),
-                              );
+                                  SnackBar(
+                                      content: Text(errorMapper
+                                          .mapFailureToMessage(state.error!))));
                             }
                           }
                         },
