@@ -126,10 +126,7 @@ class RecoveryCodesScreen extends StatelessWidget {
             text: 'Set up two-factor authentication',
             onPressed: () {
               BlocProvider.of<AuthBloc>(context).add(
-                AuthOtpGenerationRequested(
-                    accessToken: state.accessToken,
-                    refreshToken: state.refreshToken,
-                    expiresIn: state.expiresIn),
+                AuthOtpGenerationRequested(),
               );
             },
             size: ButtonSize.small,
@@ -179,9 +176,6 @@ class RecoveryCodesScreen extends StatelessWidget {
                     onPressed: () {
                       BlocProvider.of<AuthBloc>(context).add(
                         AuthOtpVerificationRequested(
-                          accessToken: state.accessToken,
-                          refreshToken: state.refreshToken,
-                          expiresIn: state.expiresIn,
                           otpBase32: state.otpBase32,
                           otpAuthUrl: state.otpAuthUrl,
                           code: _otpController.text,

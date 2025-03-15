@@ -36,35 +36,15 @@ class AuthLoginRequested extends AuthEvent {
   List<Object> get props => [username, password];
 }
 
-class AuthOtpGenerationRequested extends AuthEvent {
-  final String accessToken;
-  final String refreshToken;
-  final int expiresIn;
-
-  const AuthOtpGenerationRequested(
-      {required this.accessToken,
-      required this.refreshToken,
-      required this.expiresIn});
-
-  @override
-  List<Object> get props => [accessToken, refreshToken, expiresIn];
-}
+class AuthOtpGenerationRequested extends AuthEvent {}
 
 class AuthOtpVerificationRequested extends AuthEvent {
-  final String accessToken;
-  final String refreshToken;
-  final int expiresIn;
   final String otpBase32;
   final String otpAuthUrl;
   final String code;
 
   const AuthOtpVerificationRequested(
-      {required this.accessToken,
-      required this.refreshToken,
-      required this.expiresIn,
-      required this.otpBase32,
-      required this.otpAuthUrl,
-      required this.code});
+      {required this.otpBase32, required this.otpAuthUrl, required this.code});
 }
 
 class AuthOtpValidationRequested extends AuthEvent {

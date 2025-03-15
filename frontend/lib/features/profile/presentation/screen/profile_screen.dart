@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:reallystick/features/profile/presentation/screen/language_selection_screen%20copy.dart';
+import 'package:reallystick/features/profile/presentation/screen/language_selection_screen.dart';
 import 'package:reallystick/features/profile/presentation/screen/theme_selection_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
