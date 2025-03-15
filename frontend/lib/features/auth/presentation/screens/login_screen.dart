@@ -51,7 +51,7 @@ class LoginScreenState extends State<LoginScreen>
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(30.0),
-                      child: BlocListener<AuthBloc, AuthState>(
+                      child: BlocConsumer<AuthBloc, AuthState>(
                         listener: (context, state) {
                           if (state is AuthAuthenticatedState) {
                             setState(() {
@@ -61,19 +61,17 @@ class LoginScreenState extends State<LoginScreen>
                             GlobalSnackBar.show(context, state.message);
                           }
                         },
-                        child: BlocBuilder<AuthBloc, AuthState>(
-                          builder: (context, state) {
-                            if (state is AuthLoadingState) {
-                              return _buildLoadingScreen(context, state);
-                            } else if (state
-                                is AuthValidateOneTimePasswordState) {
-                              return _buildOneTimePasswordVerificationScreen(
-                                  context, state);
-                            } else {
-                              return _buildLoginViewScreen(context, state);
-                            }
-                          },
-                        ),
+                        builder: (context, state) {
+                          if (state is AuthLoadingState) {
+                            return _buildLoadingScreen(context, state);
+                          } else if (state
+                              is AuthValidateOneTimePasswordState) {
+                            return _buildOneTimePasswordVerificationScreen(
+                                context, state);
+                          } else {
+                            return _buildLoginViewScreen(context, state);
+                          }
+                        },
                       ),
                     ),
                   ),

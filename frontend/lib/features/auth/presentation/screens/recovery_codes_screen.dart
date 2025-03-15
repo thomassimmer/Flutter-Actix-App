@@ -35,39 +35,36 @@ class RecoveryCodesScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: Padding(
-                      padding: const EdgeInsets.all(30.0),
-                      child: BlocListener<AuthBloc, AuthState>(
-                        listener: (context, state) {
-                          GlobalSnackBar.show(context, state.message);
+                    padding: const EdgeInsets.all(30.0),
+                    child: BlocConsumer<AuthBloc, AuthState>(
+                      listener: (context, state) {
+                        GlobalSnackBar.show(context, state.message);
 
-                          if (state
-                              is AuthAuthenticatedAfterRegistrationState) {
-                            if (state.hasVerifiedOtp) {
-                              context.goNamed('home');
-                            } else {
-                              context.goNamed('recovery-codes');
-                            }
-                          } else if (state is AuthVerifyOneTimePasswordState) {
-                            _otpController.text = '';
+                        if (state is AuthAuthenticatedAfterRegistrationState) {
+                          if (state.hasVerifiedOtp) {
+                            context.goNamed('home');
+                          } else {
+                            context.goNamed('recovery-codes');
                           }
-                        },
-                        child: BlocBuilder<AuthBloc, AuthState>(
-                          builder: (context, state) {
-                            if (state
-                                is AuthAuthenticatedAfterRegistrationState) {
-                              return _buildRecoveryCodesView(context, state);
-                            } else if (state
-                                is AuthGenerateTwoFactorAuthenticationConfigState) {
-                              return _buildTwoFactorAuthenticationSetupView(
-                                  context, state);
-                            } else if (state is AuthLoadingState) {
-                              return _buildLoadingScreen(context, state);
-                            } else {
-                              return _buildErrorScreen(context, state);
-                            }
-                          },
-                        ),
-                      ))),
+                        } else if (state is AuthVerifyOneTimePasswordState) {
+                          _otpController.text = '';
+                        }
+                      },
+                      builder: (context, state) {
+                        if (state is AuthAuthenticatedAfterRegistrationState) {
+                          return _buildRecoveryCodesView(context, state);
+                        } else if (state
+                            is AuthGenerateTwoFactorAuthenticationConfigState) {
+                          return _buildTwoFactorAuthenticationSetupView(
+                              context, state);
+                        } else if (state is AuthLoadingState) {
+                          return _buildLoadingScreen(context, state);
+                        } else {
+                          return _buildErrorScreen(context, state);
+                        }
+                      },
+                    ),
+                  )),
               SizedBox(height: 16),
               ElevatedButton(
                   onPressed: () {
