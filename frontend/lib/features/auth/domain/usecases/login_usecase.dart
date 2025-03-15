@@ -8,22 +8,25 @@ class LoginUseCase {
 
   LoginUseCase(this.authRepository);
 
-  Future<Either<Failure, UserEntity>> login(
+  Future<Either<Failure, Either<String, UserEntity>>> login(
       String username, String password) async {
     try {
-      final userModel =
+      final result =
           await authRepository.login(username: username, password: password);
 
-      return Right(UserEntity(
-        id: userModel.id,
-        username: userModel.username,
-        otpEnabled: userModel.otpEnabled,
-        otpVerified: userModel.otpVerified,
-        otpBase32: userModel.otpBase32,
-        otpAuthUrl: userModel.otpAuthUrl,
-        createdAt: userModel.createdAt,
-        updatedAt: userModel.updatedAt,
-      ));
+      return result.fold(
+        (userId) => Right(Left(userId)),
+        (userModel) => Right(Right(UserEntity(
+          id: userModel.id,
+          username: userModel.username,
+          otpEnabled: userModel.otpEnabled,
+          otpVerified: userModel.otpVerified,
+          otpBase32: userModel.otpBase32,
+          otpAuthUrl: userModel.otpAuthUrl,
+          createdAt: userModel.createdAt,
+          updatedAt: userModel.updatedAt,
+        ))),
+      );
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

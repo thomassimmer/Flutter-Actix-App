@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:reallystick/core/presentation/root_screen.dart';
 import 'package:reallystick/features/auth/data/repositories/auth_repository.dart';
 import 'package:reallystick/features/auth/domain/usecases/login_usecase.dart';
+import 'package:reallystick/features/auth/domain/usecases/otp_usecase.dart';
 import 'package:reallystick/features/auth/domain/usecases/signup_usecase.dart';
-import 'package:reallystick/features/auth/domain/usecases/verify_otp_usecase.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
 import 'package:reallystick/features/auth/presentation/screens/login_screen.dart';
@@ -109,7 +109,7 @@ class MyApp extends StatelessWidget {
       create: (_) => AuthBloc(
         loginUseCase: LoginUseCase(authRepository),
         signupUseCase: SignupUseCase(authRepository),
-        verifyOTPUseCase: VerifyOTPUseCase(authRepository),
+        otpUseCase: OtpUseCase(authRepository),
       ),
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
