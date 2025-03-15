@@ -49,6 +49,15 @@ class ProfileScreen extends StatelessWidget {
                 context.goNamed('password'); // Navigate to password change
               },
             ),
+            ListTile(
+              title: Text(AppLocalizations.of(context)!.about),
+              trailing: IconWithWarning(
+                  iconData: Icons.chevron_right,
+                  shouldBeWarning: shouldBeWarning),
+              onTap: () {
+                context.goNamed('about'); // Navigate to password change
+              },
+            ),
           ],
         ),
       );
