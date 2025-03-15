@@ -38,7 +38,6 @@ class ErrorScreen extends StatelessWidget {
                   onPressed: () {
                     BlocProvider.of<AuthBloc>(context).add(AuthLogoutEvent());
                   },
-                  style: context.styles.buttonSmall,
                   child: Text(AppLocalizations.of(context)!.logout),
                 ),
             ]),

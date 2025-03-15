@@ -74,7 +74,6 @@ class RecoveryCodesScreen extends StatelessWidget {
                           onPressed: () {
                             context.goNamed('home');
                           },
-                          style: context.styles.buttonSmall,
                           child: Text(AppLocalizations.of(context)!.home),
                         )
                       ])))),
@@ -209,7 +208,6 @@ class RecoveryCodesScreen extends StatelessWidget {
               ),
             );
           },
-          style: context.styles.buttonSmall,
           child: Text(AppLocalizations.of(context)!.verify),
         ),
       ],
