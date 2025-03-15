@@ -4,10 +4,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reallystick/core/presentation/root_screen.dart';
-import 'package:reallystick/features/auth/data/repositories/auth_repository.dart';
-import 'package:reallystick/features/auth/domain/usecases/login_usecase.dart';
-import 'package:reallystick/features/auth/domain/usecases/otp_usecase.dart';
-import 'package:reallystick/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_events.dart';
 import 'package:reallystick/features/auth/presentation/bloc/auth_states.dart';
@@ -18,9 +14,6 @@ import 'package:reallystick/features/auth/presentation/screens/unauthenticated_h
 import 'package:reallystick/features/challenges/presentation/challenges_screen.dart';
 import 'package:reallystick/features/habits/presentation/habits_screen.dart';
 import 'package:reallystick/features/messages/presentation/messages_screen.dart';
-import 'package:reallystick/features/profile/data/repositories/profile_repository.dart';
-import 'package:reallystick/features/profile/domain/usecases/get_profile_usecase.dart';
-import 'package:reallystick/features/profile/domain/usecases/post_profile_usecase.dart';
 import 'package:reallystick/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:reallystick/features/profile/presentation/bloc/profile_states.dart';
 import 'package:reallystick/features/profile/presentation/screen/profile_screen.dart';
@@ -30,22 +23,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
 
-  final String baseUrl = '${dotenv.env['API_BASE_URL']}/api';
-
-  final AuthRepository authRepository = AuthRepository(baseUrl: baseUrl);
-  final ProfileRepository profileRepository =
-      ProfileRepository(baseUrl: baseUrl);
-
-  final authBloc = AuthBloc(
-    loginUseCase: LoginUseCase(authRepository),
-    signupUseCase: SignupUseCase(authRepository),
-    otpUseCase: OtpUseCase(authRepository),
-  );
-
-  final profileBloc = ProfileBloc(
-      authBloc: authBloc,
-      getProfileUsecase: GetProfileUsecase(profileRepository),
-      postProfileUsecase: PostProfileUsecase(profileRepository));
+  final authBloc = AuthBloc();
+  final profileBloc = ProfileBloc(authBloc: authBloc);
 
   authBloc.add(AuthInitRequested());
 

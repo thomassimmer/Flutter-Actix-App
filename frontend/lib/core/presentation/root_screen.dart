@@ -135,7 +135,7 @@ class RootScreen extends StatelessWidget {
                   ),
                 ],
                 Expanded(
-                  child: this.child,
+                  child: child,
                 ),
               ],
             ),

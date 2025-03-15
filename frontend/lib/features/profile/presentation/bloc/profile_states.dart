@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:reallystick/features/profile/domain/entities/user_entity.dart';
+import 'package:reallystick/features/profile/domain/entities/user.dart';
 
 abstract class ProfileState extends Equatable {
   const ProfileState();
@@ -20,7 +20,7 @@ class ProfileUnauthenticated extends ProfileState {
 }
 
 class ProfileAuthenticated extends ProfileState {
-  final UserEntity profile;
+  final User profile;
 
   const ProfileAuthenticated({
     required this.profile,

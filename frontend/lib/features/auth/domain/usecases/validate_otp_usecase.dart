@@ -4,16 +4,17 @@ import 'package:reallystick/features/auth/domain/entities/user_token.dart';
 import 'package:reallystick/features/auth/domain/errors/failures.dart';
 import 'package:reallystick/features/auth/domain/repositories/auth_repository.dart';
 
-class SignupUseCase {
+class ValidateOtpUsecase {
   final AuthRepository authRepository;
 
-  SignupUseCase(this.authRepository);
+  ValidateOtpUsecase(this.authRepository);
 
-  Future<Either<UserToken, Failure>> signup(
-      String username, String password, String locale, String theme) async {
+  /// Validates the OTP provided by the user. It's for login.
+  Future<Either<UserToken, Failure>> validateOtp(
+      String userId, String code) async {
     try {
-      final userTokenModel = await authRepository.register(
-          username: username, password: password, locale: locale, theme: theme);
+      final userTokenModel =
+          await authRepository.validateOtp(userId: userId, code: code);
 
       return Left(UserToken(
           accessToken: userTokenModel.accessToken,
