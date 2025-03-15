@@ -1,4 +1,4 @@
-Available at: TODO
+Available at: https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-jwt-session-deactivation-8ffad3d7ab5a
 
 # Building a Cross-Platform App with Flutter and Rust: JWT & Session Deactivation
 

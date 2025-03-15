@@ -1,25 +1,4 @@
 services:
-  frontend:
-    container_name: flutteractixapp_frontend
-    image: flutteractixapp_frontend
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "10"
-    build:
-      context: ./frontend
-    env_file:
-      - ./frontend/.env
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-    networks:
-      - app-network
-    environment:
-      - FLUTTER_WEB_PORT=3000
-
   backend:
     container_name: flutteractixapp_backend
     image: flutteractixapp_backend
