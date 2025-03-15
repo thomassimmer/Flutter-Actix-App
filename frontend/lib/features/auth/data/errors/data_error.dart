@@ -1,8 +1,25 @@
 import 'package:flutteractixapp/core/errors/data_error.dart';
 
-class UnauthorizedError extends DataError {
-  UnauthorizedError([String message = 'You are not authenticated']) : super();
+class UnauthorizedError extends DataError {}
 
-  @override
-  List<Object?> get props => [message];
-}
+class RefreshTokenExpiredError extends DataError {}
+
+class InvalidUsernameOrCodeOrRecoveryCodeError extends DataError {}
+
+class TwoFactorAuthenticationNotEnabledError extends DataError {}
+
+class InvalidUsernameOrRecoveryCodeError extends DataError {}
+
+class InvalidUsernameOrPasswordOrRecoveryCodeError extends DataError {}
+
+class UserNotFoundError extends DataError {}
+
+class InvalidOneTimePasswordError extends DataError {}
+
+class InvalidUsernameOrPasswordError extends DataError {}
+
+class PasswordMustBeChangedError extends DataError {}
+
+class UserAlreadyExistingError extends DataError {}
+
+class PasswordNotExpiredError extends DataError {}

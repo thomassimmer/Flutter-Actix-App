@@ -1,4 +1,3 @@
-import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 import 'package:flutteractixapp/features/auth/domain/repositories/auth_repository.dart';
 
 class DisableOtpUseCase {
@@ -8,7 +7,6 @@ class DisableOtpUseCase {
 
   /// Disable OTP authentication for the user.
   Future<void> call() async {
-    final accessToken = await TokenStorage().getAccessToken();
-    await authRepository.disableOtp(accessToken: accessToken!);
+    await authRepository.disableOtp();
   }
 }

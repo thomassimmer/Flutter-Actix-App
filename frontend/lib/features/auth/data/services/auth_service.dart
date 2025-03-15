@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutteractixapp/core/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/data/errors/data_error.dart';
 import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 import 'package:http/http.dart' as http;
@@ -23,9 +24,10 @@ class AuthService {
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'refreshToken': refreshToken}),
     );
+    final jsonBody = json.decode(response.body);
+    final responseCode = jsonBody['code'] as String;
 
     if (response.statusCode == 200) {
-      final jsonBody = json.decode(response.body);
       final newAccessToken = jsonBody['accessToken'] as String;
       final newRefreshToken = jsonBody['refreshToken'] as String;
 
@@ -34,6 +36,19 @@ class AuthService {
     }
 
     await tokenStorage.deleteTokens();
-    throw UnauthorizedError();
+
+    if (response.statusCode == 401) {
+      if (responseCode == 'REFRESH_TOKEN_EXPIRED') {
+        throw RefreshTokenExpiredError();
+      }
+
+      throw UnauthorizedError();
+    }
+
+    if (response.statusCode == 500) {
+      throw InternalServerError();
+    }
+
+    throw UnknownError();
   }
 }

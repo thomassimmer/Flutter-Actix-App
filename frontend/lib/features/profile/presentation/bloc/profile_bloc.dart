@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:flutteractixapp/core/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/disable_otp_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/generate_otp_config_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/verify_otp_usecase.dart';
@@ -56,8 +57,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     try {
       final profile = await getProfileUsecase.call();
       emit(ProfileAuthenticated(profile: profile));
-    } catch (e) {
-      emit(ProfileUnauthenticated(message: e.toString()));
+    } catch (error) {
+      emit(ProfileUnauthenticated(
+          error: error is Exception ? error : UnknownDomainError()));
     }
   }
 
@@ -75,14 +77,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final profile = await postProfileUsecase.call(event.profile);
 
       emit(ProfileAuthenticated(profile: profile));
-    } catch (e) {
+    } catch (error) {
       if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
-          message: e.toString(),
+          error: error is Exception ? error : UnknownDomainError(),
         ));
       } else {
-        emit(ProfileUnauthenticated(message: e.toString()));
+        emit(ProfileUnauthenticated(
+            error: error is Exception ? error : UnknownDomainError()));
       }
     }
   }
@@ -105,14 +108,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           profile: profile,
         ));
       }
-    } catch (e) {
+    } catch (error) {
       if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
-          profile: currentState.profile,
-          message: e.toString(),
-        ));
+            profile: currentState.profile,
+            error: error is Exception ? error : UnknownDomainError()));
       } else {
-        emit(ProfileUnauthenticated(message: e.toString()));
+        emit(ProfileUnauthenticated(
+            error: error is Exception ? error : UnknownDomainError()));
       }
     }
   }
@@ -135,14 +138,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           profile: profile,
         ));
       }
-    } catch (e) {
+    } catch (error) {
       if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
-          profile: currentState.profile,
-          message: e.toString(),
-        ));
+            profile: currentState.profile,
+            error: error is Exception ? error : UnknownDomainError()));
       } else {
-        emit(ProfileUnauthenticated(message: e.toString()));
+        emit(ProfileUnauthenticated(
+            error: error is Exception ? error : UnknownDomainError()));
       }
     }
   }
@@ -163,14 +166,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           profile: profile,
         ));
       }
-    } catch (e) {
+    } catch (error) {
       if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
           profile: currentState.profile,
-          message: e.toString(),
+          error: error is Exception ? error : UnknownDomainError(),
         ));
       } else {
-        emit(ProfileUnauthenticated(message: e.toString()));
+        emit(ProfileUnauthenticated(
+            error: error is Exception ? error : UnknownDomainError()));
       }
     }
   }
@@ -184,16 +188,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final profile =
           await setPasswordUseCase.call(newPassword: event.newPassword);
 
-      emit(ProfileAuthenticated(
-          profile: profile, message: "Your password was successfully set."));
-    } catch (e) {
+      emit(ProfileAuthenticated(profile: profile));
+    } catch (error) {
       if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
-          profile: currentState.profile,
-          message: e.toString(),
-        ));
+            profile: currentState.profile,
+            error: error is Exception ? error : UnknownDomainError()));
       } else {
-        emit(ProfileUnauthenticated(message: e.toString()));
+        emit(ProfileUnauthenticated(
+            error: error is Exception ? error : UnknownDomainError()));
       }
     }
   }
@@ -208,17 +211,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           currentPassword: event.currentPassword,
           newPassword: event.newPassword);
 
-      emit(ProfileAuthenticated(
-          profile: profile,
-          message: "Your password was successfully updated."));
-    } catch (e) {
+      emit(ProfileAuthenticated(profile: profile));
+    } catch (error) {
       if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(
-          profile: currentState.profile,
-          message: e.toString(),
-        ));
+            profile: currentState.profile,
+            error: error is Exception ? error : UnknownDomainError()));
       } else {
-        emit(ProfileUnauthenticated(message: e.toString()));
+        emit(ProfileUnauthenticated(
+            error: error is Exception ? error : UnknownDomainError()));
       }
     }
   }
