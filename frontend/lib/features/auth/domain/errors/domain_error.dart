@@ -1,103 +1,69 @@
-import 'package:flutteractixapp/core/errors/domain_error.dart';
+import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 
 class RefreshTokenExpiredDomainError extends DomainError {
-  String getErrorKey() {
-    return 'refreshTokenExpiredError';
-  }
+  final String messageKey = 'refreshTokenExpiredError';
 }
 
 class InvalidUsernameOrCodeOrRecoveryCodeDomainError extends DomainError {
-  String getErrorKey() {
-    return 'invalidUsernameOrCodeOrRecoveryCodeError';
-  }
+  final String messageKey = 'invalidUsernameOrCodeOrRecoveryCodeError';
 }
 
 class TwoFactorAuthenticationNotEnabledDomainError extends DomainError {
-  String getErrorKey() {
-    return 'twoFactorAuthenticationNotEnabledError';
-  }
+  final String messageKey = 'twoFactorAuthenticationNotEnabledError';
 }
 
 class InvalidUsernameOrRecoveryCodeDomainError extends DomainError {
-  String getErrorKey() {
-    return 'invalidUsernameOrRecoveryCodeError';
-  }
+  final String messageKey = 'invalidUsernameOrRecoveryCodeError';
 }
 
 class InvalidUsernameOrPasswordOrRecoveryCodeDomainError extends DomainError {
-  String getErrorKey() {
-    return 'invalidUsernameOrPasswordOrRecoveryCodeError';
-  }
+  final String messageKey = 'invalidUsernameOrPasswordOrRecoveryCodeError';
 }
 
 class UserNotFoundDomainError extends DomainError {
-  String getErrorKey() {
-    return 'userNotFoundError';
-  }
+  final String messageKey = 'userNotFoundError';
 }
 
 class InvalidOneTimePasswordDomainError extends DomainError {
-  String getErrorKey() {
-    return 'invalidOneTimePasswordError';
-  }
+  final String messageKey = 'invalidOneTimePasswordError';
 }
 
 class InvalidUsernameOrPasswordDomainError extends DomainError {
-  String getErrorKey() {
-    return 'invalidUsernameOrPasswordError';
-  }
+  final String messageKey = 'invalidUsernameOrPasswordError';
 }
 
 class PasswordMustBeChangedDomainError extends DomainError {
-  String getErrorKey() {
-    return 'passwordMustBeChangedError';
-  }
+  final String messageKey = 'passwordMustBeChangedError';
 }
 
 class UserAlreadyExistingDomainError extends DomainError {
-  String getErrorKey() {
-    return 'userAlreadyExistingError';
-  }
+  final String messageKey = 'userAlreadyExistingError';
 }
 
 class PasswordNotExpiredDomainError extends DomainError {
-  String getErrorKey() {
-    return 'passwordNotExpiredError';
-  }
+  final String messageKey = 'passwordNotExpiredError';
 }
 
 class InvalidRefreshTokenDomainError extends DomainError {
-  String getErrorKey() {
-    return 'defaultError';
-  }
+  final String messageKey = 'defaultError';
 }
 
 class RefreshTokenNotFoundDomainError extends DomainError {
-  String getErrorKey() {
-    return 'defaultError';
-  }
+  final String messageKey = 'defaultError';
 }
 
 class PasswordTooShortError extends DomainError {
-  String getErrorKey() {
-    return 'passwordTooShortError';
-  }
+  final String messageKey = 'passwordTooShortError';
 }
 
 class PasswordNotComplexEnoughError extends DomainError {
-  String getErrorKey() {
-    return 'passwordNotComplexEnough';
-  }
+  final String messageKey = 'passwordNotComplexEnough';
 }
 
 class UsernameWrongSizeError extends DomainError {
-  String getErrorKey() {
-    return 'usernameNotRespectingRulesError';
-  }
+  final String messageKey = 'usernameNotRespectingRulesError';
 }
 
 class UsernameNotRespectingRulesError extends DomainError {
-  String getErrorKey() {
-    return 'usernameWrongSizeError';
-  }
+  final String messageKey = 'usernameWrongSizeError';
 }

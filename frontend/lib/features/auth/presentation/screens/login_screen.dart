@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
-import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -40,31 +40,19 @@ class LoginScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(30.0),
                 child: BlocListener<AuthBloc, AuthState>(listener:
                     (context, state) {
+                  GlobalSnackBar.show(context, state.message);
+
                   if (state is AuthAuthenticated) {
                     context.go('/home');
-                  } else if (state is AuthOtpValidate) {
-                    if (state.error != null) {
-                      final errorMessage =
-                          getProfileErrorMessage(context, state.error!);
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(content: Text(errorMessage)));
-                    }
-                  } else if (state is AuthUnauthenticated) {
-                    if (state.error != null) {
-                      final errorMessage =
-                          getProfileErrorMessage(context, state.error!);
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(content: Text(errorMessage)));
-                    }
                   }
                 }, child:
                     BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
                   if (state is AuthLoading) {
-                    return CircularProgressIndicator(color: Colors.black);
+                    return _buildLoadingScreen(context, state);
                   } else if (state is AuthOtpValidate) {
                     return _buildOtpVerificationScreen(context, state);
                   } else {
-                    return _buildLoginViewScreen(context);
+                    return _buildLoginViewScreen(context, state);
                   }
                 })),
               ),
@@ -79,6 +67,10 @@ class LoginScreen extends StatelessWidget {
             ),
           ]),
     ]));
+  }
+
+  Widget _buildLoadingScreen(BuildContext context, AuthState state) {
+    return Column(children: [CircularProgressIndicator(color: Colors.black)]);
   }
 
   Widget _buildOtpVerificationScreen(
@@ -120,7 +112,7 @@ class LoginScreen extends StatelessWidget {
     ]);
   }
 
-  Widget _buildLoginViewScreen(BuildContext context) {
+  Widget _buildLoginViewScreen(BuildContext context, AuthState state) {
     return Column(children: [
       Text(
         AppLocalizations.of(context)!.logIn,

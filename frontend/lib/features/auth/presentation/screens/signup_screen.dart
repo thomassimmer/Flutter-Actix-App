@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/core/errors/domain_error.dart';
+import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
+import 'package:flutteractixapp/core/messages/message.dart';
+import 'package:flutteractixapp/core/messages/message_mapper.dart';
+import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
@@ -9,7 +12,6 @@ import 'package:flutteractixapp/features/auth/presentation/cubit/login_cubit.dar
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
-import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 import 'package:go_router/go_router.dart';
 
 class SignupScreen extends StatelessWidget {
@@ -41,6 +43,8 @@ class SignupScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(30.0),
                   child: BlocListener<AuthBloc, AuthState>(
                       listener: (context, state) {
+                    GlobalSnackBar.show(context, state.message);
+
                     if (state is AuthAuthenticatedAfterRegistration) {
                       if (state.recoveryCodes != null) {
                         context.go('/recovery-codes');
@@ -48,22 +52,12 @@ class SignupScreen extends StatelessWidget {
                         context.go('/home');
                       }
                     }
-                    if (state is AuthUnauthenticated) {
-                      if (state.error != null) {
-                        final errorMessage =
-                            getProfileErrorMessage(context, state.error!);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(errorMessage)));
-                      }
-                    }
                   }, child: BlocBuilder<AuthBloc, AuthState>(
                           builder: (context, state) {
                     if (state is AuthLoading) {
-                      return CircularProgressIndicator(
-                        color: Colors.black,
-                      );
+                      return _buildLoadingScreen(context, state);
                     } else {
-                      return _buildSignUpScreen(context);
+                      return _buildSignUpScreen(context, state);
                     }
                   })),
                 )),
@@ -79,7 +73,11 @@ class SignupScreen extends StatelessWidget {
     ]));
   }
 
-  Widget _buildSignUpScreen(BuildContext context) {
+  Widget _buildLoadingScreen(BuildContext context, AuthState state) {
+    return Column(children: [CircularProgressIndicator(color: Colors.black)]);
+  }
+
+  Widget _buildSignUpScreen(BuildContext context, AuthState state) {
     final Brightness brightness = MediaQuery.of(context).platformBrightness;
     final String themeData = brightness == Brightness.dark ? "dark" : "light";
 
@@ -87,14 +85,16 @@ class SignupScreen extends StatelessWidget {
       (LoginCubit cubit) => cubit.state.username.displayError,
     );
     final displayUsernameErrorMessage = displayUsernameError is DomainError
-        ? getProfileErrorMessage(context, displayUsernameError)
+        ? getTranslatedMessage(
+            context, ErrorMessage(displayUsernameError.messageKey))
         : null;
 
     final displayPasswordError = context.select(
       (LoginCubit cubit) => cubit.state.password.displayError,
     );
     final displayPasswordErrorMessage = displayPasswordError is DomainError
-        ? getProfileErrorMessage(context, displayPasswordError)
+        ? getTranslatedMessage(
+            context, ErrorMessage(displayPasswordError.messageKey))
         : null;
 
     return Column(

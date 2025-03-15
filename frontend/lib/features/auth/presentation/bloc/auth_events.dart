@@ -115,3 +115,5 @@ class AuthAccountRecoveryWithOtpEnabledAndOtpRequested extends AuthEvent {
   @override
   List<Object?> get props => [username, code, recoveryCode];
 }
+
+class AuthRecoveryCodeCopied extends AuthEvent {}

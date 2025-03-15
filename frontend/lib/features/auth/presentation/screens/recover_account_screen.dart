@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutteractixapp/core/messages/message_mapper.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
-import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 import 'package:go_router/go_router.dart';
 
 class RecoverAccountScreen extends StatelessWidget {
@@ -63,9 +63,9 @@ class RecoverAccountScreen extends StatelessWidget {
                                 color: Colors.black,
                               );
                             } else {
-                              return Text(state.error != null
-                                  ? getProfileErrorMessage(
-                                      context, state.error!)
+                              return Text(state.message != null
+                                  ? getTranslatedMessage(
+                                      context, state.message!)
                                   : AppLocalizations.of(context)!.noContent);
                             }
                           },

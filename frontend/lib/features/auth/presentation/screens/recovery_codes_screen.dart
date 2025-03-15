@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutteractixapp/core/messages/message.dart';
+import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
-import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -40,26 +41,16 @@ class RecoveryCodesScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(30.0),
                       child: BlocListener<AuthBloc, AuthState>(
                         listener: (context, state) {
+                          GlobalSnackBar.show(context, state.message);
+
                           if (state is AuthAuthenticatedAfterRegistration) {
                             if (state.hasVerifiedOtp) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(AppLocalizations.of(context)!
-                                        .validationCodeCorrect)),
-                              );
                               context.go('/home');
                             } else {
                               context.go('/recovery-codes');
                             }
                           } else if (state is AuthOtpVerify) {
                             _otpController.text = '';
-
-                            if (state.error != null) {
-                              final errorMessage =
-                                  getProfileErrorMessage(context, state.error!);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(errorMessage)));
-                            }
                           }
                         },
                         child: BlocBuilder<AuthBloc, AuthState>(
@@ -69,14 +60,9 @@ class RecoveryCodesScreen extends StatelessWidget {
                             } else if (state is AuthOtpGenerate) {
                               return _buildOtpSetupView(context, state);
                             } else if (state is AuthLoading) {
-                              return CircularProgressIndicator(
-                                color: Colors.black,
-                              );
+                              return _buildLoadingScreen(context, state);
                             } else {
-                              return Text(
-                                AppLocalizations.of(context)!
-                                    .unableToLoadRecoveryCodes,
-                              );
+                              return _buildErrorScreen(context, state);
                             }
                           },
                         ),
@@ -93,6 +79,18 @@ class RecoveryCodesScreen extends StatelessWidget {
             ]),
       ]),
     );
+  }
+
+  Widget _buildErrorScreen(BuildContext context, AuthState state) {
+    return Column(children: [
+      Text(
+        AppLocalizations.of(context)!.unableToLoadRecoveryCodes,
+      )
+    ]);
+  }
+
+  Widget _buildLoadingScreen(BuildContext context, AuthState state) {
+    return Column(children: [CircularProgressIndicator(color: Colors.black)]);
   }
 
   Widget _buildRecoveryCodesView(
@@ -132,11 +130,10 @@ class RecoveryCodesScreen extends StatelessWidget {
               // Concatenate all recovery codes and copy them to the clipboard
               final codes = state.recoveryCodes!.join('\n');
               Clipboard.setData(ClipboardData(text: codes));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Recovery codes copied to clipboard'),
-                ),
-              );
+
+              // Create an InfoMessage for successfully copying the codes
+              final message = InfoMessage('recoveryCodesCopied');
+              GlobalSnackBar.show(context, message);
             },
           ),
           SizedBox(height: 16),

@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutteractixapp/core/errors/domain_error.dart';
+import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
+import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/check_if_otp_enabled_usecase.dart';
@@ -54,6 +55,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _onAccountRecoveryWithOtpEnabledAndOtpRequested);
     on<AuthAccountRecoveryWithOtpDisabledRequested>(
         _onAccountRecoveryWithOtpDisabledRequested);
+      on<AuthRecoveryCodeCopied>(_onRecoveryCodeCopied);
   }
 
   // Function to check initial authentication state
@@ -89,7 +91,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           recoveryCodes: userToken.recoveryCodes, hasVerifiedOtp: false));
     } catch (error) {
       emit(AuthUnauthenticated(
-          error: error is DomainError ? error : UnknownDomainError()));
+          message: ErrorMessage(error is DomainError
+              ? error.messageKey
+              : UnknownDomainError().messageKey)));
     }
   }
 
@@ -110,7 +114,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         add(AuthLogoutRequested());
       } else {
         emit(AuthUnauthenticated(
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       }
     }
   }
@@ -122,7 +128,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await verifyOtpUseCase.call(event.code);
 
-      emit(AuthAuthenticatedAfterRegistration(hasVerifiedOtp: true));
+      emit(AuthAuthenticatedAfterRegistration(
+          hasVerifiedOtp: true,
+          message: SuccessMessage("validationCodeCorrect")));
     } catch (error) {
       if (error is InvalidRefreshTokenDomainError ||
           error is RefreshTokenExpiredDomainError ||
@@ -132,7 +140,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthOtpVerify(
             otpAuthUrl: event.otpAuthUrl,
             otpBase32: event.otpBase32,
-            error: error is DomainError ? error : UnknownDomainError()));
+            message: ErrorMessage(error is DomainError
+                ? error.messageKey
+                : UnknownDomainError().messageKey)));
       }
     }
   }
@@ -154,8 +164,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           );
 
           emit(AuthAuthenticatedAfterLogin(
-            hasValidatedOtp: false,
-          ));
+              hasValidatedOtp: false,
+              message: SuccessMessage("loginSuccessfull")));
         },
         (userId) {
           emit(AuthOtpValidate(userId: userId));
@@ -163,7 +173,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     } catch (error) {
       emit(AuthUnauthenticated(
-          error: error is DomainError ? error : UnknownDomainError()));
+          message: ErrorMessage(error is DomainError
+              ? error.messageKey
+              : UnknownDomainError().messageKey)));
     }
   }
 
@@ -180,10 +192,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         userToken.refreshToken,
       );
 
-      emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
+      emit(AuthAuthenticatedAfterLogin(
+          hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
     } catch (error) {
       emit(AuthOtpValidate(
-          error: error is DomainError ? error : UnknownDomainError(),
+          message: ErrorMessage(error is DomainError
+              ? error.messageKey
+              : UnknownDomainError().messageKey),
           userId: event.userId));
     }
   }
@@ -192,7 +207,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthLogoutRequested event, Emitter<AuthState> emit) async {
     await TokenStorage().deleteTokens();
 
-    emit(AuthUnauthenticated());
+    emit(AuthUnauthenticated(message: SuccessMessage('logoutSuccessfull')));
   }
 
   void _onAccountRecoveryForUsernameRequested(
@@ -232,7 +247,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthRecoveringAccountUsernameStep(
           username: event.username,
           passwordForgotten: event.passwordForgotten,
-          error: error is DomainError ? error : UnknownDomainError()));
+          message: ErrorMessage(error is DomainError
+              ? error.messageKey
+              : UnknownDomainError().messageKey)));
     }
   }
 
@@ -254,10 +271,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         userToken.refreshToken,
       );
 
-      emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
+      emit(AuthAuthenticatedAfterLogin(
+          hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
     } catch (error) {
       emit(AuthUnauthenticated(
-          error: error is DomainError ? error : UnknownDomainError()));
+          message: ErrorMessage(error is DomainError
+              ? error.messageKey
+              : UnknownDomainError().messageKey)));
     }
   }
 
@@ -278,10 +298,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         userToken.refreshToken,
       );
 
-      emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
+      emit(AuthAuthenticatedAfterLogin(
+          hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
     } catch (error) {
       emit(AuthUnauthenticated(
-          error: error is DomainError ? error : UnknownDomainError()));
+          message: ErrorMessage(error is DomainError
+              ? error.messageKey
+              : UnknownDomainError().messageKey)));
     }
   }
 
@@ -300,10 +323,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         userToken.refreshToken,
       );
 
-      emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
+      emit(AuthAuthenticatedAfterLogin(
+          hasValidatedOtp: true, message: SuccessMessage("loginSuccessfull")));
     } catch (error) {
       emit(AuthUnauthenticated(
-          error: error is DomainError ? error : UnknownDomainError()));
+          message: ErrorMessage(error is DomainError
+              ? error.messageKey
+              : UnknownDomainError().messageKey)));
     }
   }
+
+  void _onRecoveryCodeCopied(
+    AuthRecoveryCodeCopied event,
+    Emitter<AuthState> emit
+  ) async {
+    // emit()
+  }
+
 }
