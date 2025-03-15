@@ -21,7 +21,7 @@ COPY --chown=flutteruser:docker . .
 RUN flutter pub get
 
 # Expose the port Flutter will use for web server
-EXPOSE 8080
+EXPOSE 3000
 
 # Start the Flutter development server
-CMD ["flutter", "run", "-d", "web-server", "--web-port", "8080", "--web-hostname", "0.0.0.0"]
+CMD ["flutter", "run", "-d", "web-server", "--web-port", "3000", "--web-hostname", "0.0.0.0"]
