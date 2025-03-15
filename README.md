@@ -110,9 +110,11 @@ To install on device: flutter install --flavor dev
 
 ## Sources of inspiration
 
-Install localizations on ios: https://medium.com/@gauravswarankar/internationalizing-flutter-apps-a2b82e804ca6
-Flutter, blocs, clean architecture: https://github.com/Yoga3911/flutter_bloc_clean_architecture/tree/master
-Flutter, themes, clean architecture: https://github.com/hungps/flutter_pokedex
+- Install localizations on ios: https://medium.com/@gauravswarankar/internationalizing-flutter-apps-a2b82e804ca6
+
+- Flutter, blocs, clean architecture: https://github.com/Yoga3911/flutter_bloc_clean_architecture/tree/master
+
+- Flutter, themes, clean architecture: https://github.com/hungps/flutter_pokedex
 
 ## And now?
 

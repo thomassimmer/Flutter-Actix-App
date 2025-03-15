@@ -1,51 +1,59 @@
-# Building a Flutter / Rust app: Architecture
+# Building a Cross-Platform App with Flutter and Rust: Clean Architecture
 
-## Context
+## Introduction
 
-This article explains my project architecture to build a Flutter/Rust app with:
+This article explains the architecture I implemented to build a cross-platform app using Flutter for the frontend and Actix for the backend. The app includes key features such as:
 
-- a first page where you can login / signup using a username and a password (no email because my user shouldn't be personally identifiable)
-- a second page where freshly registered users can see their recovery codes
-- a third page where freshly registered user can enable 2-factor authentication (2FA) with one-time passwords (OTP) using an external app like Google's Authenticator
-- a fourth page that is a typical app view with four tabs using a common base screen with a logout button
-- a fifth page for the profile tab where people can change their languages, theme and enable/disable 2FA
+1. A login/signup page using a username and password (without email, for privacy).
+2. A recovery code page for new users.
+3. A 2FA setup page using OTP with an external app like Google Authenticator.
+4. A main app view with four tabs.
+5. A profile tab where users can change settings like language, theme, 2FA and logout.
+6. An account recovery page for users who lose access to 2FA or their password.
 
-Don't hesitate to read the first article of this serie to get more context, [](here).
+For more context, feel free to check out [the first article](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-a-beginners-journey-92cbb893c2f9) of this series.
 
-## Docker containers
+## Docker Architecture and Containers
 
-I used docker to make sure my app will work whatever the platforms it runs on. For this project, I used three docker containers orchestrated by a docker-compose.yml file:
+In this project, I used three Docker containers, managed via a docker-compose.yml file, to provide consistency across different environments, enabling seamless deployment regardless of the platform:
 
-- a frontend container, running a flutter web app
-- a backend container, running a Actix API
-- a database container, running a PostgreSQL database
+- Frontend container: Hosts the Flutter web app.
+- Backend container: Runs the Actix API.
+- Database container: Uses PostgreSQL for persistent storage.
 
-My global architecture looks roughly like this:
+This architecture allows for scalability. For example, if the app experiences heavy usage, I can scale the backend independently by increasing the number of API containers without needing to modify the frontend or database containers. I can also update only the frontend containers if I need to deploy a new version of the flutter code.
 
+Here’s a high-level overview of the global architecture:
+
+```
 .
+├── README.md
 ├── backend
+│   ├── .env
 │   ├── Cargo.toml
 │   ├── Dockerfile
-│ ├── .env
+│   ├── configuration
 │   ├── migrations
 │   ├── src
+│   │   ├── core
+│   │   ├── features
 │   │   ├── lib.rs
 │   │   ├── main.rs
-│   ├── ...
+│   └── tests
 ├── db
+│   ├── .env
 │   └── Dockerfile
-│ └── .env
 ├── docker-compose.yml
-├── frontend
-│ ├── Dockerfile
-│ ├── .env
-│ ├── lib
-│ │   └── main.dart
-│ ├── pubspec.yaml
-│   ├── ...
-└── ...
+└── frontend
+    ├── Dockerfile
+    ├── lib
+    │   ├── core
+    │   ├── features
+    ├── pubspec.yaml
+    └── ...
+```
 
-My docker-compose.yml file contains:
+The docker-compose.yml file contains:
 
 ```yml
 services:
@@ -104,90 +112,126 @@ networks:
     driver: bridge
 ```
 
-As you can see, I am using a bridge network to make sure only my containers can access each other locally and no other container that may exist on the machine.
+As shown above, I’ve utilized a bridge network to ensure that only my containers can communicate with each other locally. This setup isolates the network traffic, preventing other containers running on the same machine from interacting with these services. It’s an essential security measure, ensuring that the app’s internal communication remains protected.
 
-## Backend architecture
+## Backend Structure with Actix
 
-In this project, I identified two main features:
+For the backend, I focused on two core features, each encapsulating key areas of functionality:
 
-- **auth**, for everything related to authentication
-- **profile**, for everything related to user profiles
+- **auth**: Handles all authentication-related processes, including signup, login, token management, account recovery, and 2FA (two-factor authentication).
+- **profile**: Manages user profile settings, such as theme selection, language preferences, and password updates.
 
-Therefore, my Actix architecture is like so:
+The Actix backend architecture is structured as follows:
 
-backend
-├── Cargo.toml
-├── Dockerfile
-├── configuration
-│   ├── base.yaml
-│   ├── docker.yaml
-│   ├── local.yaml
-│   └── production.yaml
-├── migrations
-│   ├── ...
-├── src
-│   ├── configuration.rs
-│   ├── core
-│   │   ├── helpers
-│   │   │   └── mock_now.rs
-│   │   ├── routes
-│   │   │   └── health_check.rs
-│   │   └── structs
-│   │   └── responses.rs
-│   ├── features
-│   │   ├── auth
+```
+├── backend
+│   ├── .env
+│   ├── .env.docker
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   ├── Dockerfile
+│   ├── configuration
+│   │   ├── base.yaml
+│   │   ├── docker.yaml
+│   │   ├── local.yaml
+│   │   └── production.yaml
+│   ├── migrations
+│   ├── src
+│   │   ├── configuration.rs
+│   │   ├── core
+│   │   │   ├── constants
+│   │   │   │   └── errors.rs
 │   │   │   ├── helpers
-│   │   │   │   ├── errors.rs
-│   │   │   │   └── token.rs
+│   │   │   │   └── mock_now.rs
+│   │   │   ├── middlewares
+│   │   │   │   └── token_validator.rs
 │   │   │   ├── routes
-│   │   │   │   ├── login.rs
-│   │   │   │   ├── otp.rs
-│   │   │   │   ├── signup.rs
-│   │   │   │   └── token.rs
+│   │   │   │   └── health_check.rs
 │   │   │   └── structs
-│   │   │   ├── models.rs
-│   │   │   ├── requests.rs
-│   │   │   └── responses.rs
-│   │   └── profile
-│   │   ├── routes
-│   │   │   └── profile.rs
-│   │   └── structs
-│   │   ├── models.rs
-│   │   ├── requests.rs
-│   │   └── responses.rs
-│   ├── lib.rs
-│   ├── main.rs
-│   └── startup.rs
-└── tests
-├── auth
-│   ├── login.rs
-│   ├── otp.rs
-│   ├── signup.rs
-│   └── token.rs
-├── core
-│   └── health_check.rs
-├── helpers.rs
-├── mod.rs
-└── profile
-└── profile.rs
+│   │   │       └── responses.rs
+│   │   ├── features
+│   │   │   ├── auth
+│   │   │   │   ├── helpers
+│   │   │   │   │   ├── errors.rs
+│   │   │   │   │   ├── password.rs
+│   │   │   │   │   ├── token.rs
+│   │   │   │   │   └── username.rs
+│   │   │   │   ├── routes
+│   │   │   │   │   ├── disable_otp.rs
+│   │   │   │   │   ├── generate_otp.rs
+│   │   │   │   │   ├── log_user_in.rs
+│   │   │   │   │   ├── recover_account_using_2fa.rs
+│   │   │   │   │   ├── recover_account_using_password.rs
+│   │   │   │   │   ├── recover_account_without_2fa_enabled.rs
+│   │   │   │   │   ├── signup.rs
+│   │   │   │   │   ├── token.rs
+│   │   │   │   │   ├── validate_otp.rs
+│   │   │   │   │   └── verify_otp.rs
+│   │   │   │   └── structs
+│   │   │   │       ├── models.rs
+│   │   │   │       ├── requests.rs
+│   │   │   │       └── responses.rs
+│   │   │   └── profile
+│   │   │       ├── helpers
+│   │   │       ├── routes
+│   │   │       │   ├── get_profile_information.rs
+│   │   │       │   ├── is_otp_enabled.rs
+│   │   │       │   ├── post_profile_information.rs
+│   │   │       │   ├── set_password.rs
+│   │   │       │   └── update_password.rs
+│   │   │       └── structs
+│   │   │           ├── models.rs
+│   │   │           ├── requests.rs
+│   │   │           └── responses.rs
+│   │   ├── lib.rs
+│   │   ├── main.rs
+│   │   └── startup.rs
+│   └── tests
+│       ├── auth
+│       │   ├── login.rs
+│       │   ├── otp.rs
+│       │   ├── recovery
+│       │   │   ├── recover_account_using_2fa.rs
+│       │   │   ├── recover_account_using_password.rs
+│       │   │   └── recover_account_without_2fa_enabled.rs
+│       │   ├── signup.rs
+│       │   └── token.rs
+│       ├── core
+│       │   └── health_check.rs
+│       ├── helpers.rs
+│       ├── mod.rs
+│       └── profile
+│           ├── profile.rs
+│           ├── set_password.rs
+│           └── update_password.rs
+```
 
-It may not be the best, but I found this architecture easy to develop with as you can easily separate things in different small files that have a self-describing location based on their purpose.
+While this architecture may not be the absolute best, I found it straightforward to develop with, allowing for easy separation of concerns into small, purpose-driven files. This modular approach aids in maintaining readability and organization.
 
-The **core** folder is for everything that is not really specific to a feature. It's not big for now, but you can imagine it will be useful later.
-The **features/auth** is the biggest folder for now because the authentication requires a lot of code. For instance, my signup route is located in **features/auth/routes/signup.rs**, uses a request body schema defined in **features/auth/structs/requests.rs**, returns a response body defined in **features/auth/structs/responses.rs** and, uses helpers located in **features/auth/helpers/token.rs** to generate tokens.
+### Project Structure Overview
 
-One interesting thing here is the start process. I essentially took what zero2prod did with small ajustments so that I could define and reuse an Actix app in my tests and in my main.rs and, use the Actix's tests facilities without writing my routes twice. For this, I have:
+The **core** folder contains functionality that is not specific to any particular feature. While it’s currently minimal, I anticipate that it will become increasingly valuable as the project expands.
 
-- **src/startup.rs**, where I define:
-  - a function **create_app** that returns an Actix's App containing my routes, my cors config and other state variable
-    -> This function is used in my test so I don't have to run a server for each of them, but use Actix's testing facilities instead.
-  - a function **run** that creates a http server running my App
-  - a struct **Application** that calls **run** with a listener at the adress written in my config
-- **src/main.rs**, where I get my configuration, create an Application and run it indefinitely
-- **src/configuration.rs**, where I define functions to read my application and database configurations
-- **configuration/base.yml**, where I define my configurations, basis being used by default when a variable is not written in local.yml, docker.yml or production.yml.
+The **features/auth** folder is the largest at this stage, reflecting the complexity of the authentication process. For example, my signup route is organized as follows:
 
-To use one of these configurations, I have this **.env** file:
+- The route itself is located in **features/auth/routes/signup.rs**.
+- It uses a request body schema defined in **features/auth/structs/requests.rs**.
+- The corresponding response body is defined in **features/auth/structs/responses.rs**.
+- Helper functions for token generation are found in **features/auth/helpers/token.rs**.
+
+### Application Startup Process
+
+One interesting aspect of my implementation is the startup process. I primarily adapted methods from [zero2prod](https://www.lpalmieri.com/posts/2020-08-31-zero-to-production-3-5-html-forms-databases-integration-tests/#3-2-choosing-a-database-crate) with slight adjustments, allowing me to define and reuse an Actix app in both my tests and main.rs. This way, I can leverage Actix’s testing facilities without duplicating my route definitions. Here’s how I structured it:
+
+- **src/startup.rs**:
+  - **create_app**: This function returns an Actix App that includes my routes, CORS configuration, and other state variables. It’s utilized in my tests, eliminating the need to run a server for each one.
+  - **run**: This function initializes an HTTP server running my app.
+  - **Application** struct: This struct invokes run with a listener set to the address specified in my configuration.
+- **src/main.rs**: This file retrieves the application configuration, creates an instance of **Application**, and runs it indefinitely.
+- **src/configuration.rs**: Here, I define functions to read my application and database configurations.
+- **configuration/base.yml**: This file contains my configuration settings. The base.yml file serves as the default when a variable is not specified in local.yml, docker.yml, or production.yml.
+
+To utilize these configurations, I maintain a .env file in the backend/ directory:
 
 ```bash
 APP_ENVIRONMENT=local # or docker or production
@@ -195,119 +239,183 @@ APP_ENVIRONMENT=local # or docker or production
 DATABASE_URL=postgres://template_user:template_password@db:5432/template_db
 ```
 
-## Frontend architecture
+## Frontend Structure with Flutter
 
-Just like for my backend, I will use these two **features** folder to organize my frontend:
+Just like for my backend, I use these two **core** and **features** folders to organize my frontend:
 
-frontend
-├── Dockerfile
-├── l10n.yaml
-├── lib
-│   ├── core
-│   │   ├── constants
-│   │   │   ├── app_colors.dart
-│   │   │   └── errors.dart
-│   │   ├── network
-│   │   │   └── auth_interceptor.dart
-│   │   ├── presentation
-│   │   │   └── root_screen.dart
-│   │   ├── service_locator.dart
-│   │   ├── themes
-│   │   │   └── app_theme.dart
-│   │   └── widgets
-│   │   └── custom_tab_bar.dart
-│   ├── features
-│   │   ├── auth
-│   │   │   ├── data
-│   │   │   │   ├── models
-│   │   │   │   │   ├── otp_generation_model.dart
-│   │   │   │   │   ├── user_token_model.dart
-│   │   │   │   │   └── user_token_request_model.dart
-│   │   │   │   ├── repositories
-│   │   │   │   │   └── auth_repository_impl.dart
-│   │   │   │   ├── services
-│   │   │   │   │   └── auth_service.dart
-│   │   │   │   ├── sources
-│   │   │   │   │   └── remote_data_sources.dart
-│   │   │   │   └── storage
-│   │   │   │   └── token_storage.dart
-│   │   │   ├── domain
-│   │   │   │   ├── entities
-│   │   │   │   │   ├── otp_generation.dart
-│   │   │   │   │   └── user_token.dart
-│   │   │   │   ├── errors
-│   │   │   │   │   └── failures.dart
-│   │   │   │   ├── repositories
-│   │   │   │   │   └── auth_repository.dart
-│   │   │   │   └── usecases
-│   │   │   │   ├── disable_otp_use_case.dart
-│   │   │   │   ├── generate_otp_config_use_case.dart
-│   │   │   │   ├── login_usecase.dart
-│   │   │   │   ├── signup_usecase.dart
-│   │   │   │   ├── validate_otp_usecase.dart
-│   │   │   │   └── verify_otp_usecase.dart
-│   │   │   └── presentation
-│   │   │   ├── bloc
-│   │   │   │   ├── auth_bloc.dart
-│   │   │   │   ├── auth_events.dart
-│   │   │   │   └── auth_states.dart
-│   │   │   ├── screens
-│   │   │   │   ├── login_screen.dart
-│   │   │   │   ├── recovery_codes_screen.dart
-│   │   │   │   ├── signup_screen.dart
-│   │   │   │   └── unauthenticated_home_screen.dart
-│   │   │   ├── widgets
-│   │   │   │   ├── background.dart
-│   │   │   │   ├── button.dart
-│   │   │   │   ├── custom_text_field.dart
-│   │   │   │   └── submit_button.dart
-│   │   ├── challenges
-│   │   │   └── presentation
-│   │   │   └── challenges_screen.dart
-│   │   ├── habits
-│   │   │   └── presentation
-│   │   │   └── habits_screen.dart
-│   │   ├── messages
-│   │   │   └── presentation
-│   │   │   └── messages_screen.dart
-│   │   └── profile
-│   │   ├── data
-│   │   │   ├── models
-│   │   │   │   ├── user_model.dart
-│   │   │   │   └── user_request_model.dart
-│   │   │   ├── repositories
-│   │   │   │   └── profile_repository_impl.dart
-│   │   │   └── sources
-│   │   │   └── remote_data_sources.dart
-│   │   ├── domain
-│   │   │   ├── entities
-│   │   │   │   └── user.dart
-│   │   │   ├── errors
-│   │   │   │   └── failures.dart
-│   │   │   ├── repositories
-│   │   │   │   └── profile_repository.dart
-│   │   │   └── usecases
-│   │   │   ├── get_profile_usecase.dart
-│   │   │   └── post_profile_usecase.dart
-│   │   └── presentation
-│   │   ├── bloc
-│   │   │   ├── profile_bloc.dart
-│   │   │   ├── profile_events.dart
-│   │   │   └── profile_states.dart
-│   │   └── screen
-│   │   ├── language_selection_screen.dart
-│   │   ├── profile_screen.dart
-│   │   └── theme_selection_screen.dart
-│   ├── l10n
-│   │   ├── app_en.arb
-│   │   └── app_fr.arb
-│   └── main.dart
-├── pubspec.yaml
+```
+└── frontend
+    ├── .env
+    ├── Dockerfile
+    ├── assets
+    │   ├── fonts
+    │   └── images
+    ├── l10n.yaml
+    ├── lib
+    │   ├── core
+    │   │   ├── app.dart
+    │   │   ├── messages
+    │   │   │   ├── errors
+    │   │   │   │   ├── data_error.dart
+    │   │   │   │   └── domain_error.dart
+    │   │   │   ├── message.dart
+    │   │   │   └── message_mapper.dart
+    │   │   ├── network
+    │   │   │   ├── auth_interceptor.dart
+    │   │   │   └── expired_token_retry_policy.dart
+    │   │   ├── presentation
+    │   │   │   └── screens
+    │   │   │       ├── error_screen.dart
+    │   │   │       └── root_screen.dart
+    │   │   ├── router.dart
+    │   │   ├── service_locator.dart
+    │   │   ├── ui
+    │   │   │   ├── colors.dart
+    │   │   │   ├── extensions.dart
+    │   │   │   ├── styles.dart
+    │   │   │   ├── theme.dart
+    │   │   │   ├── themes
+    │   │   │   │   ├── dark.dart
+    │   │   │   │   └── light.dart
+    │   │   │   └── typography.dart
+    │   │   ├── validators
+    │   │   │   ├── password.dart
+    │   │   │   └── username.dart
+    │   │   └── widgets
+    │   │       ├── app_logo.dart
+    │   │       ├── custom_container.dart
+    │   │       ├── custom_text_field.dart
+    │   │       ├── global_snack_bar.dart
+    │   │       └── icon_with_warning.dart
+    │   ├── features
+    │   │   ├── auth
+    │   │   │   ├── data
+    │   │   │   │   ├── errors
+    │   │   │   │   │   └── data_error.dart
+    │   │   │   │   ├── models
+    │   │   │   │   │   ├── otp_model.dart
+    │   │   │   │   │   ├── otp_request_model.dart
+    │   │   │   │   │   ├── user_token_model.dart
+    │   │   │   │   │   └── user_token_request_model.dart
+    │   │   │   │   ├── repositories
+    │   │   │   │   │   └── auth_repository_impl.dart
+    │   │   │   │   ├── services
+    │   │   │   │   │   └── auth_service.dart
+    │   │   │   │   ├── sources
+    │   │   │   │   │   └── remote_data_sources.dart
+    │   │   │   │   └── storage
+    │   │   │   │       └── token_storage.dart
+    │   │   │   ├── domain
+    │   │   │   │   ├── entities
+    │   │   │   │   │   ├── otp_generation.dart
+    │   │   │   │   │   └── user_token.dart
+    │   │   │   │   ├── errors
+    │   │   │   │   │   └── domain_error.dart
+    │   │   │   │   ├── repositories
+    │   │   │   │   │   └── auth_repository.dart
+    │   │   │   │   └── usecases
+    │   │   │   │       ├── check_if_account_has_two_factor_authentication_enabled_use_case.dart
+    │   │   │   │       ├── disable_two_factor_authentication_use_case.dart
+    │   │   │   │       ├── generate_two_factor_authentication_config_use_case.dart
+    │   │   │   │       ├── login_usecase.dart
+    │   │   │   │       ├── recover_account_with_two_factor_authentication_and_one_time_password_use_case.dart
+    │   │   │   │       ├── recover_account_with_two_factor_authentication_and_password_use_case.dart
+    │   │   │   │       ├── recover_account_without_two_factor_authentication_enabled_use_case.dart
+    │   │   │   │       ├── signup_usecase.dart
+    │   │   │   │       ├── validate_one_time_password_use_case.dart
+    │   │   │   │       └── verify_one_time_password_use_case.dart
+    │   │   │   └── presentation
+    │   │   │       ├── blocs
+    │   │   │       │   ├── auth
+    │   │   │       │   │   ├── auth_bloc.dart
+    │   │   │       │   │   ├── auth_events.dart
+    │   │   │       │   │   └── auth_states.dart
+    │   │   │       │   └── auth_login
+    │   │   │       │       ├── auth_login_bloc.dart
+    │   │   │       │       ├── auth_login_events.dart
+    │   │   │       │       └── auth_login_states.dart
+    │   │   │       ├── screens
+    │   │   │       │   ├── login_screen.dart
+    │   │   │       │   ├── recover_account_screen.dart
+    │   │   │       │   ├── recovery_codes_screen.dart
+    │   │   │       │   ├── signup_screen.dart
+    │   │   │       │   └── unauthenticated_home_screen.dart
+    │   │   │       └── widgets
+    │   │   │           ├── background.dart
+    │   │   │           └── successful_login_animation.dart
+    │   │   ├── challenges
+    │   │   │   ├── data
+    │   │   │   ├── domain
+    │   │   │   └── presentation
+    │   │   │       └── challenges_screen.dart
+    │   │   ├── habits
+    │   │   │   ├── data
+    │   │   │   ├── domain
+    │   │   │   └── presentation
+    │   │   │       └── habits_screen.dart
+    │   │   ├── messages
+    │   │   │   ├── data
+    │   │   │   ├── domain
+    │   │   │   └── presentation
+    │   │   │       └── messages_screen.dart
+    │   │   └── profile
+    │   │       ├── data
+    │   │       │   ├── errors
+    │   │       │   │   └── data_error.dart
+    │   │       │   ├── models
+    │   │       │   │   ├── profile_model.dart
+    │   │       │   │   └── profile_request_model.dart
+    │   │       │   ├── repositories
+    │   │       │   │   └── profile_repository_impl.dart
+    │   │       │   └── sources
+    │   │       │       └── remote_data_sources.dart
+    │   │       ├── domain
+    │   │       │   ├── entities
+    │   │       │   │   └── profile.dart
+    │   │       │   ├── errors
+    │   │       │   │   └── domain_error.dart
+    │   │       │   ├── repositories
+    │   │       │   │   └── profile_repository.dart
+    │   │       │   └── usecases
+    │   │       │       ├── get_profile_usecase.dart
+    │   │       │       ├── post_profile_usecase.dart
+    │   │       │       ├── set_password_use_case.dart
+    │   │       │       └── update_password_use_case.dart
+    │   │       └── presentation
+    │   │           ├── blocs
+    │   │           │   ├── profile
+    │   │           │   │   ├── profile_bloc.dart
+    │   │           │   │   ├── profile_events.dart
+    │   │           │   │   └── profile_states.dart
+    │   │           │   ├── set_password
+    │   │           │   │   ├── set_password_bloc.dart
+    │   │           │   │   ├── set_password_events.dart
+    │   │           │   │   └── set_password_states.dart
+    │   │           │   └── update_password
+    │   │           │       ├── update_password_bloc.dart
+    │   │           │       ├── update_password_events.dart
+    │   │           │       └── update_password_states.dart
+    │   │           └── screens
+    │   │               ├── about_screen.dart
+    │   │               ├── language_selection_screen.dart
+    │   │               ├── password_screen.dart
+    │   │               ├── profile_screen.dart
+    │   │               ├── theme_selection_screen.dart
+    │   │               └── two_factor_authentication_screen.dart
+    │   ├── l10n
+    │   │   ├── app_en.arb
+    │   │   └── app_fr.arb
+    │   └── main.dart
+    ├── pubspec.lock
+    ├── pubspec.yaml
+```
 
-As you can see, I used a schema like this for each feature:
+As you can see, I used an architecture like this for each feature:
 
+```
 name_of_the_feature
 ├── data
+│   ├── errors
 │   ├── models
 │   ├── repositories
 │   └── sources
@@ -317,44 +425,73 @@ name_of_the_feature
 │   ├── repositories
 │   └── usecases
 └── presentation
-├── bloc
-└── screen
+│   ├── blocs
+│   ├── screens
+│   └── widgets
+```
 
-This may look overcomplicated but have in mind that I wanted a clean project where every file stays small, located at an expected location and every piece of my program can be easily unit tested:
+This architecture may seem complex at first glance, but my goal was to create a clean project where each file is small, logically organized, and easily testable. Here’s a breakdown of the structure:
 
-- **data** holds the API logic:
+### Project Structure Overview
 
-  - **models** are the structures for API requests and responses
+- **data**: This folder contains the API logic:
 
-  - **repositories** are the classes that implement the **business repositories**
+  - **errors**: This subfolder holds all possible data errors that may arise within this feature.
+  - **models**: These are the structures used for API requests and responses.
+  - **repositories**: This contains the classes that implement the domain repositories.
+  - **sources**: This includes the various methods to fulfill the repositories’ requirements.
 
-  - **sources** are the possible ways to effectively do what the repositories need
+    - Currently, the sources folder only contains remote source files, as the project primarily calls an external API. However, I anticipate needing local source files in the future for implementing a caching system.
 
-    - In **sources**, I have only **remote sources** files for now, because the project is simply calling an external API, but in the future, I could have to implement a caching system and I would need **local sources** files for that.
+- **domain**: This folder encapsulates the “business” logic:
 
-- **domain** holds the "business" logic:
+  - **entities**: These are the structures necessary for my frontend logic.
+  - **errors**: This subfolder contains all potential domain errors related to this feature.
+  - **usecases**: These are functions designed to perform a single task.
+  - **repositories**: This includes abstract classes that define the interfaces used in the business logic.
 
-  - **entities** are the structures I actually need for my frontend logic
+- **presentation**: This folder holds the logic for state management (using blocs), the actual views of the app (in screens), and reusable widgets:
+  - Each bloc folder contains:
+    - **events**: These represent the events emitted by screens or the bloc logic, signaling actions such as “I want to do this…” or “This just happened…”
+    - **bloc**: This is where the state management logic is defined, encompassing use case calls, event listening, and state emissions.
+    - **states**: This folder defines the possible states of the bloc, such as AuthAuthenticatedState or AuthUnauthenticatedState.
 
-  - **errors** holds all the possible errors thay may arise for this feature
+While I haven’t implemented tests for the frontend yet, this architecture is designed to facilitate testing, as everything is decomposed into small, manageable pieces.
 
-  - **usecases** are functions doing one thing only and
+### Testing Considerations
 
-  - **repositories** are abstract classes that describe the interfaces used my business logic.
+If you’re interested in testing this architecture, consider the following aspects:
 
-- **presentation** holds the logic for state management (**blocs**) and **screens**, which are the actual views of the app.
+1. Unit Tests:
 
-  - Each **bloc** folder contains:
+- Test individual use cases in the domain layer to ensure that they perform their tasks correctly.
+- Validate repositories to confirm they correctly implement their respective interfaces.
+- Test models to ensure they correctly handle data serialization and deserialization.
 
-    - **events** which are the event emitted by screens or the bloc logic to say "Hey I want to do this..." or "Hey this happened..."
+2. Widget Tests:
 
-    - **bloc** which is where the state management logic is defined; where we call usecases, listen for events and emit others...
+- Verify that widgets render correctly with various states.
+- Ensure that user interactions (e.g., button presses) trigger the appropriate events.
 
-    - **states** which are the possible states we can be for this bloc; for instance, you can be in AuthAuthenticated state or AuthUnauthenticated
+3. Integration Tests:
 
-I didn't write tests yet for the frontend, but this architecture should allow it easily because every things is decomposed into small pieces.
+- Test the interaction between blocs and screens to confirm that events flow as expected.
+- Validate that the presentation layer correctly communicates with the data layer.
 
-And that's it for this architecture presentation, I hope it was helpful and inspired you! If you have any critics and questions, don't hesitate!
+### Environment Configuration
+
+In the **frontend/** directory, I have an **.env** file with the following configuration:
+
+```
+API_BASE_URL=http://localhost:8000
+# API_BASE_URL=http://192.168.1.166:8000 # if I need to deploy on my mobile for testing
+```
+
+## Conclusion
+
+By combining Flutter, Rust, and Clean Architecture, I hope I laid the groundwork for a scalable, secure, and maintainable cross-platform app. As this project evolves, I may continue refining the architecture and adding new features in this template. Feel free to explore the project and adapt it for your own needs.
 
 See you for the next article,
 Thomas
+
+[![Watch the video](/docs/screenshots/1.png)](https://youtu.be/ZCqYWs-lrRM)
