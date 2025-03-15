@@ -13,8 +13,12 @@ pub enum AppError {
     InvalidUsernameOrPasswordOrRecoveryCode,
     InvalidUsernameOrRecoveryCode,
     PasswordHash,
+    PasswordTooShort,
+    PasswordTooWeak,
     TokenGeneration,
     TwoFactorAuthenticationNotEnabled,
+    UsernameNotRespectingRules,
+    UsernameWrongSize,
     UserTokenDeletion,
     UserUpdate,
 }
@@ -44,7 +48,7 @@ impl AppError {
             },
             AppError::InvalidOneTimePassword => GenericResponse {
                 code: "INVALID_ONE_TIME_PASSWORD".to_string(),
-                message: "Invalid one time password".to_string()
+                message: "Invalid one time password".to_string(),
             },
             AppError::InvalidRefreshToken => GenericResponse {
                 code: "INVALID_REFRESH_TOKEN".to_string(),
@@ -70,6 +74,14 @@ impl AppError {
                 code: "PASSWORD_HASH".to_string(),
                 message: "Failed to retrieve hashed password".to_string(),
             },
+            AppError::PasswordTooShort => GenericResponse {
+                code: "PASSWORD_TOO_SHORT".to_string(),
+                message: "This password is too short".to_string(),
+            },
+            AppError::PasswordTooWeak => GenericResponse {
+                code: "PASSWORD_TOO_WEAK".to_string(),
+                message: "This password is too weak".to_string(),
+            },
             AppError::TokenGeneration => GenericResponse {
                 code: "TOKEN_GENERATION".to_string(),
                 message: "Failed to generate and save token".to_string(),
@@ -77,6 +89,14 @@ impl AppError {
             AppError::TwoFactorAuthenticationNotEnabled => GenericResponse {
                 code: "TWO_FACTOR_AUTHENTICATION_NOT_ENABLED".to_string(),
                 message: "Two factor authentication is not enabled".to_string(),
+            },
+            AppError::UsernameNotRespectingRules => GenericResponse {
+                code: "USERNAME_NOT_RESPECTING_RULES".to_string(),
+                message: "This username is not respecting our rules".to_string(),
+            },
+            AppError::UsernameWrongSize => GenericResponse {
+                code: "USERNAME_WRONG_SIZE".to_string(),
+                message: "This username is too short or too long".to_string(),
             },
             AppError::UserTokenDeletion => GenericResponse {
                 code: "USER_TOKEN_DELETION".to_string(),

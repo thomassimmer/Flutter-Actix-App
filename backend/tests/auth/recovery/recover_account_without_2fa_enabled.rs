@@ -119,7 +119,7 @@ async fn user_cannot_recover_account_without_2fa_enabled_using_code_twice() {
 }
 
 #[tokio::test]
-async fn user_cannot_login_after_recover_account_using_old_password() {
+async fn user_cannot_login_with_old_password_after_recovery() {
     let app = spawn_app().await;
     let (_, _, recovery_codes) = user_signs_up(&app).await;
     let (access_token, _) =

@@ -10,10 +10,7 @@ use crate::{
     },
     features::{
         auth::{
-            helpers::{
-                password::{password_is_long_enough, password_is_strong_enough},
-                token::generate_tokens,
-            },
+            helpers::{password::is_password_valid, token::generate_tokens, username::is_username_valid},
             structs::{requests::UserRegisterRequest, responses::UserSignupResponse},
         },
         profile::structs::models::User,
@@ -65,20 +62,14 @@ pub async fn register_user(
         }
     }
 
-    // Validate password
-    if !password_is_long_enough(&body.password) {
-        let error_response = GenericResponse {
-            code: "PASSWORD_TOO_SHORT".to_string(),
-            message: "This password is too short.".to_string(),
-        };
-        return HttpResponse::Unauthorized().json(error_response);
+    // Validate username
+    if let Some(exception) = is_username_valid(&body.username) {
+        return HttpResponse::Unauthorized().json(exception.to_response());
     }
-    if !password_is_strong_enough(&body.password) {
-        let error_response = GenericResponse {
-            code: "PASSWORD_TOO_WEAK".to_string(),
-            message: "This password is too weak.".to_string(),
-        };
-        return HttpResponse::Unauthorized().json(error_response);
+
+    // Validate password
+    if let Some(exception) = is_password_valid(&body.password) {
+        return HttpResponse::Unauthorized().json(exception.to_response());
     }
 
     // Hash the password
