@@ -9,6 +9,8 @@ import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart
 import 'package:flutteractixapp/features/profile/domain/entities/user.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:flutteractixapp/features/profile/domain/usecases/post_profile_usecase.dart';
+import 'package:flutteractixapp/features/profile/domain/usecases/set_password_use_case.dart';
+import 'package:flutteractixapp/features/profile/domain/usecases/update_password_use_case.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_events.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
 import 'package:get_it/get_it.dart';
@@ -25,6 +27,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final DisableOtpUseCase disableOtpUseCase =
       GetIt.instance<DisableOtpUseCase>();
   final VerifyOtpUseCase verifyOtpUseCase = GetIt.instance<VerifyOtpUseCase>();
+  final SetPasswordUseCase setPasswordUseCase =
+      GetIt.instance<SetPasswordUseCase>();
+  final UpdatePasswordUseCase updatePasswordUseCase =
+      GetIt.instance<UpdatePasswordUseCase>();
 
   ProfileBloc({required this.authBloc}) : super(ProfileLoading()) {
     authBlocSubscription = authBloc.stream.listen((authState) {
@@ -41,6 +47,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<ProfileOtpGenerationRequested>(_onOtpGenerationRequested);
     on<ProfileOtpDisablingRequested>(_onOtpDisablingRequested);
     on<ProfileOtpVerificationRequested>(_onOtpVerificationRequested);
+    on<ProfileSetPasswordRequested>(_onSetPasswordRequested);
+    on<ProfileUpdatePasswordRequested>(_onUpdatePasswordRequested);
   }
 
   Future<void> _onInitializeProfile(
@@ -155,6 +163,54 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           profile: profile,
         ));
       }
+    } catch (e) {
+      if (currentState is ProfileAuthenticated) {
+        emit(ProfileAuthenticated(
+          profile: currentState.profile,
+          message: e.toString(),
+        ));
+      } else {
+        emit(ProfileUnauthenticated(message: e.toString()));
+      }
+    }
+  }
+
+  Future<void> _onSetPasswordRequested(
+      ProfileSetPasswordRequested event, Emitter<ProfileState> emit) async {
+    final currentState = state;
+    emit(ProfileLoading());
+
+    try {
+      final profile =
+          await setPasswordUseCase.call(newPassword: event.newPassword);
+
+      emit(ProfileAuthenticated(
+          profile: profile, message: "Your password was successfully set."));
+    } catch (e) {
+      if (currentState is ProfileAuthenticated) {
+        emit(ProfileAuthenticated(
+          profile: currentState.profile,
+          message: e.toString(),
+        ));
+      } else {
+        emit(ProfileUnauthenticated(message: e.toString()));
+      }
+    }
+  }
+
+  Future<void> _onUpdatePasswordRequested(
+      ProfileUpdatePasswordRequested event, Emitter<ProfileState> emit) async {
+    final currentState = state;
+    emit(ProfileLoading());
+
+    try {
+      final profile = await updatePasswordUseCase.call(
+          currentPassword: event.currentPassword,
+          newPassword: event.newPassword);
+
+      emit(ProfileAuthenticated(
+          profile: profile,
+          message: "Your password was successfully updated."));
     } catch (e) {
       if (currentState is ProfileAuthenticated) {
         emit(ProfileAuthenticated(

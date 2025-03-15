@@ -37,3 +37,23 @@ class ProfileOtpVerificationRequested extends ProfileEvent {
   @override
   List<Object> get props => [code];
 }
+
+class ProfileSetPasswordRequested extends ProfileEvent {
+  final String newPassword;
+
+  const ProfileSetPasswordRequested({required this.newPassword});
+
+  @override
+  List<Object> get props => [newPassword];
+}
+
+class ProfileUpdatePasswordRequested extends ProfileEvent {
+  final String currentPassword;
+  final String newPassword;
+
+  const ProfileUpdatePasswordRequested(
+      {required this.currentPassword, required this.newPassword});
+
+  @override
+  List<Object> get props => [currentPassword, newPassword];
+}

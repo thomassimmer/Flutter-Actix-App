@@ -7,6 +7,7 @@ class UserModel extends Equatable {
   final String? otpBase32;
   final String? otpAuthUrl;
   final bool otpVerified;
+  final bool passwordIsExpired;
 
   const UserModel(
       {required this.username,
@@ -14,7 +15,8 @@ class UserModel extends Equatable {
       required this.theme,
       required this.otpBase32,
       required this.otpAuthUrl,
-      required this.otpVerified});
+      required this.otpVerified,
+      required this.passwordIsExpired});
 
   // Factory constructor to create a UserModel from JSON data
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -24,10 +26,18 @@ class UserModel extends Equatable {
         theme: json['theme'] as String,
         otpBase32: json['otp_base32'] as String?,
         otpAuthUrl: json['otp_auth_url'] as String?,
-        otpVerified: json['otp_verified'] as bool);
+        otpVerified: json['otp_verified'] as bool,
+        passwordIsExpired: json['password_is_expired'] as bool);
   }
 
   @override
-  List<Object?> get props =>
-      [username, locale, theme, otpBase32, otpAuthUrl, otpVerified];
+  List<Object?> get props => [
+        username,
+        locale,
+        theme,
+        otpBase32,
+        otpAuthUrl,
+        otpVerified,
+        passwordIsExpired
+      ];
 }
