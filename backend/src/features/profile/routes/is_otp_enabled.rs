@@ -1,5 +1,5 @@
 use crate::{
-    core::structs::responses::GenericResponse,
+    core::constants::errors::AppError,
     features::profile::structs::{
         models::User, requests::IsOtpEnabledRequest, responses::IsOtpEnabledResponse,
     },
@@ -15,10 +15,8 @@ pub async fn is_otp_enabled(
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Failed to get a transaction".to_string(),
-            })
+            return HttpResponse::InternalServerError()
+                .json(AppError::DatabaseConnection.to_response())
         }
     };
 
@@ -38,18 +36,15 @@ pub async fn is_otp_enabled(
     match existing_user {
         Ok(existing_user) => match existing_user {
             Some(existing_user) => HttpResponse::Ok().json(IsOtpEnabledResponse {
-                status: "success".to_string(),
+                code: "OTP_STATUS".to_string(),
                 otp_enabled: existing_user.otp_verified,
             }),
             // If user does not exist, say false to avoid scrapping usernames
             None => HttpResponse::Ok().json(IsOtpEnabledResponse {
-                status: "success".to_string(),
+                code: "OTP_STATUS".to_string(),
                 otp_enabled: false,
             }),
         },
-        Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Database query error".to_string(),
-        }),
+        Err(_) => HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response()),
     }
 }

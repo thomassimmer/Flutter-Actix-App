@@ -1,5 +1,7 @@
 use crate::{
-    core::{helpers::mock_now::now, structs::responses::GenericResponse},
+    core::{
+        constants::errors::AppError, helpers::mock_now::now, structs::responses::GenericResponse,
+    },
     features::auth::{
         helpers::token::generate_access_token,
         structs::{models::Claims, requests::RefreshTokenRequest, responses::RefreshTokenResponse},
@@ -18,10 +20,8 @@ pub async fn refresh_token(
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Failed to get a transaction".to_string(),
-            })
+            return HttpResponse::InternalServerError()
+                .json(AppError::DatabaseConnection.to_response())
         }
     };
 
@@ -31,10 +31,7 @@ pub async fn refresh_token(
     let token_data = decode::<Claims>(&refresh_token, &decoding_key, &Validation::default());
 
     if token_data.is_err() {
-        return HttpResponse::BadRequest().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Invalid refresh token".to_string(),
-        });
+        return HttpResponse::Unauthorized().json(AppError::InvalidRefreshToken.to_response());
     }
 
     let claims = token_data.unwrap().claims;
@@ -52,26 +49,21 @@ pub async fn refresh_token(
     .await;
 
     if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
+        return HttpResponse::InternalServerError()
+            .json(AppError::DatabaseTransaction.to_response());
     }
 
     match stored_token {
         Ok(Some(expires_at)) => {
             if now() > expires_at {
                 return HttpResponse::Unauthorized().json(GenericResponse {
-                    status: "fail".to_string(),
+                    code: "REFRESH_TOKEN_EXPIRED".to_string(),
                     message: "Refresh token expired".to_string(),
                 });
             }
         }
         _ => {
-            return HttpResponse::Unauthorized().json(GenericResponse {
-                status: "fail".to_string(),
-                message: "Refresh token not found".to_string(),
-            });
+            return HttpResponse::Unauthorized().json(AppError::InvalidRefreshToken.to_response());
         }
     };
 
@@ -79,7 +71,7 @@ pub async fn refresh_token(
     let (new_access_token, _) = generate_access_token(secret.as_bytes(), &claims.jti);
 
     HttpResponse::Ok().json(RefreshTokenResponse {
-        status: "success".to_string(),
+        code: "TOKEN_REFRESHED".to_string(),
         access_token: new_access_token,
     })
 }

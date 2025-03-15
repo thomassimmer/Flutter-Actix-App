@@ -5,7 +5,10 @@ use actix_web::{
     http::header::ContentType,
     test, Error,
 };
-use flutteractixapp::{core::structs::responses::GenericResponse, features::auth::structs::responses::UserSignupResponse};
+use flutteractixapp::{
+    core::structs::responses::GenericResponse,
+    features::auth::structs::responses::UserSignupResponse,
+};
 
 use crate::{helpers::spawn_app, profile::profile::user_has_access_to_protected_route};
 
@@ -24,10 +27,12 @@ pub async fn user_signs_up(
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(200, response.status().as_u16());
+    assert_eq!(201, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: UserSignupResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "USER_SIGNED_UP");
 
     (
         response.access_token,
@@ -77,8 +82,7 @@ async fn wrong_token_cannot_access_profile_information() {
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
-    assert_eq!(response.message, "Invalid access token");
+    assert_eq!(response.code, "INVALID_ACCESS_TOKEN");
 }
 
 #[tokio::test]
@@ -90,4 +94,29 @@ async fn no_token_cannot_access_profile_information() {
     let response = test::call_service(&app, req).await;
 
     assert_eq!(401, response.status().as_u16());
+}
+
+#[tokio::test]
+async fn user_cannot_create_account_with_already_existing_username() {
+    let app = spawn_app().await;
+    user_signs_up(&app).await;
+
+    let req = test::TestRequest::post()
+        .uri("/api/auth/register")
+        .insert_header(ContentType::json())
+        .set_json(&serde_json::json!({
+        "username": "testusername",
+        "password": "password",
+        "locale": "en",
+        "theme": "dark",
+        }))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(409, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "USER_ALREADY_EXISTS");
 }

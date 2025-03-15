@@ -1,4 +1,4 @@
-use crate::core::structs::responses::GenericResponse;
+use crate::core::constants::errors::AppError;
 use crate::features::auth::structs::responses::GenerateOtpResponse;
 use crate::features::profile::structs::models::User;
 
@@ -14,10 +14,8 @@ pub async fn generate(pool: web::Data<PgPool>, mut request_user: User) -> impl R
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Failed to get a transaction".to_string(),
-            })
+            return HttpResponse::InternalServerError()
+                .json(AppError::DatabaseConnection.to_response())
         }
     };
 
@@ -62,21 +60,16 @@ pub async fn generate(pool: web::Data<PgPool>, mut request_user: User) -> impl R
     .await;
 
     if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
+        return HttpResponse::InternalServerError()
+            .json(AppError::DatabaseTransaction.to_response());
     }
 
     match updated_user_result {
         Ok(_) => HttpResponse::Ok().json(GenerateOtpResponse {
-            status: "success".to_string(),
+            code: "OTP_GENERATED".to_string(),
             otp_base32: otp_base32.to_owned(),
             otp_auth_url: otp_auth_url.to_owned(),
         }),
-        Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to update user".to_string(),
-        }),
+        Err(_) => HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response()),
     }
 }

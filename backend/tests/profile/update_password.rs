@@ -5,6 +5,7 @@ use actix_web::{
     http::header::ContentType,
     test, Error,
 };
+use flutteractixapp::features::profile::structs::responses::UserResponse;
 
 use crate::{
     auth::{
@@ -33,6 +34,11 @@ pub async fn user_updates_password(
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: UserResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "PASSWORD_CHANGED");
 }
 
 #[tokio::test]

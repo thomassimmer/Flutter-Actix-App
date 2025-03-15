@@ -33,6 +33,8 @@ pub async fn user_refreshes_token(
     let body = test::read_body(response).await;
     let response: RefreshTokenResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "TOKEN_REFRESHED");
+
     response.access_token
 }
 
@@ -60,13 +62,12 @@ async fn user_cannot_refresh_using_a_wrong_refresh_token() {
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(400, response.status().as_u16());
+    assert_eq!(401, response.status().as_u16());
 
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
-    assert_eq!(response.message, "Invalid refresh token");
+    assert_eq!(response.code, "INVALID_REFRESH_TOKEN");
 }
 
 #[tokio::test]
@@ -99,9 +100,8 @@ async fn access_token_becomes_expired_after_15_minutes() {
 
     let body = test::read_body(response).await;
     let profile_response: GenericResponse = serde_json::from_slice(&body).unwrap();
-    let message = profile_response.message;
 
-    assert_eq!(message, "Token expired");
+    assert_eq!(profile_response.code, "ACCESS_TOKEN_EXPIRED");
 }
 
 #[tokio::test]
@@ -139,7 +139,6 @@ async fn refresh_token_becomes_expired_after_7_days() {
 
     let body = test::read_body(response).await;
     let profile_response: GenericResponse = serde_json::from_slice(&body).unwrap();
-    let message = profile_response.message;
 
-    assert_eq!(message, "Refresh token expired");
+    assert_eq!(profile_response.code, "REFRESH_TOKEN_EXPIRED");
 }

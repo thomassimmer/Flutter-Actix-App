@@ -17,6 +17,5 @@ async fn health_check() {
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    // Check the "message" key in the JSON response
-    assert_eq!(response.message, "Server is running fine");
+    assert_eq!(response.code, "SERVER_IS_RUNNING");
 }

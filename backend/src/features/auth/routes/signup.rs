@@ -5,12 +5,16 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    core::{helpers::mock_now::now, structs::responses::GenericResponse},
-    features::auth::{
-        helpers::token::generate_tokens,
-        structs::{requests::UserRegisterRequest, responses::UserSignupResponse},
+    core::{
+        constants::errors::AppError, helpers::mock_now::now, structs::responses::GenericResponse,
     },
-    features::profile::structs::models::User,
+    features::{
+        auth::{
+            helpers::token::generate_tokens,
+            structs::{requests::UserRegisterRequest, responses::UserSignupResponse},
+        },
+        profile::structs::models::User,
+    },
 };
 
 #[post("/register")]
@@ -22,10 +26,8 @@ pub async fn register_user(
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Failed to get a transaction".to_string(),
-            })
+            return HttpResponse::InternalServerError()
+                .json(AppError::DatabaseConnection.to_response())
         }
     };
 
@@ -49,17 +51,14 @@ pub async fn register_user(
         Ok(existing_user) => {
             if existing_user.is_some() {
                 let error_response = GenericResponse {
-                    status: "fail".to_string(),
+                    code: "USER_ALREADY_EXISTS".to_string(),
                     message: format!("User with username: {} already exists", username_lower),
                 };
                 return HttpResponse::Conflict().json(error_response);
             }
         }
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Database query error".to_string(),
-            });
+            return HttpResponse::InternalServerError().json(AppError::DatabaseQuery.to_response());
         }
     }
 
@@ -69,10 +68,7 @@ pub async fn register_user(
     let password_hash = match argon2.hash_password(body.password.as_bytes(), &salt) {
         Ok(hash) => hash.to_string(),
         Err(_) => {
-            return HttpResponse::BadRequest().json(GenericResponse {
-                status: "fail".to_string(),
-                message: "Failed to hash password".to_string(),
-            })
+            return HttpResponse::InternalServerError().json(AppError::PasswordHash.to_response())
         }
     };
 
@@ -91,8 +87,8 @@ pub async fn register_user(
         let hashed_code = match argon2.hash_password(code.as_bytes(), &salt) {
             Ok(hash) => hash.to_string(),
             Err(_) => {
-                return HttpResponse::BadRequest().json(GenericResponse {
-                    status: "fail".to_string(),
+                return HttpResponse::InternalServerError().json(GenericResponse {
+                    code: "RECOVERY_CODE_HASH".to_string(),
                     message: "Failed to hash recovery code".to_string(),
                 })
             }
@@ -149,7 +145,7 @@ pub async fn register_user(
 
     if insert_result.is_err() {
         return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
+            code: "USER_INSERT".to_string(),
             message: "Failed to insert user into the database".to_string(),
         });
     }
@@ -158,26 +154,22 @@ pub async fn register_user(
         match generate_tokens(secret.as_bytes(), new_user.id, &mut transaction).await {
             Ok((access_token, refresh_token)) => (access_token, refresh_token),
             Err(_) => {
-                return HttpResponse::InternalServerError().json(GenericResponse {
-                    status: "error".to_string(),
-                    message: "Failed to generate and save token".to_string(),
-                });
+                return HttpResponse::InternalServerError()
+                    .json(AppError::TokenGeneration.to_response());
             }
         };
 
     if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
+        return HttpResponse::InternalServerError()
+            .json(AppError::DatabaseTransaction.to_response());
     }
 
     let json_response = UserSignupResponse {
-        status: "success".to_string(),
+        code: "USER_SIGNED_UP".to_string(),
         recovery_codes: clear_recovery_codes,
         access_token,
         refresh_token,
     };
 
-    HttpResponse::Ok().json(json_response)
+    HttpResponse::Created().json(json_response)
 }

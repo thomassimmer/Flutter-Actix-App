@@ -4,7 +4,7 @@ use rand::rngs::OsRng;
 use sqlx::PgPool;
 
 use crate::{
-    core::structs::responses::GenericResponse,
+    core::constants::errors::AppError,
     features::{
         auth::helpers::password::password_is_valid,
         profile::structs::{
@@ -22,19 +22,15 @@ pub async fn update_password(
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Failed to get a transaction".to_string(),
-            })
+            return HttpResponse::InternalServerError()
+                .json(AppError::DatabaseConnection.to_response())
         }
     };
 
     // Verify current password
     if !password_is_valid(&request_user, &body.current_password) {
-        return HttpResponse::Forbidden().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Invalid username or password".to_string(),
-        });
+        return HttpResponse::Unauthorized()
+            .json(AppError::InvalidUsernameOrPassword.to_response());
     }
 
     // Hash the new password
@@ -43,10 +39,7 @@ pub async fn update_password(
     let password_hash = match argon2.hash_password(body.new_password.as_bytes(), &salt) {
         Ok(hash) => hash.to_string(),
         Err(_) => {
-            return HttpResponse::BadRequest().json(GenericResponse {
-                status: "fail".to_string(),
-                message: "Failed to hash password".to_string(),
-            })
+            return HttpResponse::InternalServerError().json(AppError::PasswordHash.to_response())
         }
     };
 
@@ -67,20 +60,15 @@ pub async fn update_password(
     .await;
 
     if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
+        return HttpResponse::InternalServerError()
+            .json(AppError::DatabaseTransaction.to_response());
     }
 
     match updated_user_result {
         Ok(_) => HttpResponse::Ok().json(UserResponse {
-            status: "success".to_string(),
+            code: "PASSWORD_CHANGED".to_string(),
             user: request_user.to_user_data(),
         }),
-        Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to update user".to_string(),
-        }),
+        Err(_) => HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response()),
     }
 }

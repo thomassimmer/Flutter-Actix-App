@@ -1,6 +1,29 @@
 pub mod configuration;
 pub mod startup;
 
+pub mod core {
+
+    pub mod constants {
+        pub mod errors;
+    }
+
+    pub mod routes {
+        pub mod health_check;
+    }
+
+    pub mod helpers {
+        pub mod mock_now;
+    }
+
+    pub mod structs {
+        pub mod responses;
+    }
+
+    pub mod middlewares {
+        pub mod token_validator;
+    }
+}
+
 pub mod features {
     pub mod auth {
         pub mod helpers {
@@ -43,23 +66,5 @@ pub mod features {
             pub mod requests;
             pub mod responses;
         }
-    }
-}
-
-pub mod core {
-    pub mod routes {
-        pub mod health_check;
-    }
-
-    pub mod helpers {
-        pub mod mock_now;
-    }
-
-    pub mod structs {
-        pub mod responses;
-    }
-
-    pub mod middlewares {
-        pub mod token_validator;
     }
 }

@@ -9,6 +9,7 @@ use flutteractixapp::features::auth::structs::responses::{
     VerifyOtpResponse,
 };
 use totp_rs::{Algorithm, Secret, TOTP};
+use uuid::Uuid;
 
 use crate::auth::signup::user_signs_up;
 use crate::helpers::spawn_app;
@@ -28,6 +29,8 @@ pub async fn user_generates_otp(
 
     let body = test::read_body(response).await;
     let response: GenerateOtpResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "OTP_GENERATED");
 
     response.otp_base32.to_owned()
 }
@@ -61,6 +64,7 @@ pub async fn user_verifies_otp(
     let body = test::read_body(response).await;
     let response: VerifyOtpResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "OTP_VERIFIED");
     assert_eq!(response.otp_verified, true);
 }
 
@@ -97,6 +101,8 @@ async fn registered_user_can_validate_otp() {
     let body = test::read_body(response).await;
     let response: UserLoginWhenOtpEnabledResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "USER_LOGS_IN_WITH_OTP_ENABLED");
+
     // A TOTP is necessary to log in.
     let totp = TOTP::new(
         Algorithm::SHA1,
@@ -122,6 +128,8 @@ async fn registered_user_can_validate_otp() {
     let body = test::read_body(response).await;
     let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "USER_LOGGED_IN_AFTER_OTP_VALIDATION");
+
     user_has_access_to_protected_route(&app, &response.access_token).await;
 }
 
@@ -144,6 +152,7 @@ async fn registered_user_can_disable_otp() {
     let body = test::read_body(response).await;
     let response: DisableOtpResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "OTP_DISABLED");
     assert_eq!(response.two_fa_enabled, false);
 }
 
@@ -162,6 +171,26 @@ async fn wrong_token_user_can_generate_otp() {
     let body = test::read_body(response).await;
     let response: GenericResponse = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(response.status, "fail");
-    assert_eq!(response.message, "Invalid access token");
+    assert_eq!(response.code, "INVALID_ACCESS_TOKEN");
+}
+
+#[tokio::test]
+async fn user_cannot_validate_otp_for_a_wrong_user() {
+    let app = spawn_app().await;
+    let (access_token, _, _) = user_signs_up(&app).await;
+
+    let req = test::TestRequest::post()
+        .uri("/api/auth/otp/validate")
+        .insert_header(ContentType::json())
+        .insert_header((header::AUTHORIZATION, format!("Bearer {}", access_token)))
+        .set_json(&serde_json::json!({"code": "000000", "user_id": Uuid::new_v4()}))
+        .to_request();
+    let response = test::call_service(&app, req).await;
+
+    assert_eq!(404, response.status().as_u16());
+
+    let body = test::read_body(response).await;
+    let response: GenericResponse = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(response.code, "USER_NOT_FOUND");
 }

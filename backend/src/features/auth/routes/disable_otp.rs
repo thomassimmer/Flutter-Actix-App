@@ -1,4 +1,4 @@
-use crate::core::structs::responses::GenericResponse;
+use crate::core::constants::errors::AppError;
 use crate::features::auth::structs::responses::DisableOtpResponse;
 use crate::features::profile::structs::models::User;
 
@@ -11,10 +11,8 @@ async fn disable(pool: web::Data<PgPool>, mut request_user: User) -> impl Respon
     let mut transaction = match pool.begin().await {
         Ok(t) => t,
         Err(_) => {
-            return HttpResponse::InternalServerError().json(GenericResponse {
-                status: "error".to_string(),
-                message: "Failed to get a transaction".to_string(),
-            })
+            return HttpResponse::InternalServerError()
+                .json(AppError::DatabaseConnection.to_response())
         }
     };
 
@@ -37,20 +35,15 @@ async fn disable(pool: web::Data<PgPool>, mut request_user: User) -> impl Respon
     .await;
 
     if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
+        return HttpResponse::InternalServerError()
+            .json(AppError::DatabaseTransaction.to_response());
     }
 
     match updated_user_result {
         Ok(_) => HttpResponse::Ok().json(DisableOtpResponse {
-            status: "success".to_string(),
+            code: "OTP_DISABLED".to_string(),
             two_fa_enabled: false,
         }),
-        Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to update user".to_string(),
-        }),
+        Err(_) => HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response()),
     }
 }

@@ -30,6 +30,7 @@ pub async fn user_has_access_to_protected_route(
     let body = test::read_body(response).await;
     let response: UserResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "PROFILE_FETCHED");
     assert_eq!(response.user.username, "testusername");
     assert_eq!(response.user.locale, "en");
 }
@@ -58,6 +59,7 @@ pub async fn user_update_its_profile() {
     let body = test::read_body(response).await;
     let response: UserResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "PROFILE_UPDATED");
     assert_eq!(response.user.username, "testusername");
     assert_eq!(response.user.locale, "fr");
     assert_eq!(response.user.theme, "light");
@@ -82,6 +84,7 @@ pub async fn is_otp_enabled_for_user_that_activated_it() {
     let body = test::read_body(response).await;
     let response: IsOtpEnabledResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "OTP_STATUS");
     assert_eq!(response.otp_enabled, false);
 
     // User only generates OTP
@@ -101,6 +104,7 @@ pub async fn is_otp_enabled_for_user_that_activated_it() {
     let body = test::read_body(response).await;
     let response: IsOtpEnabledResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "OTP_STATUS");
     assert_eq!(response.otp_enabled, false);
 
     // User generates and validates OTP
@@ -121,5 +125,6 @@ pub async fn is_otp_enabled_for_user_that_activated_it() {
     let body = test::read_body(response).await;
     let response: IsOtpEnabledResponse = serde_json::from_slice(&body).unwrap();
 
+    assert_eq!(response.code, "OTP_STATUS");
     assert_eq!(response.otp_enabled, true);
 }
