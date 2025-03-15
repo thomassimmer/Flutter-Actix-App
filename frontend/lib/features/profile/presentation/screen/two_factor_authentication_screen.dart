@@ -65,6 +65,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                             ProfileGenerateTwoFactorAuthenticationConfigEvent(),
                           );
                         },
+                        style: context.styles.buttonSmall,
                         child: Text(
                             AppLocalizations.of(context)!.generateNewQrCode),
                       ),
@@ -75,6 +76,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                             ProfileDisableTwoFactorAuthenticationEvent(),
                           );
                         },
+                        style: context.styles.buttonSmall,
                         child: Text(AppLocalizations.of(context)!.disableTwoFA),
                       ),
                     ],
@@ -203,6 +205,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                         ProfileGenerateTwoFactorAuthenticationConfigEvent(),
                       );
                     },
+                    style: context.styles.buttonMedium,
                     child: Text(AppLocalizations.of(context)!.enable),
                   ),
                 ])))

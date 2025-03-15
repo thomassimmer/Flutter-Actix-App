@@ -89,7 +89,8 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
                               onPressed: () {
                                 context.goNamed('home');
                               },
-                              child: Text(AppLocalizations.of(context)!.home),
+                              child:
+                                  Text(AppLocalizations.of(context)!.comeBack),
                             ),
                           ],
                         )))),
