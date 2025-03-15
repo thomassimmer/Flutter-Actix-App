@@ -24,8 +24,16 @@ pub async fn spawn_app(
         c
     };
 
-    configure_database(&configuration.database).await;
-    init_service(create_app(&configuration)).await
+    let connection_pool = configure_database(&configuration.database).await;
+    let token_cache = TokenCache::default();
+    let secret = configuration.application.secret;
+
+    init_service(create_app(
+        connection_pool.clone(),
+        secret.clone(),
+        token_cache.clone(),
+    ))
+    .await
 }
 
 async fn configure_database(config: &DatabaseSettings) -> PgPool {

@@ -28,7 +28,7 @@ pub struct Claims {
     pub is_admin: bool,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct TokenCache {
     data: Arc<RwLock<HashMap<Uuid, DateTime<Utc>>>>,
 }
