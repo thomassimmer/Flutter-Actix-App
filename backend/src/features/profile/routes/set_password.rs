@@ -8,7 +8,9 @@ use crate::{
     core::{helpers::mock_now::now, structs::responses::GenericResponse},
     features::{
         auth::helpers::token::retrieve_claims_for_token,
-        profile::structs::{models::User, requests::SetUserPasswordRequest},
+        profile::structs::{
+            models::User, requests::SetUserPasswordRequest, responses::UserResponse,
+        },
     },
 };
 
@@ -116,9 +118,9 @@ pub async fn set_password(
             }
 
             match updated_user_result {
-                Ok(_) => HttpResponse::Ok().json(GenericResponse {
+                Ok(_) => HttpResponse::Ok().json(UserResponse {
                     status: "success".to_string(),
-                    message: "ok".to_string(),
+                    user: user.to_user_data(),
                 }),
                 Err(_) => HttpResponse::InternalServerError().json(GenericResponse {
                     status: "error".to_string(),
