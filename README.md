@@ -31,16 +31,24 @@ I tried implementing clean architecture, but do not consider me an expert, I hav
 The frontend has no tests (feel free to add some!).
 The backend has 45 tests covering most of the code.
 
-## Demo
+## Demo Video
 
-[![Demo](./docs/screenshots/1.png)](https://youtu.be/ZCqYWs-lrRM)
+Click on it to watch, it's a youtube link.
+
+<div style="text-align: center;">
+    <a href="https://youtu.be/ZCqYWs-lrRM" target="_blank">
+        <img src="./docs/screenshots/1.png" alt="Demo" width="200"/>
+    </a>
+</div>
 
 ## Screenshots
 
-<img src="./docs/screenshots/1.png" alt="drawing" width="200"/>
-<img src="./docs/screenshots/9.png" alt="drawing" width="200"/>
-<img src="./docs/screenshots/24.png" alt="drawing" width="500"/>
-<img src="./docs/screenshots/25.png" alt="drawing" width="500"/>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <img src="./docs/screenshots/1.png" alt="drawing" width="200"/>
+    <img src="./docs/screenshots/9.png" alt="drawing" width="200"/>
+    <img src="./docs/screenshots/24.png" alt="drawing" width="500"/>
+    <img src="./docs/screenshots/25.png" alt="drawing" width="500"/>
+</div>
 
 ## Installation and development
 
