@@ -6,8 +6,6 @@ use crate::response::GenericResponse;
 pub async fn health_check() -> impl Responder {
     const MESSAGE: &str = "Server is running fine";
 
-    println!("Hi");
-
     HttpResponse::Ok().json(GenericResponse {
         status: "success".to_string(),
         message: MESSAGE.to_string(),

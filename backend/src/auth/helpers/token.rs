@@ -47,20 +47,18 @@ pub fn retrieve_claims_for_token(req: HttpRequest, secret: String) -> Result<Cla
     };
 
     if let Some(auth_header) = auth_header {
-        if auth_header.starts_with("Bearer ") {
-            let token = &auth_header[7..]; // Strip "Bearer " from the token
-
+        if let Some(token) = auth_header.strip_prefix("Bearer ") {
             let decoding_key = DecodingKey::from_secret(secret.as_bytes());
             let token_data = decode::<Claims>(token, &decoding_key, &Validation::default());
 
             match token_data {
-                Ok(token_data) => return Ok(token_data.claims),
-                Err(e) => return Err(AuthError::TokenDecodingError(e)),
+                Ok(token_data) => Ok(token_data.claims),
+                Err(e) => Err(AuthError::TokenDecodingError(e)),
             }
         } else {
-            return Err(AuthError::InvalidAuthHeader);
+            Err(AuthError::InvalidAuthHeader)
         }
     } else {
-        return Err(AuthError::MissingAuthHeader);
+        Err(AuthError::MissingAuthHeader)
     }
 }

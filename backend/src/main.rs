@@ -10,11 +10,8 @@ async fn main() {
         .expect("Failed to build the app");
 
     println!(
-        "🚀 Server started successfully at : {}",
-        format!(
-            "http://{}:{}",
-            configuration.application.host, configuration.application.port
-        )
+        "🚀  Server started successfully at : http://{}:{}",
+        configuration.application.host, configuration.application.port
     );
 
     if let Err(e) = application.run_until_stopped().await {

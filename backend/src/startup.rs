@@ -17,7 +17,6 @@ use sqlx::PgPool;
 
 pub fn run(listener: TcpListener, configuration: Settings) -> Result<Server, std::io::Error> {
     // Wrap the pool using web::Data, which boils down to an Arc smart pointer
-    println!("{:?}", &configuration.database.host);
     let connection_pool = get_connection_pool(&configuration.database);
     let secret = configuration.application.secret;
 

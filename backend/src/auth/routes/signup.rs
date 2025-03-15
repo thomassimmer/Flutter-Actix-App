@@ -53,8 +53,7 @@ pub async fn register_user(
                 return HttpResponse::Conflict().json(error_response);
             }
         }
-        Err(e) => {
-            println!("{:?}", e);
+        Err(_) => {
             return HttpResponse::InternalServerError().json(GenericResponse {
                 status: "error".to_string(),
                 message: "Database query error".to_string(),
@@ -133,8 +132,7 @@ pub async fn register_user(
     .execute(&mut *transaction)
     .await;
 
-    if let Err(e) = insert_result {
-        println!("{:?}", e);
+    if insert_result.is_err() {
         return HttpResponse::InternalServerError().json(GenericResponse {
             status: "error".to_string(),
             message: "Failed to insert user into the database".to_string(),
@@ -146,7 +144,7 @@ pub async fn register_user(
 
     let new_token = UserToken {
         id: Uuid::new_v4(),
-        user_id: new_user.id.clone(),
+        user_id: new_user.id,
         token_id: claim.jti,
         expires_at: DateTime::<Utc>::from_timestamp(claim.exp as i64, 0).unwrap(),
     };
@@ -165,14 +163,14 @@ pub async fn register_user(
     .execute(&mut *transaction)
     .await;
 
-    if let Err(_) = transaction.commit().await {
+    if (transaction.commit().await).is_err() {
         return HttpResponse::InternalServerError().json(GenericResponse {
             status: "error".to_string(),
             message: "Failed to commit transaction".to_string(),
         });
     }
 
-    if let Err(_) = insert_result {
+    if insert_result.is_err() {
         return HttpResponse::InternalServerError().json(GenericResponse {
             status: "error".to_string(),
             message: "Failed to insert user token into the database".to_string(),
