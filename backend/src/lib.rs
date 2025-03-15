@@ -30,6 +30,8 @@ pub mod features {
     pub mod profile {
         pub mod routes {
             pub mod profile;
+            pub mod set_password;
+            pub mod update_password;
         }
 
         pub mod structs {

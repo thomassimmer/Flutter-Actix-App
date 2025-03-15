@@ -48,7 +48,7 @@ pub async fn recover_account_without_2fa_enabled(
     .fetch_optional(&mut *transaction)
     .await;
 
-    let user = match existing_user {
+    let mut user = match existing_user {
         Ok(existing_user) => {
             if let Some(user) = existing_user {
                 user
@@ -125,6 +125,23 @@ pub async fn recover_account_without_2fa_enabled(
         });
     }
 
+    // Delete any other existing tokens for that user
+    let delete_result = sqlx::query!(
+        r#"
+        DELETE FROM user_tokens WHERE user_id = $1
+        "#,
+        user.id,
+    )
+    .execute(&mut *transaction)
+    .await;
+
+    if delete_result.is_err() {
+        return HttpResponse::InternalServerError().json(GenericResponse {
+            status: "error".to_string(),
+            message: "Failed to delete user tokens into the database".to_string(),
+        });
+    }
+
     let jti = Uuid::new_v4().to_string();
     let (access_token, refresh_token, claim) = generate_tokens(secret.as_bytes(), jti);
 
@@ -153,17 +170,38 @@ pub async fn recover_account_without_2fa_enabled(
     .execute(&mut *transaction)
     .await;
 
-    if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError().json(GenericResponse {
-            status: "error".to_string(),
-            message: "Failed to commit transaction".to_string(),
-        });
-    }
-
     if insert_result.is_err() {
         return HttpResponse::InternalServerError().json(GenericResponse {
             status: "error".to_string(),
             message: "Failed to insert user token into the database".to_string(),
+        });
+    }
+
+    user.password_is_expired = true;
+
+    let updated_user_result = sqlx::query_scalar!(
+        r#"
+        UPDATE users
+        SET password_is_expired = $1
+        WHERE id = $2
+        "#,
+        user.password_is_expired,
+        user.id
+    )
+    .fetch_optional(&mut *transaction)
+    .await;
+
+    if updated_user_result.is_err() {
+        return HttpResponse::InternalServerError().json(GenericResponse {
+            status: "error".to_string(),
+            message: "Failed to update user into the database".to_string(),
+        });
+    }
+
+    if (transaction.commit().await).is_err() {
+        return HttpResponse::InternalServerError().json(GenericResponse {
+            status: "error".to_string(),
+            message: "Failed to commit transaction".to_string(),
         });
     }
 

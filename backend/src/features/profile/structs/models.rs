@@ -17,6 +17,8 @@ pub struct UserData {
 
     pub createdAt: DateTime<Utc>,
     pub updatedAt: DateTime<Utc>,
+
+    pub password_is_expired: bool
 }
 
 #[allow(non_snake_case)]
@@ -36,6 +38,7 @@ pub struct User {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 
     pub recovery_codes: String, // case sensitive
+    pub password_is_expired: bool
 }
 
 impl User {
@@ -50,6 +53,7 @@ impl User {
             otp_verified: self.otp_verified,
             createdAt: self.created_at,
             updatedAt: self.updated_at,
+            password_is_expired: self.password_is_expired
         }
     }
 }

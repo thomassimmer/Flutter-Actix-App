@@ -39,15 +39,16 @@ pub async fn user_recovers_account_using_password(
 #[tokio::test]
 async fn user_can_recover_account_using_password() {
     let app = spawn_app().await;
-    let (access_token, _, recovery_codes) = user_signs_up(&app).await;
+    let (mut access_token, _, recovery_codes) = user_signs_up(&app).await;
 
     for recovery_code in recovery_codes {
         let otp_base32 = user_generates_otp(&app, &access_token).await;
 
         user_verifies_otp(&app, &access_token, &otp_base32).await;
 
-        let (access_token, _) =
-            user_recovers_account_using_password(&app, &recovery_code, "password").await;
+        access_token = user_recovers_account_using_password(&app, &recovery_code, "password")
+            .await
+            .0;
 
         user_has_access_to_protected_route(&app, &access_token).await;
     }

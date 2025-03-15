@@ -12,6 +12,8 @@ pub mod auth {
 
 pub mod profile {
     pub mod profile;
+    pub mod set_password;
+    pub mod update_password;
 }
 
 pub mod core {

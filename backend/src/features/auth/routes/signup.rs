@@ -115,13 +115,25 @@ pub async fn register_user(
         created_at: now(),
         updated_at: now(),
         recovery_codes: hashed_recovery_codes.join(";"),
+        password_is_expired: false,
     };
 
     // Insert the new user into the database
     let insert_result = sqlx::query!(
         r#"
-        INSERT INTO users (id, username, password, otp_verified, otp_base32, otp_auth_url, created_at, updated_at, recovery_codes)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        INSERT INTO users (
+            id,
+            username,
+            password,
+            otp_verified,
+            otp_base32,
+            otp_auth_url,
+            created_at,
+            updated_at,
+            recovery_codes,
+            password_is_expired
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         "#,
         new_user.id,
         new_user.username,
@@ -132,6 +144,7 @@ pub async fn register_user(
         new_user.created_at,
         new_user.updated_at,
         new_user.recovery_codes,
+        new_user.password_is_expired
     )
     .execute(&mut *transaction)
     .await;
