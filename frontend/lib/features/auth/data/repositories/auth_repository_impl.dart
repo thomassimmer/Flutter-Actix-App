@@ -186,4 +186,122 @@ class AuthRepositoryImpl implements AuthRepository {
       throw UnknownDomainError();
     }
   }
+
+  @override
+  Future<bool> checkIfOtpEnabled({required String username}) async {
+    try {
+      final result = await remoteDataSource
+          .checkIfOtpEnabled(CheckIfOtpEnabledRequestModel(username: username));
+      return result;
+    } on NetworkError catch (e) {
+      logger.e('Network error occurred: ${e.message}');
+      throw NetworkDomainError('Unable to disable otp due to a network error.');
+    } on ParsingError catch (e) {
+      logger.e('ParsingError error occurred: ${e.message}');
+      throw InvalidOtpDisablingDomainError();
+    } on UnauthorizedError catch (e) {
+      logger.e('UnauthorizedError error occurred: ${e.message}');
+      throw UnauthorizedDomainError();
+    } catch (e) {
+      logger.e('Data error occurred: ${e.toString()}');
+      throw UnknownDomainError();
+    }
+  }
+
+  @override
+  Future<UserToken> recoverAccountWithRecoveryCodeAndPassword({
+    required String username,
+    required String password,
+    required String recoveryCode,
+  }) async {
+    try {
+      final userTokenModel =
+          await remoteDataSource.recoverAccountWithRecoveryCodeAndPassword(
+              RecoverAccountWithRecoveryCodeAndPasswordRequestModel(
+                  password: password,
+                  username: username,
+                  recoveryCode: recoveryCode));
+
+      return UserToken(
+          accessToken: userTokenModel.accessToken,
+          refreshToken: userTokenModel.refreshToken,
+          expiresIn: userTokenModel.expiresIn);
+    } on NetworkError catch (e) {
+      logger.e('Network error occurred: ${e.message}');
+      throw NetworkDomainError(
+          'Unable to validate otp due to a network error.');
+    } on ParsingError catch (e) {
+      logger.e('ParsingError error occurred: ${e.message}');
+      throw InvalidOtpValidationDomainError();
+    } on UnauthorizedError catch (e) {
+      logger.e('UnauthorizedError error occurred: ${e.message}');
+      throw UnauthorizedDomainError();
+    } catch (e) {
+      logger.e('Data error occurred: ${e.toString()}');
+      throw UnknownDomainError();
+    }
+  }
+
+  @override
+  Future<UserToken> recoverAccountWithRecoveryCodeAndOtp({
+    required String username,
+    required String code,
+    required String recoveryCode,
+  }) async {
+    try {
+      final userTokenModel =
+          await remoteDataSource.recoverAccountWithRecoveryCodeAndOtp(
+              RecoverAccountWithRecoveryCodeAndOtpRequestModel(
+                  code: code, username: username, recoveryCode: recoveryCode));
+
+      return UserToken(
+          accessToken: userTokenModel.accessToken,
+          refreshToken: userTokenModel.refreshToken,
+          expiresIn: userTokenModel.expiresIn);
+    } on NetworkError catch (e) {
+      logger.e('Network error occurred: ${e.message}');
+      throw NetworkDomainError(
+          'Unable to validate otp due to a network error.');
+    } on ParsingError catch (e) {
+      logger.e('ParsingError error occurred: ${e.message}');
+      throw InvalidOtpValidationDomainError();
+    } on UnauthorizedError catch (e) {
+      logger.e('UnauthorizedError error occurred: ${e.message}');
+      throw UnauthorizedDomainError();
+    } catch (e) {
+      logger.e('Data error occurred: ${e.toString()}');
+      throw UnknownDomainError();
+    }
+  }
+
+  @override
+  Future<UserToken> recoverAccountWithRecoveryCode({
+    required String username,
+    required String recoveryCode,
+  }) async {
+    try {
+      final userTokenModel =
+          await remoteDataSource.recoverAccountWithRecoveryCode(
+              RecoverAccountWithRecoveryCodeRequestModel(
+                  username: username, recoveryCode: recoveryCode));
+
+      return UserToken(
+          accessToken: userTokenModel.accessToken,
+          refreshToken: userTokenModel.refreshToken,
+          expiresIn: userTokenModel.expiresIn);
+    } on NetworkError catch (e) {
+      logger.e('Network error occurred: ${e.message}');
+      throw NetworkDomainError(
+          'Unable to validate otp due to a network error.');
+    } on ParsingError catch (e) {
+      logger.e('ParsingError error occurred: ${e.message}');
+      throw InvalidOtpValidationDomainError();
+    } on UnauthorizedError catch (e) {
+      logger.e('UnauthorizedError error occurred: ${e.message}');
+      throw UnauthorizedDomainError();
+    } catch (e) {
+      logger.e('Data error occurred: ${e.toString()}');
+      throw UnknownDomainError();
+    }
+  }
 }

@@ -102,39 +102,49 @@ class RootScreen extends StatelessWidget {
             body: Row(
               children: [
                 if (isLargeScreen) ...[
-                  NavigationRail(
-                    backgroundColor: AppTheme.lightTheme.primaryColor,
-                    unselectedLabelTextStyle: TextStyle(color: Colors.white),
-                    selectedLabelTextStyle: TextStyle(color: Colors.blue),
-                    selectedIconTheme: IconThemeData(color: Colors.blue),
-                    unselectedIconTheme: IconThemeData(color: Colors.white),
-                    groupAlignment: 0.0,
-                    selectedIndex: _calculateSelectedIndex(context),
-                    onDestinationSelected: onItemTapped,
-                    labelType: NavigationRailLabelType.all,
-                    destinations: <NavigationRailDestination>[
-                      NavigationRailDestination(
-                        icon: Icon(Icons.check_circle_outline),
-                        selectedIcon: Icon(Icons.check_circle),
-                        label: Text(AppLocalizations.of(context)!.habits),
+                  Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.blue.shade200, Colors.blue.shade900],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
                       ),
-                      NavigationRailDestination(
-                        icon: Icon(Icons.flag_outlined),
-                        selectedIcon: Icon(Icons.flag),
-                        label: Text(AppLocalizations.of(context)!.challenges),
-                      ),
-                      NavigationRailDestination(
-                        icon: Icon(Icons.message_outlined),
-                        selectedIcon: Icon(Icons.message),
-                        label: Text(AppLocalizations.of(context)!.messages),
-                      ),
-                      NavigationRailDestination(
-                        icon: Icon(Icons.person_outline),
-                        selectedIcon: Icon(Icons.person),
-                        label: Text(AppLocalizations.of(context)!.profile),
-                      ),
-                    ],
-                  ),
+                      child: NavigationRail(
+                        backgroundColor: Colors.transparent,
+                        unselectedLabelTextStyle:
+                            TextStyle(color: Colors.white),
+                        selectedLabelTextStyle: TextStyle(color: Colors.white),
+                        selectedIconTheme: IconThemeData(color: Colors.blue),
+                        unselectedIconTheme: IconThemeData(color: Colors.white),
+                        groupAlignment: 0.0,
+                        selectedIndex: _calculateSelectedIndex(context),
+                        onDestinationSelected: onItemTapped,
+                        labelType: NavigationRailLabelType.all,
+                        destinations: <NavigationRailDestination>[
+                          NavigationRailDestination(
+                            icon: Icon(Icons.check_circle_outline),
+                            selectedIcon: Icon(Icons.check_circle),
+                            label: Text(AppLocalizations.of(context)!.habits),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.flag_outlined),
+                            selectedIcon: Icon(Icons.flag),
+                            label:
+                                Text(AppLocalizations.of(context)!.challenges),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.message_outlined),
+                            selectedIcon: Icon(Icons.message),
+                            label: Text(AppLocalizations.of(context)!.messages),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.person_outline),
+                            selectedIcon: Icon(Icons.person),
+                            label: Text(AppLocalizations.of(context)!.profile),
+                          ),
+                        ],
+                      )),
                 ],
                 Expanded(
                   child: child,
@@ -154,39 +164,48 @@ class RootScreen extends StatelessWidget {
                       labelTextStyle:
                           WidgetStateProperty.resolveWith<TextStyle>(
                         (Set<WidgetState> states) =>
-                            states.contains(WidgetState.selected)
-                                ? const TextStyle(color: Colors.blue)
-                                : const TextStyle(color: Colors.white),
+                            const TextStyle(color: Colors.white),
                       ),
                     ),
-                    child: NavigationBar(
-                      backgroundColor: AppTheme.lightTheme.primaryColor,
-                      indicatorColor: Colors.white,
-                      selectedIndex: _calculateSelectedIndex(context),
-                      onDestinationSelected: onItemTapped,
-                      destinations: const <NavigationDestination>[
-                        NavigationDestination(
-                          icon: Icon(Icons.check_circle_outline),
-                          selectedIcon: Icon(Icons.check_circle),
-                          label: 'Habits',
+                    child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.blue.shade200,
+                              Colors.blue.shade900
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
                         ),
-                        NavigationDestination(
-                          icon: Icon(Icons.flag_outlined),
-                          selectedIcon: Icon(Icons.flag),
-                          label: 'Challenges',
-                        ),
-                        NavigationDestination(
-                          icon: Icon(Icons.message_outlined),
-                          selectedIcon: Icon(Icons.message),
-                          label: 'Messages',
-                        ),
-                        NavigationDestination(
-                          icon: Icon(Icons.person_outline),
-                          selectedIcon: Icon(Icons.person),
-                          label: 'Profile',
-                        ),
-                      ],
-                    ),
+                        child: NavigationBar(
+                          backgroundColor: Colors.transparent,
+                          indicatorColor: Colors.white,
+                          selectedIndex: _calculateSelectedIndex(context),
+                          onDestinationSelected: onItemTapped,
+                          destinations: const <NavigationDestination>[
+                            NavigationDestination(
+                              icon: Icon(Icons.check_circle_outline),
+                              selectedIcon: Icon(Icons.check_circle),
+                              label: 'Habits',
+                            ),
+                            NavigationDestination(
+                              icon: Icon(Icons.flag_outlined),
+                              selectedIcon: Icon(Icons.flag),
+                              label: 'Challenges',
+                            ),
+                            NavigationDestination(
+                              icon: Icon(Icons.message_outlined),
+                              selectedIcon: Icon(Icons.message),
+                              label: 'Messages',
+                            ),
+                            NavigationDestination(
+                              icon: Icon(Icons.person_outline),
+                              selectedIcon: Icon(Icons.person),
+                              label: 'Profile',
+                            ),
+                          ],
+                        )),
                   )));
   }
 }

@@ -1,7 +1,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/check_if_otp_enabled_usecase.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/generate_otp_config_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/login_usecase.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_recovery_code_and_otp_usecase.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_recovery_code_and_password_usecase%20copy.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_recovery_code_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/signup_usecase.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/validate_otp_usecase.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/verify_otp_usecase.dart';
@@ -18,6 +22,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifyOtpUseCase verifyOtpUseCase = GetIt.instance<VerifyOtpUseCase>();
   final ValidateOtpUsecase validateOtpUsecase =
       GetIt.instance<ValidateOtpUsecase>();
+  final CheckIfOtpEnabledUsecase checkIfOtpEnabledUsecase =
+      GetIt.instance<CheckIfOtpEnabledUsecase>();
+  final RecoverAccountWithRecoveryCodeAndPasswordUseCase
+      recoverAccountWithRecoveryCodeAndPasswordUseCase =
+      GetIt.instance<RecoverAccountWithRecoveryCodeAndPasswordUseCase>();
+  final RecoverAccountWithRecoveryCodeAndOtpUseCase
+      recoverAccountWithRecoveryCodeAndOtpUseCase =
+      GetIt.instance<RecoverAccountWithRecoveryCodeAndOtpUseCase>();
+  final RecoverAccountWithRecoveryCodeUseCase
+      recoverAccountWithRecoveryCodeUseCase =
+      GetIt.instance<RecoverAccountWithRecoveryCodeUseCase>();
 
   AuthBloc() : super(AuthLoading()) {
     on<AuthInitRequested>(_onInitializeAuth);
@@ -27,6 +42,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthOtpValidationRequested>(_onOtpValidationRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
+    on<AuthAccountRecoveryForUsernameRequested>(
+        _onAccountRecoveryForUsernameRequested);
+    on<AuthDoesAccountHaveOtpEnabledRequested>(
+        _onDoesAccountHaveOtpEnabledRequested);
+    on<AuthAccountRecoveryWithOtpEnabledAndPasswordRequested>(
+        _onAccountRecoveryWithOtpEnabledAndPasswordRequested);
+    on<AuthAccountRecoveryWithOtpEnabledAndOtpRequested>(
+        _onAccountRecoveryWithOtpEnabledAndOtpRequested);
+    on<AuthAccountRecoveryWithOtpDisabledRequested>(
+        _onAccountRecoveryWithOtpDisabledRequested);
   }
 
   // Function to check initial authentication state
@@ -152,5 +177,117 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await TokenStorage().deleteTokens();
 
     emit(AuthUnauthenticated());
+  }
+
+  void _onAccountRecoveryForUsernameRequested(
+      AuthAccountRecoveryForUsernameRequested event,
+      Emitter<AuthState> emit) async {
+    emit(AuthRecoveringAccountUsernameStep(
+        username: event.username, passwordForgotten: event.passwordForgotten));
+  }
+
+  void _onDoesAccountHaveOtpEnabledRequested(
+      AuthDoesAccountHaveOtpEnabledRequested event,
+      Emitter<AuthState> emit) async {
+    final currentState = state;
+    emit(AuthLoading());
+
+    try {
+      final isOtpEnabled = await checkIfOtpEnabledUsecase.call(event.username);
+
+      if (currentState is AuthRecoveringAccountUsernameStep) {
+        if (isOtpEnabled) {
+          if (currentState.passwordForgotten) {
+            emit(AuthRecoveringAccountWithOtpEnabledAndUsingOtp(
+                username: event.username,
+                passwordForgotten: currentState.passwordForgotten));
+          } else {
+            emit(AuthRecoveringAccountWithOtpEnabledAndUsingPassword(
+                username: event.username,
+                passwordForgotten: currentState.passwordForgotten));
+          }
+        } else {
+          emit(AuthRecoveringAccountWithOtpDisabled(
+              username: event.username,
+              passwordForgotten: currentState.passwordForgotten));
+        }
+      }
+    } catch (e) {
+      emit(AuthRecoveringAccountUsernameStep(
+          username: event.username,
+          passwordForgotten: event.passwordForgotten,
+          message: e.toString()));
+    }
+  }
+
+  void _onAccountRecoveryWithOtpEnabledAndPasswordRequested(
+      AuthAccountRecoveryWithOtpEnabledAndPasswordRequested event,
+      Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+
+    try {
+      final userToken =
+          await recoverAccountWithRecoveryCodeAndPasswordUseCase.call(
+              username: event.username,
+              password: event.password,
+              recoveryCode: event.recoveryCode);
+
+      // Store tokens securely after successful login
+      await TokenStorage().saveTokens(
+        userToken.accessToken,
+        userToken.refreshToken,
+        userToken.expiresIn,
+      );
+
+      emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
+    } catch (e) {
+      emit(AuthUnauthenticated(message: e.toString()));
+    }
+  }
+
+  void _onAccountRecoveryWithOtpEnabledAndOtpRequested(
+      AuthAccountRecoveryWithOtpEnabledAndOtpRequested event,
+      Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+
+    try {
+      final userToken = await recoverAccountWithRecoveryCodeAndOtpUseCase.call(
+          username: event.username,
+          code: event.code,
+          recoveryCode: event.recoveryCode);
+
+      // Store tokens securely after successful login
+      await TokenStorage().saveTokens(
+        userToken.accessToken,
+        userToken.refreshToken,
+        userToken.expiresIn,
+      );
+
+      emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
+    } catch (e) {
+      emit(AuthUnauthenticated(message: e.toString()));
+    }
+  }
+
+  void _onAccountRecoveryWithOtpDisabledRequested(
+      AuthAccountRecoveryWithOtpDisabledRequested event,
+      Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+
+    try {
+      final userToken = await recoverAccountWithRecoveryCodeUseCase.call(
+          username: event.username, recoveryCode: event.recoveryCode);
+
+      // Store tokens securely after successful login
+      await TokenStorage().saveTokens(
+        userToken.accessToken,
+        userToken.refreshToken,
+        userToken.expiresIn,
+      );
+
+      emit(AuthAuthenticatedAfterLogin(hasValidatedOtp: true));
+    } catch (e) {
+      emit(AuthUnauthenticated(message: e.toString()));
+    }
   }
 }

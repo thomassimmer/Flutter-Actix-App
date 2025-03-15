@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
@@ -16,105 +17,122 @@ class RecoveryCodesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Background(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                BlocListener<AuthBloc, AuthState>(
-                  listener: (context, state) {
-                    if (state is AuthAuthenticatedAfterRegistration) {
-                      if (state.hasVerifiedOtp) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(AppLocalizations.of(context)!
-                                  .validationCodeCorrect)),
-                        );
-                        context.go('/home');
-                      } else {
-                        context.go('/recovery-codes');
-                      }
-                    } else if (state is AuthOtpVerify) {
-                      _otpController.text = '';
-
-                      if (state.message != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(state.message!)),
-                        );
-                      }
-                    }
-                  },
-                  child: BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, state) {
-                      if (state is AuthAuthenticatedAfterRegistration) {
-                        return _buildRecoveryCodesView(context, state);
-                      } else if (state is AuthOtpGenerate) {
-                        return _buildOtpSetupView(context, state);
-                      } else if (state is AuthLoading) {
-                        return Center(child: CircularProgressIndicator());
-                      } else {
-                        return Center(
-                          child: Text(
-                            AppLocalizations.of(context)!
-                                .unableToLoadRecoveryCodes,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        );
-                      }
-                    },
+      body: Stack(fit: StackFit.expand, children: [
+        Background(),
+        Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 100,
+                width: 100,
+                child: Placeholder(),
+              ),
+              SizedBox(height: 40),
+              Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(width: 1.0, color: Colors.blue.shade200),
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
-                ),
-                SizedBox(height: 16),
-                Button(
-                  onPressed: () {
-                    context.go('/');
-                  },
-                  text: AppLocalizations.of(context)!.home,
-                  isPrimary: true,
-                  size: ButtonSize.small,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+                  child: Padding(
+                      padding: const EdgeInsets.all(30.0),
+                      child: BlocListener<AuthBloc, AuthState>(
+                        listener: (context, state) {
+                          if (state is AuthAuthenticatedAfterRegistration) {
+                            if (state.hasVerifiedOtp) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(AppLocalizations.of(context)!
+                                        .validationCodeCorrect)),
+                              );
+                              context.go('/home');
+                            } else {
+                              context.go('/recovery-codes');
+                            }
+                          } else if (state is AuthOtpVerify) {
+                            _otpController.text = '';
+
+                            if (state.message != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(state.message!)),
+                              );
+                            }
+                          }
+                        },
+                        child: BlocBuilder<AuthBloc, AuthState>(
+                          builder: (context, state) {
+                            if (state is AuthAuthenticatedAfterRegistration) {
+                              return _buildRecoveryCodesView(context, state);
+                            } else if (state is AuthOtpGenerate) {
+                              return _buildOtpSetupView(context, state);
+                            } else if (state is AuthLoading) {
+                              return CircularProgressIndicator(
+                                color: Colors.black,
+                              );
+                            } else {
+                              return Text(
+                                AppLocalizations.of(context)!
+                                    .unableToLoadRecoveryCodes,
+                              );
+                            }
+                          },
+                        ),
+                      ))),
+              SizedBox(height: 16),
+              Button(
+                onPressed: () {
+                  context.go('/');
+                },
+                text: AppLocalizations.of(context)!.home,
+                isPrimary: true,
+                size: ButtonSize.small,
+              )
+            ]),
+      ]),
     );
   }
 
   Widget _buildRecoveryCodesView(
       BuildContext context, AuthAuthenticatedAfterRegistration state) {
     if (state.recoveryCodes == null) {
-      return Center(
-        child: Text(
-          AppLocalizations.of(context)!.noRecoveryCodeAvailable
-          ,
-          style: TextStyle(color: Colors.white),
+      return Column(children: [
+        Text(
+          AppLocalizations.of(context)!.noRecoveryCodeAvailable,
         ),
-      );
+      ]);
     } else {
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             AppLocalizations.of(context)!.keepRecoveryCodesSafe,
-            style: TextStyle(color: Colors.white),
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 16),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: state.recoveryCodes!.length,
-            itemBuilder: (context, index) {
-              return Material(
-                color: Colors.transparent,
-                child: ListTile(
-                  title: Text(
-                    state.recoveryCodes![index],
-                    style: TextStyle(color: Colors.white),
-                  ),
+          SelectionArea(
+            child: Column(
+              children: [
+                for (var recoveryCode in state.recoveryCodes!)
+                  SelectableText(
+                    recoveryCode,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.copy,
+              size: 12,
+            ),
+            onPressed: () {
+              // Concatenate all recovery codes and copy them to the clipboard
+              final codes = state.recoveryCodes!.join('\n');
+              Clipboard.setData(ClipboardData(text: codes));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Recovery codes copied to clipboard'),
                 ),
               );
             },
@@ -122,7 +140,7 @@ class RecoveryCodesScreen extends StatelessWidget {
           SizedBox(height: 16),
           Text(
             AppLocalizations.of(context)!.twoFAInvitation,
-            style: TextStyle(color: Colors.white),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 16),
           Button(
@@ -145,7 +163,6 @@ class RecoveryCodesScreen extends StatelessWidget {
       children: [
         Text(
           AppLocalizations.of(context)!.twoFASetup,
-          style: TextStyle(color: Colors.white),
         ),
         SizedBox(height: 16),
         QrImageView(
@@ -157,36 +174,26 @@ class RecoveryCodesScreen extends StatelessWidget {
         SelectableText(
             AppLocalizations.of(context)!.twoFASecretKey(state.otpBase32)),
         SizedBox(height: 24),
-        Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(width: 1.0, color: Colors.blue.shade200),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Padding(
-                padding: const EdgeInsets.all(30.0),
-                child: Column(children: [
-                  CustomTextField(
-                    controller: _otpController,
-                    label: AppLocalizations.of(context)!.validationCode,
-                    obscureText: true,
-                  ),
-                  SizedBox(height: 24),
-                  Button(
-                    text: AppLocalizations.of(context)!.signUp,
-                    onPressed: () {
-                      BlocProvider.of<AuthBloc>(context).add(
-                        AuthOtpVerificationRequested(
-                          otpBase32: state.otpBase32,
-                          otpAuthUrl: state.otpAuthUrl,
-                          code: _otpController.text,
-                        ),
-                      );
-                    },
-                    isPrimary: true,
-                    size: ButtonSize.small,
-                  ),
-                ])))
+        CustomTextField(
+          controller: _otpController,
+          label: AppLocalizations.of(context)!.validationCode,
+          obscureText: true,
+        ),
+        SizedBox(height: 24),
+        Button(
+          text: AppLocalizations.of(context)!.signUp,
+          onPressed: () {
+            BlocProvider.of<AuthBloc>(context).add(
+              AuthOtpVerificationRequested(
+                otpBase32: state.otpBase32,
+                otpAuthUrl: state.otpAuthUrl,
+                code: _otpController.text,
+              ),
+            );
+          },
+          isPrimary: true,
+          size: ButtonSize.small,
+        ),
       ],
     );
   }
