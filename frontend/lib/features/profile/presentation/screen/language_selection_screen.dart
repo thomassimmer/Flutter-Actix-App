@@ -28,7 +28,7 @@ class LocaleSelectionScreen extends StatelessWidget {
               } else if (state is ProfileLoading) {
                 return Center(child: CircularProgressIndicator());
               } else {
-                return Center(child: Text('Failed to load profile'));
+                return Center(child: Text(AppLocalizations.of(context)!.failedToLoadProfile));
               }
             },
           ),

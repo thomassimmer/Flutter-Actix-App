@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
+import 'package:go_router/go_router.dart';
 
 class UnauthenticatedHomeScreen extends StatelessWidget {
   @override
@@ -46,7 +47,7 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 40),
                         Text(
-                          'Welcome to Flutter Actix App',
+                          AppLocalizations.of(context)!.welcome,
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -56,7 +57,7 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 16),
                         Text(
-                          'Please login or sign up to continue',
+                          AppLocalizations.of(context)!.pleaseLoginOrSignUp,
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.white70,
@@ -68,7 +69,7 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
                           onPressed: () {
                             context.go('/login');
                           },
-                          text: 'Login',
+                          text: AppLocalizations.of(context)!.logIn,
                           isPrimary: true,
                         ),
                         SizedBox(height: 16),
@@ -76,7 +77,7 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
                           onPressed: () {
                             context.go('/signup');
                           },
-                          text: 'Sign Up',
+                          text: AppLocalizations.of(context)!.signUp,
                           isPrimary: false,
                         ),
                       ],

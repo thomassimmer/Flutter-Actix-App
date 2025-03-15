@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:go_router/go_router.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class RecoveryCodesScreen extends StatelessWidget {
   final TextEditingController _otpController = TextEditingController();
@@ -29,8 +30,8 @@ class RecoveryCodesScreen extends StatelessWidget {
                       if (state.hasVerifiedOtp) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                              content:
-                                  Text('Your validation code was correct!')),
+                              content: Text(AppLocalizations.of(context)!
+                                  .validationCodeCorrect)),
                         );
                         context.go('/home');
                       } else {
@@ -57,7 +58,8 @@ class RecoveryCodesScreen extends StatelessWidget {
                       } else {
                         return Center(
                           child: Text(
-                            'Unable to load recovery codes.',
+                            AppLocalizations.of(context)!
+                                .unableToLoadRecoveryCodes,
                             style: TextStyle(color: Colors.white),
                           ),
                         );
@@ -70,7 +72,7 @@ class RecoveryCodesScreen extends StatelessWidget {
                   onPressed: () {
                     context.go('/');
                   },
-                  text: 'Home',
+                  text: AppLocalizations.of(context)!.home,
                   isPrimary: true,
                   size: ButtonSize.small,
                 ),
@@ -87,7 +89,8 @@ class RecoveryCodesScreen extends StatelessWidget {
     if (state.recoveryCodes == null) {
       return Center(
         child: Text(
-          'No recovery codes available.',
+          AppLocalizations.of(context)!.noRecoveryCodeAvailable
+          ,
           style: TextStyle(color: Colors.white),
         ),
       );
@@ -96,7 +99,7 @@ class RecoveryCodesScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'Keep these recovery codes safe',
+            AppLocalizations.of(context)!.keepRecoveryCodesSafe,
             style: TextStyle(color: Colors.white),
           ),
           SizedBox(height: 16),
@@ -118,12 +121,12 @@ class RecoveryCodesScreen extends StatelessWidget {
           ),
           SizedBox(height: 16),
           Text(
-            'Security and privacy are our first concern. We kindly ask you to set up two-factor authentication to protect your account from brute-force attacks.',
+            AppLocalizations.of(context)!.twoFAInvitation,
             style: TextStyle(color: Colors.white),
           ),
           SizedBox(height: 16),
           Button(
-            text: 'Set up two-factor authentication',
+            text: AppLocalizations.of(context)!.goToTwoFASetup,
             onPressed: () {
               BlocProvider.of<AuthBloc>(context).add(
                 AuthOtpGenerationRequested(),
@@ -141,7 +144,7 @@ class RecoveryCodesScreen extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'Set up two-factor authentication',
+          AppLocalizations.of(context)!.twoFASetup,
           style: TextStyle(color: Colors.white),
         ),
         SizedBox(height: 16),
@@ -152,9 +155,7 @@ class RecoveryCodesScreen extends StatelessWidget {
         ),
         SizedBox(height: 16),
         SelectableText(
-          'Secret Key: ${state.otpBase32}',
-          style: TextStyle(color: Colors.white),
-        ),
+            AppLocalizations.of(context)!.twoFASecretKey(state.otpBase32)),
         SizedBox(height: 24),
         Container(
             decoration: BoxDecoration(
@@ -167,12 +168,12 @@ class RecoveryCodesScreen extends StatelessWidget {
                 child: Column(children: [
                   CustomTextField(
                     controller: _otpController,
-                    label: 'Validation code',
+                    label: AppLocalizations.of(context)!.validationCode,
                     obscureText: true,
                   ),
                   SizedBox(height: 24),
                   Button(
-                    text: 'Sign Up',
+                    text: AppLocalizations.of(context)!.signUp,
                     onPressed: () {
                       BlocProvider.of<AuthBloc>(context).add(
                         AuthOtpVerificationRequested(

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:go_router/go_router.dart';
 
 class SignupScreen extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
@@ -64,18 +65,18 @@ class SignupScreen extends StatelessWidget {
                         child: Column(children: [
                           CustomTextField(
                             controller: _usernameController,
-                            label: 'Username',
+                            label: AppLocalizations.of(context)!.username,
                             obscureText: false,
                           ),
                           SizedBox(height: 16),
                           CustomTextField(
                             controller: _passwordController,
-                            label: 'Password',
+                            label: AppLocalizations.of(context)!.password,
                             obscureText: true,
                           ),
                           SizedBox(height: 24),
                           Button(
-                            text: 'Sign Up',
+                            text: AppLocalizations.of(context)!.signUp,
                             onPressed: () {
                               BlocProvider.of<AuthBloc>(context).add(
                                 AuthSignupRequested(
@@ -92,7 +93,7 @@ class SignupScreen extends StatelessWidget {
                   onPressed: () {
                     context.go('/');
                   },
-                  text: 'Come back',
+                  text: AppLocalizations.of(context)!.comeBack,
                   isPrimary: false,
                 ),
                 SizedBox(height: 16),
@@ -101,7 +102,7 @@ class SignupScreen extends StatelessWidget {
                     context.go('/login');
                   },
                   child: Text(
-                    'Already have an account? Sign in',
+                    AppLocalizations.of(context)!.alreadyAnAccountLogin,
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

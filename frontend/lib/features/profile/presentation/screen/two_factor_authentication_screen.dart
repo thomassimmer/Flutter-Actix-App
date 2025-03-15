@@ -39,7 +39,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
               } else if (state is ProfileLoading) {
                 return Center(child: CircularProgressIndicator());
               } else {
-                return Center(child: Text('Failed to load profile'));
+                return Center(child: Text(AppLocalizations.of(context)!.failedToLoadProfile));
               }
             },
           ))),
@@ -124,7 +124,7 @@ class TwoFactorAuthenticationScreen extends StatelessWidget {
                             CustomTextField(
                               controller: _otpController,
                               label:
-                                  AppLocalizations.of(context)!.validationCode,
+                                  AppLocalizations.of(context)!.validationCodeField,
                               obscureText: true,
                             ),
                             SizedBox(height: 24),
