@@ -35,11 +35,11 @@ class ErrorScreen extends StatelessWidget {
               Spacer(),
               if (state is AuthAuthenticatedState)
                 ElevatedButton(
-                  child: Text(AppLocalizations.of(context)!.logout),
                   onPressed: () {
                     BlocProvider.of<AuthBloc>(context).add(AuthLogoutEvent());
                   },
                   style: context.styles.buttonSmall,
+                  child: Text(AppLocalizations.of(context)!.logout),
                 ),
             ]),
             backgroundColor: context.colors.primary,

@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/message_mapper.dart';
 import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/app_logo.dart';
+import 'package:flutteractixapp/core/widgets/custom_container.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
@@ -28,70 +29,72 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
 
     return Scaffold(
       body: Stack(
-        fit: StackFit.expand,
         children: [
           Background(),
           if (!_isAuthenticated)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                AppLogo(),
-                SizedBox(height: 40),
-                Container(
-                    decoration: BoxDecoration(
-                      color: context.colors.background,
-                      border: Border.all(
-                          width: 1.5, color: context.colors.primarySwatch),
-                      borderRadius: BorderRadius.circular(8.0),
+            SingleChildScrollView(
+                child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height,
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(30.0),
-                      child: BlocConsumer<AuthBloc, AuthState>(
-                        listener: (context, state) {
-                          if (state is AuthAuthenticatedState) {
-                            setState(() {
-                              _isAuthenticated = true;
-                            });
-                          } else {
-                            GlobalSnackBar.show(context, state.message);
-                          }
-                        },
-                        builder: (context, state) {
-                          if (state
-                              is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndPasswordState) {
-                            return _buildRecoveryCodeAndPasswordView(
-                                context, state);
-                          } else if (state
-                              is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState) {
-                            return _buildRecoveryCodeAndOneTimePasswordView(
-                                context, state);
-                          } else if (state
-                              is AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState) {
-                            return _buildRecoveryCodeView(context, state);
-                          } else if (state
-                              is AuthRecoverAccountUsernameStepState) {
-                            return _buildUsernameStepView(context, state);
-                          } else if (state is AuthLoadingState) {
-                            return CircularProgressIndicator();
-                          } else {
-                            return Text(state.message != null
-                                ? getTranslatedMessage(context, state.message!)
-                                : AppLocalizations.of(context)!.noContent);
-                          }
-                        },
-                      ),
-                    )),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    context.goNamed('home');
-                  },
-                  child: Text(AppLocalizations.of(context)!.home),
-                  style: context.styles.buttonSmall,
-                ),
-              ],
-            ),
+                        padding: const EdgeInsets.all(30.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            AppLogo(),
+                            SizedBox(height: 40),
+                            CustomContainer(
+                              child: BlocConsumer<AuthBloc, AuthState>(
+                                listener: (context, state) {
+                                  if (state is AuthAuthenticatedState) {
+                                    setState(() {
+                                      _isAuthenticated = true;
+                                    });
+                                  } else {
+                                    GlobalSnackBar.show(context, state.message);
+                                  }
+                                },
+                                builder: (context, state) {
+                                  if (state
+                                      is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndPasswordState) {
+                                    return _buildRecoveryCodeAndPasswordView(
+                                        context, state);
+                                  } else if (state
+                                      is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState) {
+                                    return _buildRecoveryCodeAndOneTimePasswordView(
+                                        context, state);
+                                  } else if (state
+                                      is AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState) {
+                                    return _buildRecoveryCodeView(
+                                        context, state);
+                                  } else if (state
+                                      is AuthRecoverAccountUsernameStepState) {
+                                    return _buildUsernameStepView(
+                                        context, state);
+                                  } else if (state is AuthLoadingState) {
+                                    return CircularProgressIndicator();
+                                  } else {
+                                    return Text(state.message != null
+                                        ? getTranslatedMessage(
+                                            context, state.message!)
+                                        : AppLocalizations.of(context)!
+                                            .noContent);
+                                  }
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                context.goNamed('home');
+                              },
+                              style: context.styles.buttonSmall,
+                              child: Text(AppLocalizations.of(context)!.home),
+                            ),
+                          ],
+                        )))),
           SuccessfulLoginAnimation(
             isVisible: _isAuthenticated,
             onAnimationComplete: () {
@@ -126,15 +129,16 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 24),
       ElevatedButton(
-          child: Text(AppLocalizations.of(context)!.next),
-          onPressed: () {
-            BlocProvider.of<AuthBloc>(context).add(
-              AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent(
-                  username: usernameController.text,
-                  passwordForgotten: state.passwordForgotten),
-            );
-          },
-          style: context.styles.buttonSmall),
+        onPressed: () {
+          BlocProvider.of<AuthBloc>(context).add(
+            AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent(
+                username: usernameController.text,
+                passwordForgotten: state.passwordForgotten),
+          );
+        },
+        style: context.styles.buttonSmall,
+        child: Text(AppLocalizations.of(context)!.next),
+      ),
     ]);
   }
 
@@ -169,16 +173,17 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 24),
       ElevatedButton(
-          child: Text(AppLocalizations.of(context)!.next),
-          onPressed: () {
-            BlocProvider.of<AuthBloc>(context).add(
-              AuthRecoverAccountWithTwoFactorAuthenticationAndPasswordEvent(
-                  username: state.username,
-                  password: passwordController.text,
-                  recoveryCode: recoveryCodeController.text),
-            );
-          },
-          style: context.styles.buttonSmall),
+        onPressed: () {
+          BlocProvider.of<AuthBloc>(context).add(
+            AuthRecoverAccountWithTwoFactorAuthenticationAndPasswordEvent(
+                username: state.username,
+                password: passwordController.text,
+                recoveryCode: recoveryCodeController.text),
+          );
+        },
+        style: context.styles.buttonSmall,
+        child: Text(AppLocalizations.of(context)!.next),
+      ),
     ]);
   }
 
@@ -203,15 +208,16 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 24),
       ElevatedButton(
-          child: Text(AppLocalizations.of(context)!.next),
-          onPressed: () {
-            BlocProvider.of<AuthBloc>(context).add(
-              AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
-                  username: state.username,
-                  recoveryCode: recoveryCodeController.text),
-            );
-          },
-          style: context.styles.buttonSmall),
+        onPressed: () {
+          BlocProvider.of<AuthBloc>(context).add(
+            AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
+                username: state.username,
+                recoveryCode: recoveryCodeController.text),
+          );
+        },
+        style: context.styles.buttonSmall,
+        child: Text(AppLocalizations.of(context)!.next),
+      ),
     ]);
   }
 
@@ -246,15 +252,16 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
       ),
       SizedBox(height: 24),
       ElevatedButton(
-          child: Text(AppLocalizations.of(context)!.next),
-          onPressed: () {
-            BlocProvider.of<AuthBloc>(context).add(
-              AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
-                  username: state.username,
-                  recoveryCode: recoveryCodeController.text),
-            );
-          },
-          style: context.styles.buttonSmall),
+        onPressed: () {
+          BlocProvider.of<AuthBloc>(context).add(
+            AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledEvent(
+                username: state.username,
+                recoveryCode: recoveryCodeController.text),
+          );
+        },
+        style: context.styles.buttonSmall,
+        child: Text(AppLocalizations.of(context)!.next),
+      ),
     ]);
   }
 }

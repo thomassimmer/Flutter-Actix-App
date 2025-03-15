@@ -64,6 +64,7 @@
   "profile": "Profil",
   "profileSettings": "Paramètres du profil",
   "profileUpdateSuccessful": "Vos informations ont bien été sauvegardées.",
+  "qrCodeSecretKeyCopied": "La clé secrète du QR-code a été copiée dans le presse-papiers.",
   "recoverAccount": "Récupération de compte",
   "recoveryCode": "Code de récupération",
   "recoveryCodesCopied": "Les codes de récupération ont été copiés dans le presse-papiers.",

@@ -5,6 +5,7 @@ import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/core/messages/message_mapper.dart';
 import 'package:flutteractixapp/core/ui/extensions.dart';
+import 'package:flutteractixapp/core/widgets/custom_container.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_events.dart';
@@ -25,25 +26,22 @@ class PasswordScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.changePassword),
       ),
-      body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: BlocBuilder<ProfileBloc, ProfileState>(
-            builder: (context, state) {
-              if (state is ProfileAuthenticated) {
-                if (state.profile.passwordIsExpired) {
-                  return _buildSetPasswordView(context, state);
-                } else {
-                  return _buildUpdatePasswordView(context, state);
-                }
-              } else if (state is ProfileLoading) {
-                return Center(child: CircularProgressIndicator());
-              } else {
-                return Center(
-                    child: Text(
-                        AppLocalizations.of(context)!.failedToLoadProfile));
-              }
-            },
-          )),
+      body: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, state) {
+          if (state is ProfileAuthenticated) {
+            if (state.profile.passwordIsExpired) {
+              return _buildSetPasswordView(context, state);
+            } else {
+              return _buildUpdatePasswordView(context, state);
+            }
+          } else if (state is ProfileLoading) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            return Center(
+                child: Text(AppLocalizations.of(context)!.failedToLoadProfile));
+          }
+        },
+      ),
     );
   }
 
@@ -58,54 +56,38 @@ class PasswordScreen extends StatelessWidget {
         : null;
 
     return SingleChildScrollView(
-        child: Column(
-      children: [
-        Center(
-            child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(children: [
-                  Text(
-                    AppLocalizations.of(context)!.setNewPassword,
-                  ),
-                  SizedBox(height: 16),
-                  Container(
-                      decoration: BoxDecoration(
-                        color: context.colors.background,
-                        border: Border.all(
-                            width: 1.5, color: context.colors.primarySwatch),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Padding(
-                          padding: const EdgeInsets.all(30.0),
-                          child: Column(children: [
-                            CustomTextField(
-                              controller: _newPasswordController,
-                              onChanged: (password) =>
-                                  BlocProvider.of<ProfileSetPasswordFormBloc>(
-                                          context)
-                                      .add(SetPasswordFormPasswordChangedEvent(
-                                          password)),
-                              obscureText: true,
-                              label: AppLocalizations.of(context)!.newPassword,
-                              errorText: displayPasswordErrorMessage,
-                            ),
-                            SizedBox(height: 24),
-                            ElevatedButton(
-                                child:
-                                    Text(AppLocalizations.of(context)!.verify),
-                                onPressed: () {
-                                  BlocProvider.of<ProfileBloc>(context).add(
-                                    ProfileSetPasswordEvent(
-                                      newPassword: _newPasswordController.text,
-                                    ),
-                                  );
-                                  _newPasswordController.text = '';
-                                },
-                                style: context.styles.buttonSmall),
-                          ])))
-                ])))
-      ],
-    ));
+        child: Center(
+            child: Column(children: [
+      Text(
+        AppLocalizations.of(context)!.setNewPassword,
+      ),
+      SizedBox(height: 16),
+      CustomContainer(
+          child: Column(children: [
+        CustomTextField(
+          controller: _newPasswordController,
+          onChanged: (password) =>
+              BlocProvider.of<ProfileSetPasswordFormBloc>(context)
+                  .add(SetPasswordFormPasswordChangedEvent(password)),
+          obscureText: true,
+          label: AppLocalizations.of(context)!.newPassword,
+          errorText: displayPasswordErrorMessage,
+        ),
+        SizedBox(height: 24),
+        ElevatedButton(
+          onPressed: () {
+            BlocProvider.of<ProfileBloc>(context).add(
+              ProfileSetPasswordEvent(
+                newPassword: _newPasswordController.text,
+              ),
+            );
+            _newPasswordController.text = '';
+          },
+          style: context.styles.buttonSmall,
+          child: Text(AppLocalizations.of(context)!.verify),
+        ),
+      ]))
+    ])));
   }
 
   Widget _buildUpdatePasswordView(
@@ -119,61 +101,45 @@ class PasswordScreen extends StatelessWidget {
         : null;
 
     return SingleChildScrollView(
-        child: Column(
-      children: [
-        Center(
-            child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(children: [
-                  Text(
-                    AppLocalizations.of(context)!.updatePassword,
-                  ),
-                  SizedBox(height: 16),
-                  Container(
-                      decoration: BoxDecoration(
-                        color: context.colors.background,
-                        border: Border.all(
-                            width: 1.5, color: context.colors.primarySwatch),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Padding(
-                          padding: const EdgeInsets.all(30.0),
-                          child: Column(children: [
-                            CustomTextField(
-                              controller: _currentPasswordController,
-                              label:
-                                  AppLocalizations.of(context)!.currentPassword,
-                              obscureText: true,
-                            ),
-                            SizedBox(height: 24),
-                            CustomTextField(
-                              controller: _newPasswordController,
-                              onChanged: (password) => BlocProvider.of<
-                                      ProfileUpdatePasswordFormBloc>(context)
-                                  .add(UpdatePasswordFormPasswordChangedEvent(
-                                      password)),
-                              obscureText: true,
-                              label: AppLocalizations.of(context)!.newPassword,
-                              errorText: displayPasswordErrorMessage,
-                            ),
-                            SizedBox(height: 24),
-                            ElevatedButton(
-                                child: Text(AppLocalizations.of(context)!.save),
-                                onPressed: () {
-                                  BlocProvider.of<ProfileBloc>(context).add(
-                                    ProfileUpdatePasswordEvent(
-                                      currentPassword:
-                                          _currentPasswordController.text,
-                                      newPassword: _newPasswordController.text,
-                                    ),
-                                  );
-                                  _currentPasswordController.text = '';
-                                  _newPasswordController.text = '';
-                                },
-                                style: context.styles.buttonSmall),
-                          ])))
-                ])))
-      ],
-    ));
+        child: Center(
+            child: Column(children: [
+      Text(
+        AppLocalizations.of(context)!.updatePassword,
+      ),
+      SizedBox(height: 16),
+      CustomContainer(
+          child: Column(children: [
+        CustomTextField(
+          controller: _currentPasswordController,
+          label: AppLocalizations.of(context)!.currentPassword,
+          obscureText: true,
+        ),
+        SizedBox(height: 24),
+        CustomTextField(
+          controller: _newPasswordController,
+          onChanged: (password) =>
+              BlocProvider.of<ProfileUpdatePasswordFormBloc>(context)
+                  .add(UpdatePasswordFormPasswordChangedEvent(password)),
+          obscureText: true,
+          label: AppLocalizations.of(context)!.newPassword,
+          errorText: displayPasswordErrorMessage,
+        ),
+        SizedBox(height: 24),
+        ElevatedButton(
+          onPressed: () {
+            BlocProvider.of<ProfileBloc>(context).add(
+              ProfileUpdatePasswordEvent(
+                currentPassword: _currentPasswordController.text,
+                newPassword: _newPasswordController.text,
+              ),
+            );
+            _currentPasswordController.text = '';
+            _newPasswordController.text = '';
+          },
+          style: context.styles.buttonSmall,
+          child: Text(AppLocalizations.of(context)!.save),
+        ),
+      ])),
+    ])));
   }
 }

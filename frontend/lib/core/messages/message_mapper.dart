@@ -80,6 +80,8 @@ String getTranslatedMessage(BuildContext context, Message message) {
       // Auth
       case 'recoveryCodesCopied':
         return localizations.recoveryCodesCopied;
+      case 'qrCodeSecretKeyCopied':
+        return localizations.qrCodeSecretKeyCopied;
 
       default:
         return localizations.defaultError;

@@ -22,20 +22,25 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
         },
         child: Scaffold(
           body: Stack(
-            fit: StackFit.expand,
             children: [
               Background(),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child:
-                    BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-                  if (state is AuthLoadingState) {
-                    return _buildLoadingScreen(context, state);
-                  } else {
-                    return _buildUnauthenticatedHomeScreen(context, state);
-                  }
-                }),
-              )
+              SingleChildScrollView(
+                  child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(30.0),
+                        child: BlocBuilder<AuthBloc, AuthState>(
+                            builder: (context, state) {
+                          if (state is AuthLoadingState) {
+                            return _buildLoadingScreen(context, state);
+                          } else {
+                            return _buildUnauthenticatedHomeScreen(
+                                context, state);
+                          }
+                        }),
+                      )))
             ],
           ),
         ));
@@ -76,13 +81,14 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
         ),
         SizedBox(height: 16),
         ElevatedButton(
-            onPressed: () {
-              context.goNamed('signup');
-            },
-            child: Text(AppLocalizations.of(context)!.signUp),
-            style: ButtonStyle(
-                backgroundColor:
-                    WidgetStatePropertyAll(context.colors.secondary))),
+          onPressed: () {
+            context.goNamed('signup');
+          },
+          style: ButtonStyle(
+              backgroundColor:
+                  WidgetStatePropertyAll(context.colors.secondary)),
+          child: Text(AppLocalizations.of(context)!.signUp),
+        ),
       ],
     );
   }

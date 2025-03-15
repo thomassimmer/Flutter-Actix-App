@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/app_logo.dart';
+import 'package:flutteractixapp/core/widgets/custom_container.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
@@ -31,60 +31,56 @@ class LoginScreenState extends State<LoginScreen>
 
     return Scaffold(
       body: Stack(
-        fit: StackFit.expand,
         children: [
           Background(),
           if (!_isAuthenticated)
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  AppLogo(),
-                  SizedBox(height: 40),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: context.colors.background,
-                      border: Border.all(
-                          width: 1.5, color: context.colors.primarySwatch),
-                      borderRadius: BorderRadius.circular(8.0),
+            SingleChildScrollView(
+                child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(30.0),
-                      child: BlocConsumer<AuthBloc, AuthState>(
-                        listener: (context, state) {
-                          if (state is AuthAuthenticatedState) {
-                            setState(() {
-                              _isAuthenticated = true;
-                            });
-                          } else {
-                            GlobalSnackBar.show(context, state.message);
-                          }
-                        },
-                        builder: (context, state) {
-                          if (state is AuthLoadingState) {
-                            return _buildLoadingScreen(context, state);
-                          } else if (state
-                              is AuthValidateOneTimePasswordState) {
-                            return _buildOneTimePasswordVerificationScreen(
-                                context, state);
-                          } else {
-                            return _buildLoginViewScreen(context, state);
-                          }
-                        },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AppLogo(),
+                          SizedBox(height: 40),
+                          CustomContainer(
+                            child: BlocConsumer<AuthBloc, AuthState>(
+                              listener: (context, state) {
+                                if (state is AuthAuthenticatedState) {
+                                  setState(() {
+                                    _isAuthenticated = true;
+                                  });
+                                } else {
+                                  GlobalSnackBar.show(context, state.message);
+                                }
+                              },
+                              builder: (context, state) {
+                                if (state is AuthLoadingState) {
+                                  return _buildLoadingScreen(context, state);
+                                } else if (state
+                                    is AuthValidateOneTimePasswordState) {
+                                  return _buildOneTimePasswordVerificationScreen(
+                                      context, state);
+                                } else {
+                                  return _buildLoginViewScreen(context, state);
+                                }
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          ElevatedButton(
+                            child: Text(AppLocalizations.of(context)!.comeBack),
+                            onPressed: () {
+                              context.goNamed('home');
+                            },
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    child: Text(AppLocalizations.of(context)!.comeBack),
-                    onPressed: () {
-                      context.goNamed('home');
-                    },
-                  ),
-                ],
-              ),
-            ),
+                    ))),
           SuccessfulLoginAnimation(
             isVisible: _isAuthenticated,
             onAnimationComplete: () {

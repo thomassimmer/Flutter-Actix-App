@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/core/ui/extensions.dart';
 import 'package:flutteractixapp/core/widgets/app_logo.dart';
+import 'package:flutteractixapp/core/widgets/custom_container.dart';
 import 'package:flutteractixapp/core/widgets/custom_text_field.dart';
 import 'package:flutteractixapp/core/widgets/global_snack_bar.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
@@ -20,62 +21,64 @@ class RecoveryCodesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(fit: StackFit.expand, children: [
-        Background(),
-        Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              AppLogo(),
-              SizedBox(height: 40),
-              Container(
-                  decoration: BoxDecoration(
-                    color: context.colors.background,
-                    border: Border.all(
-                        width: 1.5, color: context.colors.primarySwatch),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(30.0),
-                    child: BlocConsumer<AuthBloc, AuthState>(
-                      listener: (context, state) {
-                        GlobalSnackBar.show(context, state.message);
+        body: Stack(children: [
+      Background(),
+      SingleChildScrollView(
+          child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
+              ),
+              child: Padding(
+                  padding: const EdgeInsets.all(30.0),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        AppLogo(),
+                        SizedBox(height: 40),
+                        CustomContainer(
+                          child: BlocConsumer<AuthBloc, AuthState>(
+                            listener: (context, state) {
+                              GlobalSnackBar.show(context, state.message);
 
-                        if (state is AuthAuthenticatedAfterRegistrationState) {
-                          if (state.hasVerifiedOtp) {
+                              if (state
+                                  is AuthAuthenticatedAfterRegistrationState) {
+                                if (state.hasVerifiedOtp) {
+                                  context.goNamed('home');
+                                } else {
+                                  context.goNamed('recovery-codes');
+                                }
+                              } else if (state
+                                  is AuthVerifyOneTimePasswordState) {
+                                _otpController.text = '';
+                              }
+                            },
+                            builder: (context, state) {
+                              if (state
+                                  is AuthAuthenticatedAfterRegistrationState) {
+                                return _buildRecoveryCodesView(context, state);
+                              } else if (state
+                                  is AuthGenerateTwoFactorAuthenticationConfigState) {
+                                return _buildTwoFactorAuthenticationSetupView(
+                                    context, state);
+                              } else if (state is AuthLoadingState) {
+                                return _buildLoadingScreen(context, state);
+                              } else {
+                                return _buildErrorScreen(context, state);
+                              }
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
                             context.goNamed('home');
-                          } else {
-                            context.goNamed('recovery-codes');
-                          }
-                        } else if (state is AuthVerifyOneTimePasswordState) {
-                          _otpController.text = '';
-                        }
-                      },
-                      builder: (context, state) {
-                        if (state is AuthAuthenticatedAfterRegistrationState) {
-                          return _buildRecoveryCodesView(context, state);
-                        } else if (state
-                            is AuthGenerateTwoFactorAuthenticationConfigState) {
-                          return _buildTwoFactorAuthenticationSetupView(
-                              context, state);
-                        } else if (state is AuthLoadingState) {
-                          return _buildLoadingScreen(context, state);
-                        } else {
-                          return _buildErrorScreen(context, state);
-                        }
-                      },
-                    ),
-                  )),
-              SizedBox(height: 16),
-              ElevatedButton(
-                  onPressed: () {
-                    context.goNamed('home');
-                  },
-                  child: Text(AppLocalizations.of(context)!.home),
-                  style: context.styles.buttonSmall)
-            ]),
-      ]),
-    );
+                          },
+                          style: context.styles.buttonSmall,
+                          child: Text(AppLocalizations.of(context)!.home),
+                        )
+                      ])))),
+    ]));
   }
 
   Widget _buildErrorScreen(BuildContext context, AuthState state) {
@@ -140,13 +143,14 @@ class RecoveryCodesScreen extends StatelessWidget {
           ),
           SizedBox(height: 16),
           ElevatedButton(
-              child: Text(AppLocalizations.of(context)!.goToTwoFASetup),
-              onPressed: () {
-                BlocProvider.of<AuthBloc>(context).add(
-                  AuthGenerateTwoFactorAuthenticationConfigEvent(),
-                );
-              },
-              style: context.styles.buttonSmall),
+            onPressed: () {
+              BlocProvider.of<AuthBloc>(context).add(
+                AuthGenerateTwoFactorAuthenticationConfigEvent(),
+              );
+            },
+            style: context.styles.buttonSmall,
+            child: Text(AppLocalizations.of(context)!.goToTwoFASetup),
+          ),
         ],
       );
     }
@@ -166,8 +170,28 @@ class RecoveryCodesScreen extends StatelessWidget {
           size: 200.0,
         ),
         SizedBox(height: 16),
-        SelectableText(
-            AppLocalizations.of(context)!.twoFASecretKey(state.otpBase32)),
+        Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            alignment: WrapAlignment.center, // Align the elements to the center
+            spacing: 8.0, // Add spacing between elements
+            direction:
+                Axis.horizontal, // Horizontal direction for the initial layout
+            children: [
+              SelectableText(AppLocalizations.of(context)!
+                  .twoFASecretKey(state.otpBase32)),
+              IconButton(
+                icon: Icon(
+                  Icons.copy,
+                ),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: state.otpBase32));
+
+                  // Create an InfoMessage for successfully copying the codes
+                  final message = InfoMessage('qrCodeSecretKeyCopied');
+                  GlobalSnackBar.show(context, message);
+                },
+              )
+            ]),
         SizedBox(height: 24),
         CustomTextField(
           controller: _otpController,
@@ -176,17 +200,18 @@ class RecoveryCodesScreen extends StatelessWidget {
         ),
         SizedBox(height: 24),
         ElevatedButton(
-            child: Text(AppLocalizations.of(context)!.signUp),
-            onPressed: () {
-              BlocProvider.of<AuthBloc>(context).add(
-                AuthVerifyOneTimePasswordEvent(
-                  otpBase32: state.otpBase32,
-                  otpAuthUrl: state.otpAuthUrl,
-                  code: _otpController.text,
-                ),
-              );
-            },
-            style: context.styles.buttonSmall),
+          onPressed: () {
+            BlocProvider.of<AuthBloc>(context).add(
+              AuthVerifyOneTimePasswordEvent(
+                otpBase32: state.otpBase32,
+                otpAuthUrl: state.otpAuthUrl,
+                code: _otpController.text,
+              ),
+            );
+          },
+          style: context.styles.buttonSmall,
+          child: Text(AppLocalizations.of(context)!.verify),
+        ),
       ],
     );
   }
