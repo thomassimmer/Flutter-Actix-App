@@ -1,8 +1,10 @@
 // Inspired by : https://github.com/actix/actix-web/issues/1147
 
 use std::net::TcpListener;
+use std::rc::Rc;
 
 use crate::configuration::{DatabaseSettings, Settings};
+use crate::core::middlewares::token_validator::TokenValidator;
 use crate::core::routes::health_check::health_check;
 use crate::features::auth::routes::disable_otp::disable;
 use crate::features::auth::routes::generate_otp::generate;
@@ -71,25 +73,41 @@ pub fn create_app(
                     web::scope("/auth")
                         .service(register_user)
                         .service(log_user_in)
-                        .service(refresh_token)
                         .service(recover_account_without_2fa_enabled)
                         .service(recover_account_using_password)
                         .service(recover_account_using_2fa)
+                        .service(refresh_token)
                         .service(
                             web::scope("/otp")
-                                .service(generate)
-                                .service(verify)
+                                // Scope without middleware applied to routes that don't need it
                                 .service(validate)
-                                .service(disable),
+                                // Nested scope with middleware for protected routes
+                                .service(
+                                    web::scope("")
+                                        .wrap(TokenValidator {
+                                            secret: Rc::new(secret.to_owned()),
+                                        })
+                                        .service(generate)
+                                        .service(verify)
+                                        .service(disable),
+                                ),
                         ),
                 )
                 .service(
                     web::scope("/users")
-                        .service(get_profile_information)
-                        .service(post_profile_information)
+                        // Scope without middleware applied to routes that don't need it
                         .service(is_otp_enabled)
-                        .service(set_password)
-                        .service(update_password),
+                        // Nested scope with middleware for protected routes
+                        .service(
+                            web::scope("")
+                                .wrap(TokenValidator {
+                                    secret: Rc::new(secret.to_owned()),
+                                })
+                                .service(get_profile_information)
+                                .service(post_profile_information)
+                                .service(set_password)
+                                .service(update_password),
+                        ),
                 ),
         )
         .wrap(cors)

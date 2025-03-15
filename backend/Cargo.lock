@@ -888,6 +888,7 @@ dependencies = [
  "config",
  "dotenv",
  "env_logger",
+ "futures-util",
  "jsonwebtoken",
  "lazy_static",
  "rand",
