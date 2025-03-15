@@ -7,6 +7,7 @@ use actix_web::{
 };
 use flutteractixapp::{
     configuration::{get_configuration, DatabaseSettings},
+    features::auth::structs::models::TokenCache,
     startup::create_app,
 };
 use sqlx::{migrate, Connection, Executor, PgConnection, PgPool};

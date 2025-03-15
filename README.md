@@ -24,7 +24,7 @@ Features done:
 
 ## Medium articles
 
-I wrote 4 articles about this project on Medium:
+I wrote 5 articles about this project on Medium:
 
 - [JWT & Session Deactivation](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-jwt-session-deactivation-8ffad3d7ab5a)
 - [Locale Selection](https://medium.com/@thomas.simmer/building-a-cross-platform-app-with-flutter-and-rust-locale-selection-1fb318224129)
@@ -43,7 +43,7 @@ The backend has 45 tests covering most of the code.
 
 ## Demo Video
 
-Click on it to watch, it's a youtube link.
+You can click on it to watch, it's a youtube link.
 
 <div style="text-align: center;">
     <a href="https://youtu.be/ZCqYWs-lrRM" target="_blank">
@@ -86,7 +86,7 @@ sqlx migrate run
 
 ### Run locally on an external device
 
-Change every occurrence of 192.168. somewhere in the code to match your IP.
+Change every occurrence of 192.168. somewhere in the code to match your local IP address.
 
 Create frontend/.env on the model of frontend/.env.template changing the variable to match your situation (API_BASE_URL for instance).
 
