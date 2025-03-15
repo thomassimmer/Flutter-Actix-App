@@ -10,7 +10,7 @@ class VerifyOtpUseCase {
   VerifyOtpUseCase(this.authRepository);
 
   /// Verifies the OTP provided by the user. It's for enabling 2FA.
-  Future<Either<bool, Failure>> verifyOtp(String code) async {
+  Future<Either<bool, Failure>> call(String code) async {
     final accessToken = await TokenStorage().getAccessToken();
 
     try {

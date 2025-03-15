@@ -51,7 +51,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
 
     // We use the device locale by default on signup
-    final result = await signupUseCase.signup(
+    final result = await signupUseCase.call(
         event.username, event.password, Platform.localeName, event.theme);
 
     await result.fold(
@@ -76,7 +76,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthOtpGenerationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await generateOtpConfigUseCase.generateOtpConfig();
+    final result = await generateOtpConfigUseCase.call();
 
     result.fold(
       (generatedOtpConfig) => emit(AuthOtpVerify(
@@ -90,7 +90,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthOtpVerificationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result = await verifyOtpUseCase.verifyOtp(event.code);
+    final result = await verifyOtpUseCase.call(event.code);
 
     result.fold(
       (_) => emit(AuthAuthenticatedAfterRegistration(hasVerifiedOtp: true)),
@@ -105,8 +105,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthLoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final loginResult =
-        await loginUseCase.login(event.username, event.password);
+    final loginResult = await loginUseCase.call(event.username, event.password);
 
     await loginResult.fold(
       (userOrUserId) async {
@@ -138,8 +137,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthOtpValidationRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
-    final result =
-        await validateOtpUsecase.validateOtp(event.userId, event.code);
+    final result = await validateOtpUsecase.call(event.userId, event.code);
 
     result.fold(
       (userTokenModel) =>

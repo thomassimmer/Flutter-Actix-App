@@ -33,7 +33,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onInitializeProfile(
       ProfileLoadRequested event, Emitter<ProfileState> emit) async {
-    final profile = await getProfileUsecase.getProfile();
+    final profile = await getProfileUsecase.call();
 
     profile.fold((profile) => emit(ProfileAuthenticated(profile: profile)),
         (failure) => emit(ProfileUnauthenticated(message: failure.message)));
@@ -46,7 +46,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onProfileUpdateRequest(
       ProfileUpdateRequested event, Emitter<ProfileState> emit) async {
-    final profile = await postProfileUsecase.postProfile(event.profile);
+    final profile = await postProfileUsecase.call(event.profile);
 
     profile.fold((profile) => emit(ProfileAuthenticated(profile: profile)),
         (failure) => emit(ProfileUnauthenticated(message: failure.message)));

@@ -9,7 +9,7 @@ class SignupUseCase {
 
   SignupUseCase(this.authRepository);
 
-  Future<Either<UserToken, Failure>> signup(
+  Future<Either<UserToken, Failure>> call(
       String username, String password, String locale, String theme) async {
     try {
       final userTokenModel = await authRepository.register(
