@@ -1,12 +1,15 @@
 use actix_web::{post, web, HttpResponse, Responder};
-use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use rand::rngs::OsRng;
 use sqlx::PgPool;
 
 use crate::{
     core::structs::responses::GenericResponse,
-    features::profile::structs::{
-        models::User, requests::UpdateUserPasswordRequest, responses::UserResponse,
+    features::{
+        auth::helpers::password::password_is_valid,
+        profile::structs::{
+            models::User, requests::UpdateUserPasswordRequest, responses::UserResponse,
+        },
     },
 };
 
@@ -27,21 +30,7 @@ pub async fn update_password(
     };
 
     // Verify current password
-    let parsed_hash = if let Ok(parsed_hash) = PasswordHash::new(&request_user.password) {
-        parsed_hash
-    } else {
-        return HttpResponse::BadRequest().json(GenericResponse {
-            status: "fail".to_string(),
-            message: "Failed to retrieve hashed password".to_string(),
-        });
-    };
-
-    let argon2 = Argon2::default();
-    let is_valid = argon2
-        .verify_password(body.current_password.as_bytes(), &parsed_hash)
-        .is_ok();
-
-    if !is_valid {
+    if !password_is_valid(&request_user, &body.current_password) {
         return HttpResponse::Forbidden().json(GenericResponse {
             status: "fail".to_string(),
             message: "Invalid username or password".to_string(),
