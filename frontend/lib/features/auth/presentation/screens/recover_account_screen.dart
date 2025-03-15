@@ -77,9 +77,7 @@ class RecoverAccountScreenState extends State<RecoverAccountScreen>
                                   is AuthRecoverAccountUsernameStepState) {
                                 return _buildUsernameStepView(context, state);
                               } else if (state is AuthLoadingState) {
-                                return CircularProgressIndicator(
-                                  color: Colors.black,
-                                );
+                                return CircularProgressIndicator();
                               } else {
                                 return Text(state.message != null
                                     ? getTranslatedMessage(

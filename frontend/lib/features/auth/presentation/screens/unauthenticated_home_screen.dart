@@ -41,7 +41,7 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
   }
 
   Widget _buildLoadingScreen(BuildContext context, AuthState state) {
-    return Column(children: [CircularProgressIndicator(color: Colors.black)]);
+    return Center(child: CircularProgressIndicator());
   }
 
   Widget _buildUnauthenticatedHomeScreen(

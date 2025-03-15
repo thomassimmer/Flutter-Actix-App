@@ -28,91 +28,83 @@ class LoginScreenState extends State<LoginScreen>
   Widget build(BuildContext context) {
     final authMessage = context.select((AuthBloc bloc) => bloc.state.message);
 
-    return BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          GlobalSnackBar.show(context, state.message);
-
-          if (state is AuthAuthenticatedState) {
-            context.goNamed('home');
-          }
-        },
-        child: Scaffold(
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              Background(),
-              if (!_isAuthenticated)
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Placeholder for logo or anything
-                      SizedBox(
-                        height: 100,
-                        width: 100,
-                        child: Placeholder(),
-                      ),
-                      SizedBox(height: 40),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: context.colors.background,
-                          border: Border.all(
-                              width: 1.0, color: Colors.blue.shade200),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(30.0),
-                          child: BlocListener<AuthBloc, AuthState>(
-                            listener: (context, state) {
-                              if (state is AuthAuthenticatedState) {
-                                setState(() {
-                                  _isAuthenticated = true;
-                                });
-                              } else {
-                                GlobalSnackBar.show(context, state.message);
-                              }
-                            },
-                            child: BlocBuilder<AuthBloc, AuthState>(
-                              builder: (context, state) {
-                                if (state is AuthLoadingState) {
-                                  return _buildLoadingScreen(context, state);
-                                } else if (state
-                                    is AuthValidateOneTimePasswordState) {
-                                  return _buildOneTimePasswordVerificationScreen(
-                                      context, state);
-                                } else {
-                                  return _buildLoginViewScreen(context, state);
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        child: Text(AppLocalizations.of(context)!.comeBack),
-                        onPressed: () {
-                          context.goNamed('home');
-                        },
-                      ),
-                    ],
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Background(),
+          if (!_isAuthenticated)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Placeholder for logo or anything
+                  SizedBox(
+                    height: 100,
+                    width: 100,
+                    child: Placeholder(),
                   ),
-                ),
-              SuccessfulLoginAnimation(
-                isVisible: _isAuthenticated,
-                onAnimationComplete: () {
-                  GlobalSnackBar.show(context, authMessage);
-                  context.goNamed('home');
-                },
+                  SizedBox(height: 40),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: context.colors.background,
+                      border:
+                          Border.all(width: 1.0, color: Colors.blue.shade200),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(30.0),
+                      child: BlocListener<AuthBloc, AuthState>(
+                        listener: (context, state) {
+                          if (state is AuthAuthenticatedState) {
+                            setState(() {
+                              _isAuthenticated = true;
+                            });
+                          } else {
+                            GlobalSnackBar.show(context, state.message);
+                          }
+                        },
+                        child: BlocBuilder<AuthBloc, AuthState>(
+                          builder: (context, state) {
+                            if (state is AuthLoadingState) {
+                              return _buildLoadingScreen(context, state);
+                            } else if (state
+                                is AuthValidateOneTimePasswordState) {
+                              return _buildOneTimePasswordVerificationScreen(
+                                  context, state);
+                            } else {
+                              return _buildLoginViewScreen(context, state);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    child: Text(AppLocalizations.of(context)!.comeBack),
+                    onPressed: () {
+                      context.goNamed('home');
+                    },
+                  ),
+                ],
               ),
-            ],
+            ),
+          SuccessfulLoginAnimation(
+            isVisible: _isAuthenticated,
+            onAnimationComplete: () {
+              GlobalSnackBar.show(context, authMessage);
+              context.goNamed('home');
+            },
           ),
-        ));
+        ],
+      ),
+    );
   }
 
   Widget _buildLoadingScreen(BuildContext context, AuthState state) {
-    return Column(children: [CircularProgressIndicator(color: Colors.black)]);
+    return Column(children: [CircularProgressIndicator()]);
   }
 
   Widget _buildOneTimePasswordVerificationScreen(
