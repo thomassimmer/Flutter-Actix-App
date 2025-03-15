@@ -9,7 +9,7 @@ use reallystick::features::profile::structs::response::UserResponse;
 
 use crate::{auth::signup::user_signs_up, helpers::spawn_app};
 
-pub async fn user_accesses_protected_route(
+pub async fn user_has_access_to_protected_route(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
     access_token: String,
 ) {
@@ -33,7 +33,7 @@ pub async fn user_update_its_profile() {
     let app = spawn_app().await;
     let (access_token, _) = user_signs_up(&app).await;
 
-    user_accesses_protected_route(&app, access_token.clone()).await;
+    user_has_access_to_protected_route(&app, access_token.clone()).await;
 
     let req = test::TestRequest::post()
         .uri("/api/users/me")

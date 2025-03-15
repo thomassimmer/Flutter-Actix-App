@@ -6,8 +6,8 @@ use actix_web::{test, Error};
 use reallystick::features::auth::structs::response::UserLoginResponse;
 
 use crate::auth::signup::user_signs_up;
-use crate::profile::profile::user_accesses_protected_route;
 use crate::helpers::spawn_app;
+use crate::profile::profile::user_has_access_to_protected_route;
 
 pub async fn user_logs_in(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
@@ -45,5 +45,5 @@ async fn logged_in_user_can_access_profile_information() {
     let (access_token, _) = user_logs_in(&app).await;
 
     // User can access a route protected by token authentication
-    user_accesses_protected_route(&app, access_token).await;
+    user_has_access_to_protected_route(&app, access_token).await;
 }

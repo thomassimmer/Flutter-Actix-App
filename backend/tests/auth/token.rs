@@ -12,7 +12,7 @@ use reallystick::core::structs::response::GenericResponse;
 
 use crate::auth::login::user_logs_in;
 use crate::auth::signup::user_signs_up;
-use crate::profile::profile::user_accesses_protected_route;
+use crate::profile::profile::user_has_access_to_protected_route;
 use crate::helpers::spawn_app;
 
 pub async fn user_refreshes_token(
@@ -43,7 +43,7 @@ async fn user_can_refresh_token() {
     let (_, refresh_token) = user_logs_in(&app).await;
     let access_token = user_refreshes_token(&app, refresh_token).await;
 
-    user_accesses_protected_route(&app, access_token).await;
+    user_has_access_to_protected_route(&app, access_token).await;
 }
 
 #[tokio::test]
@@ -52,13 +52,14 @@ async fn access_token_becomes_expired_after_15_minutes() {
 
     let (access_token, _) = user_signs_up(&app).await;
 
-    user_accesses_protected_route(&app, access_token.clone()).await;
+    user_has_access_to_protected_route(&app, access_token.clone()).await;
 
     override_now(Some(
         (Utc::now() + Duration::new(14 * 60, 1)).fixed_offset(),
     ));
 
-    user_accesses_protected_route(&app, access_token.clone()).await;
+    // After 14 minutes, user can still access protected route
+    user_has_access_to_protected_route(&app, access_token.clone()).await;
 
     override_now(Some(
         (Utc::now() + Duration::new(15 * 60, 1)).fixed_offset(),
@@ -87,7 +88,7 @@ async fn refresh_token_becomes_expired_after_7_days() {
     let (_, refresh_token) = user_logs_in(&app).await;
 
     let access_token = user_refreshes_token(&app, refresh_token.clone()).await;
-    user_accesses_protected_route(&app, access_token).await;
+    user_has_access_to_protected_route(&app, access_token).await;
 
     // After 6 days, user can still refresh its access_token
     override_now(Some(
@@ -95,7 +96,7 @@ async fn refresh_token_becomes_expired_after_7_days() {
     ));
 
     let access_token = user_refreshes_token(&app, refresh_token.clone()).await;
-    user_accesses_protected_route(&app, access_token).await;
+    user_has_access_to_protected_route(&app, access_token).await;
 
     // After 7 days, user can still refresh its access_token
     override_now(Some(
