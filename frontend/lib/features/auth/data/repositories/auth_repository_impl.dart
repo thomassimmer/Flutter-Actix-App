@@ -106,14 +106,15 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<DomainError, GeneratedOtpConfig>> generateOtpConfig() async {
+  Future<Either<DomainError, TwoFactorAuthenticationConfig>>
+      generateTwoFactorAuthenticationConfig() async {
     try {
-      final generatedOtpConfigModel =
-          await remoteDataSource.generateOtpConfig();
+      final twoFactorAuthenticationConfig =
+          await remoteDataSource.generateTwoFactorAuthenticationConfig();
 
-      return Right(GeneratedOtpConfig(
-          otpBase32: generatedOtpConfigModel.otpBase32,
-          otpAuthUrl: generatedOtpConfigModel.otpAuthUrl));
+      return Right(TwoFactorAuthenticationConfig(
+          otpBase32: twoFactorAuthenticationConfig.otpBase32,
+          otpAuthUrl: twoFactorAuthenticationConfig.otpAuthUrl));
     } on ParsingError {
       logger.e('ParsingError occurred.');
       return Left(InvalidResponseDomainError());
@@ -139,12 +140,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<DomainError, bool>> verifyOtp({
+  Future<Either<DomainError, bool>> verifyOneTimePassword({
     required String code,
   }) async {
     try {
-      final result =
-          await remoteDataSource.verifyOtp(VerifyOtpRequestModel(code: code));
+      final result = await remoteDataSource
+          .verifyOneTimePassword(VerifyOneTimePasswordRequestModel(code: code));
       return Right(result);
     } on ParsingError {
       logger.e('ParsingError occurred.');
@@ -174,13 +175,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<DomainError, UserToken>> validateOtp({
+  Future<Either<DomainError, UserToken>> validateOneTimePassword({
     required String userId,
     required String code,
   }) async {
     try {
-      final userTokenModel = await remoteDataSource
-          .validateOtp(ValidateOtpRequestModel(userId: userId, code: code));
+      final userTokenModel = await remoteDataSource.validateOneTimePassword(
+          ValidateOneTimePasswordRequestModel(userId: userId, code: code));
 
       return Right(UserToken(
         accessToken: userTokenModel.accessToken,
@@ -208,9 +209,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<DomainError, bool>> disableOtp() async {
+  Future<Either<DomainError, bool>> disableTwoFactorAuthentication() async {
     try {
-      final result = await remoteDataSource.disableOtp();
+      final result = await remoteDataSource.disableTwoFactorAuthentication();
       return Right(result);
     } on ParsingError {
       logger.e('ParsingError occurred.');
@@ -237,11 +238,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<DomainError, bool>> checkIfOtpEnabled(
-      {required String username}) async {
+  Future<Either<DomainError, bool>>
+      checkIfAccountHasTwoFactorAuthenticationEnabled(
+          {required String username}) async {
     try {
       final result = await remoteDataSource
-          .checkIfOtpEnabled(CheckIfOtpEnabledRequestModel(username: username));
+          .checkIfAccountHasTwoFactorAuthenticationEnabled(
+              CheckIfAccountHasTwoFactorAuthenticationEnabledRequestModel(
+                  username: username));
       return Right(result);
     } on ParsingError {
       logger.e('ParsingError occurred.');
@@ -257,14 +261,14 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<DomainError, UserToken>>
-      recoverAccountWithRecoveryCodeAndPassword({
+      recoverAccountWithTwoFactorAuthenticationAndPassword({
     required String username,
     required String password,
     required String recoveryCode,
   }) async {
     try {
-      final userTokenModel =
-          await remoteDataSource.recoverAccountWithRecoveryCodeAndPassword(
+      final userTokenModel = await remoteDataSource
+          .recoverAccountWithTwoFactorAuthenticationAndPassword(
               RecoverAccountWithRecoveryCodeAndPasswordRequestModel(
                   password: password,
                   username: username,
@@ -296,15 +300,16 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<DomainError, UserToken>> recoverAccountWithRecoveryCodeAndOtp({
+  Future<Either<DomainError, UserToken>>
+      recoverAccountWithTwoFactorAuthenticationAndOneTimePassword({
     required String username,
     required String code,
     required String recoveryCode,
   }) async {
     try {
-      final userTokenModel =
-          await remoteDataSource.recoverAccountWithRecoveryCodeAndOtp(
-              RecoverAccountWithRecoveryCodeAndOtpRequestModel(
+      final userTokenModel = await remoteDataSource
+          .recoverAccountWithTwoFactorAuthenticationAndOneTimePassword(
+              RecoverAccountWithRecoveryCodeAndOneTimePasswordRequestModel(
                   code: code, username: username, recoveryCode: recoveryCode));
 
       return Right(UserToken(
@@ -333,13 +338,14 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<DomainError, UserToken>> recoverAccountWithRecoveryCode({
+  Future<Either<DomainError, UserToken>>
+      recoverAccountWithoutTwoFactorAuthenticationEnabled({
     required String username,
     required String recoveryCode,
   }) async {
     try {
-      final userTokenModel =
-          await remoteDataSource.recoverAccountWithRecoveryCode(
+      final userTokenModel = await remoteDataSource
+          .recoverAccountWithoutTwoFactorAuthenticationEnabled(
               RecoverAccountWithRecoveryCodeRequestModel(
                   username: username, recoveryCode: recoveryCode));
 

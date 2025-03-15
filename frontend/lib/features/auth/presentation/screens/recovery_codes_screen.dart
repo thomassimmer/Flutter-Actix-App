@@ -61,7 +61,7 @@ class RecoveryCodesScreen extends StatelessWidget {
                               return _buildRecoveryCodesView(context, state);
                             } else if (state
                                 is AuthGenerateTwoFactorAuthenticationConfigState) {
-                              return _buildOtpSetupView(context, state);
+                              return _buildTwoFactorAuthenticationSetupView(context, state);
                             } else if (state is AuthLoadingState) {
                               return _buildLoadingScreen(context, state);
                             } else {
@@ -160,7 +160,7 @@ class RecoveryCodesScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildOtpSetupView(BuildContext context,
+  Widget _buildTwoFactorAuthenticationSetupView(BuildContext context,
       AuthGenerateTwoFactorAuthenticationConfigState state) {
     return Column(
       children: [

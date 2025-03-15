@@ -3,15 +3,15 @@ import 'package:flutteractixapp/core/messages/errors/domain_error.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/features/auth/data/storage/token_storage.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/check_if_otp_enabled_usecase.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/generate_otp_config_use_case.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/check_if_account_has_two_factor_authentication_enabled_use_case.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/generate_two_factor_authentication_config_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/login_usecase.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_recovery_code_and_otp_usecase.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_recovery_code_and_password_usecase%20copy.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_recovery_code_use_case.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_two_factor_authentication_and_one_time_password_use_case.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_with_two_factor_authentication_and_password_use_case.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/recover_account_without_two_factor_authentication_enabled_use_case.dart';
 import 'package:flutteractixapp/features/auth/domain/usecases/signup_usecase.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/validate_otp_usecase.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/verify_otp_usecase.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/validate_one_time_password_use_case.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/verify_one_time_password_use_case.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
 import 'package:get_it/get_it.dart';
@@ -20,22 +20,27 @@ import 'package:universal_io/io.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase = GetIt.instance<LoginUseCase>();
   final SignupUseCase signupUseCase = GetIt.instance<SignupUseCase>();
-  final GenerateOtpConfigUseCase generateOtpConfigUseCase =
-      GetIt.instance<GenerateOtpConfigUseCase>();
-  final VerifyOtpUseCase verifyOtpUseCase = GetIt.instance<VerifyOtpUseCase>();
-  final ValidateOtpUsecase validateOtpUsecase =
-      GetIt.instance<ValidateOtpUsecase>();
-  final CheckIfOtpEnabledUsecase checkIfOtpEnabledUsecase =
-      GetIt.instance<CheckIfOtpEnabledUsecase>();
-  final RecoverAccountWithRecoveryCodeAndPasswordUseCase
-      recoverAccountWithRecoveryCodeAndPasswordUseCase =
-      GetIt.instance<RecoverAccountWithRecoveryCodeAndPasswordUseCase>();
-  final RecoverAccountWithRecoveryCodeAndOtpUseCase
-      recoverAccountWithRecoveryCodeAndOtpUseCase =
-      GetIt.instance<RecoverAccountWithRecoveryCodeAndOtpUseCase>();
-  final RecoverAccountWithRecoveryCodeUseCase
-      recoverAccountWithRecoveryCodeUseCase =
-      GetIt.instance<RecoverAccountWithRecoveryCodeUseCase>();
+  final GenerateTwoFactorAuthenticationConfigUseCase
+      generateTwoFactorAuthenticationConfigUseCase =
+      GetIt.instance<GenerateTwoFactorAuthenticationConfigUseCase>();
+  final VerifyOneTimePasswordUseCase verifyOneTimePasswordUseCase =
+      GetIt.instance<VerifyOneTimePasswordUseCase>();
+  final ValidateOneTimePasswordUseCase validateOneTimePasswordUseCase =
+      GetIt.instance<ValidateOneTimePasswordUseCase>();
+  final CheckIfAccountHasTwoFactorAuthenticationEnabledUseCase
+      checkIfAccountHasTwoFactorAuthenticationEnabledUseCase =
+      GetIt.instance<CheckIfAccountHasTwoFactorAuthenticationEnabledUseCase>();
+  final RecoverAccountWithTwoFactorAuthenticationAndPasswordUseCase
+      recoverAccountWithTwoFactorAuthenticationAndPasswordUseCase =
+      GetIt.instance<
+          RecoverAccountWithTwoFactorAuthenticationAndPasswordUseCase>();
+  final RecoverAccountWithTwoFactorAuthenticationAndOneTimePasswordUseCase
+      recoverAccountWithTwoFactorAuthenticationAndOneTimePasswordUseCase =
+      GetIt.instance<
+          RecoverAccountWithTwoFactorAuthenticationAndOneTimePasswordUseCase>();
+  final RecoverAccountWithoutTwoFactorAuthenticationEnabledUseCase
+      recoverAccountWithoutTwoFactorAuthenticationEnabledUseCase = GetIt.instance<
+          RecoverAccountWithoutTwoFactorAuthenticationEnabledUseCase>();
 
   AuthBloc() : super(AuthLoadingState()) {
     on<AuthInitializeEvent>(_initialize);
@@ -44,7 +49,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _generateTwoFactorAuthenticationConfig);
     on<AuthVerifyOneTimePasswordEvent>(_verifyOneTimePassword);
     on<AuthLoginEvent>(_login);
-    on<AuthValidationOneTimePasswordEvent>(_validateOneTimePassword);
+    on<AuthValidateOneTimePasswordEvent>(_validateOneTimePassword);
     on<AuthLogoutEvent>(_logout);
     on<AuthRecoverAccountForUsernameEvent>(_recoverAccountForUsername);
     on<AuthCheckIfAccountHasTwoFactorAuthenticationEnabledEvent>(
@@ -92,7 +97,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Emitter<AuthState> emit) async {
     emit(AuthLoadingState());
 
-    final result = await generateOtpConfigUseCase.call();
+    final result = await generateTwoFactorAuthenticationConfigUseCase.call();
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
@@ -101,10 +106,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthUnauthenticatedState(message: ErrorMessage(error.messageKey)));
       }
     },
-        (generatedOtpConfig) => {
+        (twoFactorAuthenticationConfig) => {
               emit(AuthVerifyOneTimePasswordState(
-                  otpAuthUrl: generatedOtpConfig.otpAuthUrl,
-                  otpBase32: generatedOtpConfig.otpBase32))
+                  otpAuthUrl: twoFactorAuthenticationConfig.otpAuthUrl,
+                  otpBase32: twoFactorAuthenticationConfig.otpBase32))
             });
   }
 
@@ -113,7 +118,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoadingState());
 
     try {
-      await verifyOtpUseCase.call(event.code);
+      await verifyOneTimePasswordUseCase.call(event.code);
 
       emit(AuthAuthenticatedAfterRegistrationState(
           hasVerifiedOtp: true,
@@ -151,10 +156,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _validateOneTimePassword(
-      AuthValidationOneTimePasswordEvent event, Emitter<AuthState> emit) async {
+      AuthValidateOneTimePasswordEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoadingState());
 
-    final result = await validateOtpUsecase.call(event.userId, event.code);
+    final result =
+        await validateOneTimePasswordUseCase.call(event.userId, event.code);
 
     result.fold(
         (error) => emit(AuthValidateOneTimePasswordState(
@@ -188,15 +194,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final currentState = state;
     emit(AuthLoadingState());
 
-    final result = await checkIfOtpEnabledUsecase.call(event.username);
+    final result = await checkIfAccountHasTwoFactorAuthenticationEnabledUseCase
+        .call(event.username);
 
     result.fold(
         (error) => emit(AuthRecoverAccountUsernameStepState(
             username: event.username,
             passwordForgotten: event.passwordForgotten,
-            message: ErrorMessage(error.messageKey))), (isOtpEnabled) async {
+            message: ErrorMessage(error.messageKey))), (isTwoFactorAuthenticationEnabled) async {
       if (currentState is AuthRecoverAccountUsernameStepState) {
-        if (isOtpEnabled) {
+        if (isTwoFactorAuthenticationEnabled) {
           if (currentState.passwordForgotten) {
             emit(
                 AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState(
@@ -222,10 +229,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Emitter<AuthState> emit) async {
     emit(AuthLoadingState());
 
-    final result = await recoverAccountWithRecoveryCodeAndPasswordUseCase.call(
-        username: event.username,
-        password: event.password,
-        recoveryCode: event.recoveryCode);
+    final result =
+        await recoverAccountWithTwoFactorAuthenticationAndPasswordUseCase.call(
+            username: event.username,
+            password: event.password,
+            recoveryCode: event.recoveryCode);
 
     result.fold(
         (error) => emit(
@@ -242,10 +250,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Emitter<AuthState> emit) async {
     emit(AuthLoadingState());
 
-    final result = await recoverAccountWithRecoveryCodeAndOtpUseCase.call(
-        username: event.username,
-        code: event.code,
-        recoveryCode: event.recoveryCode);
+    final result =
+        await recoverAccountWithTwoFactorAuthenticationAndOneTimePasswordUseCase
+            .call(
+                username: event.username,
+                code: event.code,
+                recoveryCode: event.recoveryCode);
 
     result.fold(
         (error) => emit(
@@ -261,7 +271,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       Emitter<AuthState> emit) async {
     emit(AuthLoadingState());
 
-    final result = await recoverAccountWithRecoveryCodeUseCase.call(
+    final result = await recoverAccountWithoutTwoFactorAuthenticationEnabledUseCase.call(
         username: event.username, recoveryCode: event.recoveryCode);
 
     result.fold(

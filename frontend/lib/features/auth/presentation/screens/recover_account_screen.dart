@@ -50,7 +50,7 @@ class RecoverAccountScreen extends StatelessWidget {
                                   context, state);
                             } else if (state
                                 is AuthRecoverAccountWithTwoFactorAuthenticationEnabledAndOneTimePasswordState) {
-                              return _buildRecoveryCodeAndOtpView(
+                              return _buildRecoveryCodeAndOneTimePasswordView(
                                   context, state);
                             } else if (state
                                 is AuthRecoverAccountWithoutTwoFactorAuthenticationEnabledState) {
@@ -200,7 +200,7 @@ class RecoverAccountScreen extends StatelessWidget {
     ]);
   }
 
-  Widget _buildRecoveryCodeAndOtpView(
+  Widget _buildRecoveryCodeAndOneTimePasswordView(
       BuildContext context, AuthRecoverAccountUsernameStepState state) {
     final TextEditingController _recoveryCodeController =
         TextEditingController();

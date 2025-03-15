@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutteractixapp/core/messages/message.dart';
 import 'package:flutteractixapp/features/auth/domain/errors/domain_error.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/disable_otp_use_case.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/generate_otp_config_use_case.dart';
-import 'package:flutteractixapp/features/auth/domain/usecases/verify_otp_usecase.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/disable_two_factor_authentication_use_case.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/generate_two_factor_authentication_config_use_case.dart';
+import 'package:flutteractixapp/features/auth/domain/usecases/verify_one_time_password_use_case.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
 import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
@@ -25,11 +25,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       GetIt.instance<GetProfileUsecase>();
   final PostProfileUsecase postProfileUsecase =
       GetIt.instance<PostProfileUsecase>();
-  final GenerateOtpConfigUseCase generateOtpConfigUseCase =
-      GetIt.instance<GenerateOtpConfigUseCase>();
-  final DisableOtpUseCase disableOtpUseCase =
-      GetIt.instance<DisableOtpUseCase>();
-  final VerifyOtpUseCase verifyOtpUseCase = GetIt.instance<VerifyOtpUseCase>();
+  final GenerateTwoFactorAuthenticationConfigUseCase generateTwoFactorAuthenticationConfigUseCase =
+      GetIt.instance<GenerateTwoFactorAuthenticationConfigUseCase>();
+  final DisableTwoFactorAuthenticationUseCase
+      disableTwoFactorAuthenticationUseCase =
+      GetIt.instance<DisableTwoFactorAuthenticationUseCase>();
+  final VerifyOneTimePasswordUseCase verifyOneTimePasswordUseCase =
+      GetIt.instance<VerifyOneTimePasswordUseCase>();
   final SetPasswordUseCase setPasswordUseCase =
       GetIt.instance<SetPasswordUseCase>();
   final UpdatePasswordUseCase updatePasswordUseCase =
@@ -134,7 +136,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     emit(ProfileLoading(profile: state.profile));
 
-    final result = await generateOtpConfigUseCase.call();
+    final result = await generateTwoFactorAuthenticationConfigUseCase.call();
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
@@ -145,10 +147,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           message: ErrorMessage(error.messageKey),
         ));
       }
-    }, (generatedOtpConfig) {
+    }, (twoFactorAuthenticationConfig) {
       Profile profile = currentState.profile;
-      profile.otpAuthUrl = generatedOtpConfig.otpAuthUrl;
-      profile.otpBase32 = generatedOtpConfig.otpBase32;
+      profile.otpAuthUrl = twoFactorAuthenticationConfig.otpAuthUrl;
+      profile.otpBase32 = twoFactorAuthenticationConfig.otpBase32;
       profile.otpVerified = false;
 
       emit(ProfileAuthenticated(
@@ -164,7 +166,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     emit(ProfileLoading(profile: state.profile));
 
-    final result = await disableOtpUseCase.call();
+    final result = await disableTwoFactorAuthenticationUseCase.call();
 
     result.fold((error) {
       if (error is ShouldLogoutError) {
@@ -193,7 +195,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     emit(ProfileLoading(profile: state.profile));
 
-    final result = await verifyOtpUseCase.call(event.code);
+    final result = await verifyOneTimePasswordUseCase.call(event.code);
 
     result.fold((error) {
       if (error is ShouldLogoutError) {

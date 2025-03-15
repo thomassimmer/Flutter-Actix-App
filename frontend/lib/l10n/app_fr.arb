@@ -10,7 +10,7 @@
   "defaultError": "Une erreur s'est produite. Veuillez réessayer.",
   "disableTwoFA": "Désactiver",
   "enable": "Activer",
-  "enterOtp": "Entrez le code à 6 chiffres généré par votre application pour confirmer votre authentification.",
+  "enterOneTimePassword": "Entrez le code à 6 chiffres généré par votre application pour confirmer votre authentification.",
   "enterPassword": "Entrez votre mot de passe.",
   "enterRecoveryCode": "Entrez un de vos codes de récupération.",
   "enterUsername": "Entrez votre nom d'utilisateur.",

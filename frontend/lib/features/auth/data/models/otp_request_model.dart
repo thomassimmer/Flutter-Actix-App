@@ -1,7 +1,7 @@
-class VerifyOtpRequestModel {
+class VerifyOneTimePasswordRequestModel {
   final String code;
 
-  const VerifyOtpRequestModel({
+  const VerifyOneTimePasswordRequestModel({
     required this.code,
   });
 
@@ -12,11 +12,11 @@ class VerifyOtpRequestModel {
   }
 }
 
-class ValidateOtpRequestModel {
+class ValidateOneTimePasswordRequestModel {
   final String userId;
   final String code;
 
-  const ValidateOtpRequestModel({
+  const ValidateOneTimePasswordRequestModel({
     required this.userId,
     required this.code,
   });
@@ -29,10 +29,10 @@ class ValidateOtpRequestModel {
   }
 }
 
-class CheckIfOtpEnabledRequestModel {
+class CheckIfAccountHasTwoFactorAuthenticationEnabledRequestModel {
   final String username;
 
-  const CheckIfOtpEnabledRequestModel({
+  const CheckIfAccountHasTwoFactorAuthenticationEnabledRequestModel({
     required this.username,
   });
 
@@ -62,12 +62,12 @@ class RecoverAccountWithRecoveryCodeAndPasswordRequestModel {
   }
 }
 
-class RecoverAccountWithRecoveryCodeAndOtpRequestModel {
+class RecoverAccountWithRecoveryCodeAndOneTimePasswordRequestModel {
   final String username;
   final String code;
   final String recoveryCode;
 
-  const RecoverAccountWithRecoveryCodeAndOtpRequestModel(
+  const RecoverAccountWithRecoveryCodeAndOneTimePasswordRequestModel(
       {required this.username, required this.code, required this.recoveryCode});
 
   Map<String, dynamic> toJson() {
