@@ -197,7 +197,7 @@ pub async fn verify(
             )
             .unwrap();
 
-            let is_valid = totp.check_current(&body.token).unwrap();
+            let is_valid = totp.check_current(&body.code).unwrap();
 
             if !is_valid {
                 let json_error = GenericResponse {
@@ -322,7 +322,7 @@ async fn validate(
     )
     .unwrap();
 
-    let is_valid = totp.check_current(&body.token).unwrap();
+    let is_valid = totp.check_current(&body.code).unwrap();
 
     if !is_valid {
         return HttpResponse::Forbidden().json(GenericResponse {

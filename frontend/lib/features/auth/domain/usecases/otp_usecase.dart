@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:reallystick/features/auth/domain/entities/otp_entity.dart';
-import 'package:reallystick/features/auth/domain/entities/user_entity.dart';
+import 'package:reallystick/features/auth/domain/entities/otp_generation_entity.dart';
+import 'package:reallystick/features/auth/domain/entities/user_token_entity.dart';
 import 'package:reallystick/features/auth/domain/errors/failures.dart';
 
 import '../../data/repositories/auth_repository.dart';
@@ -10,39 +10,59 @@ class OtpUseCase {
 
   OtpUseCase(this.authRepository);
 
-  /// Verifies the OTP provided by the user.
-  Future<Either<Failure, UserEntity>> verifyOTP(
-      String userId, String otp) async {
+  /// Verifies the OTP provided by the user. It's for enabling 2FA.
+  Future<Either<bool, Failure>> verifyOtp(
+      String accessToken, String code) async {
     try {
-      final userModel =
-          await authRepository.verifyOtp(userId: userId, token: otp);
+      final otp_verified =
+          await authRepository.verifyOtp(accessToken: accessToken, code: code);
 
-      return Right(UserEntity(
-        id: userModel.id,
-        username: userModel.username,
-        otpEnabled: userModel.otpEnabled,
-        otpVerified: userModel.otpVerified,
-        otpBase32: userModel.otpBase32,
-        otpAuthUrl: userModel.otpAuthUrl,
-        createdAt: userModel.createdAt,
-        updatedAt: userModel.updatedAt,
-      ));
+      return Left(otp_verified);
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Right(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Generates a new OTP for the user.
-  Future<Either<Failure, OtpEntity>> generateOTP(
-      String userId, String username) async {
+  /// Validates the OTP provided by the user. It's for login.
+  Future<Either<UserTokenEntity, Failure>> validateOtp(
+      String userId, String code) async {
     try {
-      final result =
-          await authRepository.generateOtp(userId: userId, username: username);
+      final userTokenModel =
+          await authRepository.validateOtp(userId: userId, code: code);
 
-      return Right(OtpEntity(
-          otpAuthUrl: result.otpAuthUrl, otpBase32: result.otpBase32));
+      return Left(UserTokenEntity(
+          accessToken: userTokenModel.accessToken,
+          refreshToken: userTokenModel.refreshToken,
+          expiresIn: userTokenModel.expiresIn,
+          recoveryCodes: userTokenModel.recoveryCodes));
     } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+      return Right(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Generates a new OTP's base32 and url for the user.
+  Future<Either<OtpGenerationEntity, Failure>> generateOtp(
+      String accessToken) async {
+    try {
+      final otpGenerationModel =
+          await authRepository.generateOtp(accessToken: accessToken);
+
+      return Left(OtpGenerationEntity(
+          otpBase32: otpGenerationModel.otpBase32,
+          otpAuthUrl: otpGenerationModel.otpAuthUrl));
+    } catch (e) {
+      return Right(ServerFailure(message: e.toString()));
+    }
+  }
+
+  /// Disable OTP authentication for the user.
+  Future<Either<bool, Failure>> disableOtp(String accessToken) async {
+    try {
+      final result = await authRepository.disableOtp(accessToken: accessToken);
+
+      return Left(result);
+    } catch (e) {
+      return Right(ServerFailure(message: e.toString()));
     }
   }
 }

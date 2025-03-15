@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:reallystick/features/auth/domain/entities/user_entity.dart';
 
 abstract class AuthEvent extends Equatable {
   const AuthEvent();
@@ -9,19 +8,6 @@ abstract class AuthEvent extends Equatable {
 }
 
 class AuthLogoutRequested extends AuthEvent {}
-
-class AuthLoginRequested extends AuthEvent {
-  final String username;
-  final String password;
-
-  const AuthLoginRequested({
-    required this.username,
-    required this.password,
-  });
-
-  @override
-  List<Object> get props => [username, password];
-}
 
 class AuthSignupRequested extends AuthEvent {
   final String username;
@@ -36,38 +22,47 @@ class AuthSignupRequested extends AuthEvent {
   List<Object> get props => [username, password];
 }
 
-class AuthOtpRequested extends AuthEvent {
-  final UserEntity user;
-  final String username;
-
-  const AuthOtpRequested({required this.user, required this.username});
-
-  @override
-  List<Object> get props => [user, username];
+class AuthLoginRequested extends AuthSignupRequested {
+  const AuthLoginRequested({
+    required super.username,
+    required super.password,
+  });
 }
 
-class AuthOtpFirstTimeVerified extends AuthEvent {
-  final UserEntity user;
+class AuthOtpGenerationRequested extends AuthEvent {
+  final String accessToken;
+  final String refreshToken;
+  final String expiresIn;
+
+  const AuthOtpGenerationRequested(
+      {required this.accessToken,
+      required this.refreshToken,
+      required this.expiresIn});
+
+  @override
+  List<Object> get props => [accessToken, refreshToken, expiresIn];
+}
+
+class AuthOtpVerificationRequested extends AuthOtpGenerationRequested {
+  final String otpBase32;
+  final String otpAuthUrl;
   final String code;
 
-  const AuthOtpFirstTimeVerified({
-    required this.user,
-    required this.code,
-  });
-
-  @override
-  List<Object> get props => [user, code];
+  const AuthOtpVerificationRequested(
+      {required super.accessToken,
+      required super.refreshToken,
+      required super.expiresIn,
+      required this.otpBase32,
+      required this.otpAuthUrl,
+      required this.code});
 }
 
-class AuthOTPVerified extends AuthEvent {
+class AuthOtpValidationRequested extends AuthEvent {
   final String userId;
-  final String otp;
+  final String code;
 
-  const AuthOTPVerified({
-    required this.userId,
-    required this.otp,
-  });
+  const AuthOtpValidationRequested({required this.userId, required this.code});
 
   @override
-  List<Object> get props => [userId, otp];
+  List<Object> get props => [userId, code];
 }

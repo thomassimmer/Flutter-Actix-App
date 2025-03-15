@@ -1,6 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:reallystick/features/auth/domain/entities/otp_entity.dart';
-import 'package:reallystick/features/auth/domain/entities/user_entity.dart';
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -9,66 +7,107 @@ abstract class AuthState extends Equatable {
   List<Object?> get props => [];
 }
 
-class AuthInitial extends AuthState {}
+class AuthUnauthenticated extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
 class AuthAuthenticated extends AuthState {
-  final UserEntity user;
+  final String accessToken;
+  final String refreshToken;
+  final String expiresIn;
 
-  const AuthAuthenticated({required this.user});
+  const AuthAuthenticated({
+    required this.accessToken,
+    required this.refreshToken,
+    required this.expiresIn,
+  });
 
   @override
-  List<Object> get props => [user];
+  List<Object?> get props => [
+        accessToken,
+        refreshToken,
+        expiresIn,
+      ];
 }
 
-class AuthUnauthenticated extends AuthState {}
+class AuthAuthenticatedAfterRegistration extends AuthAuthenticated {
+  final String? recoveryCodes;
+  final bool hasVerifiedOtp;
 
-class AuthOtpFirstTimeRequired extends AuthState {
-  final UserEntity user;
-  final OtpEntity? otp;
-
-  const AuthOtpFirstTimeRequired({required this.user, this.otp});
+  const AuthAuthenticatedAfterRegistration(
+      {required super.accessToken,
+      required super.refreshToken,
+      required super.expiresIn,
+      this.recoveryCodes,
+      required this.hasVerifiedOtp});
 
   @override
-  List<Object?> get props => [user, otp];
+  List<Object?> get props =>
+      [accessToken, refreshToken, expiresIn, recoveryCodes, hasVerifiedOtp];
 }
 
-class AuthOtpRequired extends AuthState {
-  final String userId;
-  final OtpEntity? otp;
+class AuthAuthenticatedAfterLogin extends AuthAuthenticated {
+  final bool hasValidatedOtp;
 
-  const AuthOtpRequired({required this.userId, this.otp});
+  const AuthAuthenticatedAfterLogin(
+      {required super.accessToken,
+      required super.refreshToken,
+      required super.expiresIn,
+      required this.hasValidatedOtp});
 
   @override
-  List<Object?> get props => [userId, otp];
+  List<Object?> get props => [
+        accessToken,
+        refreshToken,
+        expiresIn,
+        hasValidatedOtp,
+      ];
 }
 
 class AuthFailure extends AuthState {
-  final String message;
+  final String? message;
 
-  const AuthFailure({required this.message});
-
-  @override
-  List<Object> get props => [message];
-}
-
-class AuthOtpFirstTimeFailure extends AuthState {
-  final String message;
-  final UserEntity user;
-
-  const AuthOtpFirstTimeFailure({required this.message, required this.user});
+  const AuthFailure({this.message});
 
   @override
-  List<Object> get props => [message, user];
+  List<Object?> get props => [message];
 }
 
-class AuthOtpFailure extends AuthState {
-  final String message;
+class AuthOtpGenerate extends AuthAuthenticated {
+  final String? message;
+  final String otpBase32;
+  final String otpAuthUrl;
+
+  const AuthOtpGenerate({
+    required super.accessToken,
+    required super.refreshToken,
+    required super.expiresIn,
+    this.message,
+    required this.otpBase32,
+    required this.otpAuthUrl,
+  });
+
+  @override
+  List<Object?> get props =>
+      [accessToken, refreshToken, expiresIn, message, otpBase32, otpAuthUrl];
+}
+
+class AuthOtpVerify extends AuthOtpGenerate {
+  const AuthOtpVerify(
+      {required super.accessToken,
+      required super.refreshToken,
+      required super.expiresIn,
+      super.message,
+      required super.otpBase32,
+      required super.otpAuthUrl});
+}
+
+class AuthOtpValidate extends AuthState {
+  final String? message;
   final String userId;
 
-  const AuthOtpFailure({required this.message, required this.userId});
+  const AuthOtpValidate({this.message, required this.userId});
 
   @override
-  List<Object> get props => [message, userId];
+  List<Object?> get props => [message, userId];
 }

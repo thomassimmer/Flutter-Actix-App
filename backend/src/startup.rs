@@ -7,7 +7,9 @@ use crate::auth::routes::signup::register_user;
 use crate::auth::routes::token::refresh_token;
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::core::routes::health_check::health_check;
+use actix_cors::Cors;
 use actix_web::dev::Server;
+use actix_web::http::header;
 use actix_web::{web, App, HttpServer};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
@@ -17,18 +19,18 @@ pub fn run(listener: TcpListener, configuration: Settings) -> Result<Server, std
     let connection_pool = get_connection_pool(&configuration.database);
     let secret = configuration.application.secret;
 
-    // let cors = Cors::default()
-    //     .allow_any_origin()
-    //     // .allowed_origin("localhost:3000")
-    //     .allowed_methods(vec!["GET", "POST"])
-    //     .allowed_headers(vec![
-    //         header::CONTENT_TYPE,
-    //         header::AUTHORIZATION,
-    //         header::ACCEPT,
-    //     ])
-    //     .supports_credentials();
-
     let server = HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            // .allowed_origin("localhost:3000")
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_headers(vec![
+                header::CONTENT_TYPE,
+                header::AUTHORIZATION,
+                header::ACCEPT,
+            ])
+            .supports_credentials();
+
         App::new()
             .service(
                 web::scope("/api")
@@ -48,7 +50,7 @@ pub fn run(listener: TcpListener, configuration: Settings) -> Result<Server, std
                     )
                     .service(web::scope("/users").service(get_profile_information)),
             )
-            // .wrap(cors)
+            .wrap(cors)
             .app_data(web::Data::new(connection_pool.clone()))
             .app_data(web::Data::new(secret.clone()))
     })

@@ -19,9 +19,11 @@ class UnauthenticatedHomeScreen extends StatelessWidget {
             child: BlocListener<AuthBloc, AuthState>(
               listener: (context, state) {
                 if (state is AuthFailure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
+                  if (state.message != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(state.message!)),
+                    );
+                  }
                 }
               },
               child: Column(
