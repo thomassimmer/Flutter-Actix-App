@@ -7,6 +7,7 @@ import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 import 'package:go_router/go_router.dart';
 
 class RecoverAccountScreen extends StatelessWidget {
@@ -63,7 +64,8 @@ class RecoverAccountScreen extends StatelessWidget {
                               );
                             } else {
                               return Text(state.error != null
-                                  ? state.error!.display(context)
+                                  ? getProfileErrorMessage(
+                                      context, state.error!)
                                   : AppLocalizations.of(context)!.noContent);
                             }
                           },

@@ -7,6 +7,7 @@ import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -43,13 +44,17 @@ class LoginScreen extends StatelessWidget {
                     context.go('/home');
                   } else if (state is AuthOtpValidate) {
                     if (state.error != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text(state.error!.display(context))));
+                      final errorMessage =
+                          getProfileErrorMessage(context, state.error!);
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(errorMessage)));
                     }
                   } else if (state is AuthUnauthenticated) {
                     if (state.error != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text(state.error!.display(context))));
+                      final errorMessage =
+                          getProfileErrorMessage(context, state.error!);
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(errorMessage)));
                     }
                   }
                 }, child:

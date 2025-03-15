@@ -1,129 +1,103 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/errors/domain_error.dart';
 
-class UnauthorizedDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.unauthorizedError;
-  }
-}
-
 class RefreshTokenExpiredDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.refreshTokenExpiredError;
+  String getErrorKey() {
+    return 'refreshTokenExpiredError';
   }
 }
 
 class InvalidUsernameOrCodeOrRecoveryCodeDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.invalidUsernameOrCodeOrRecoveryCodeError;
+  String getErrorKey() {
+    return 'invalidUsernameOrCodeOrRecoveryCodeError';
   }
 }
 
 class TwoFactorAuthenticationNotEnabledDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.twoFactorAuthenticationNotEnabledError;
+  String getErrorKey() {
+    return 'twoFactorAuthenticationNotEnabledError';
   }
 }
 
 class InvalidUsernameOrRecoveryCodeDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.invalidUsernameOrRecoveryCodeError;
+  String getErrorKey() {
+    return 'invalidUsernameOrRecoveryCodeError';
   }
 }
 
 class InvalidUsernameOrPasswordOrRecoveryCodeDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.invalidUsernameOrPasswordOrRecoveryCodeError;
+  String getErrorKey() {
+    return 'invalidUsernameOrPasswordOrRecoveryCodeError';
   }
 }
 
 class UserNotFoundDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.userNotFoundError;
+  String getErrorKey() {
+    return 'userNotFoundError';
   }
 }
 
 class InvalidOneTimePasswordDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.invalidOneTimePasswordError;
+  String getErrorKey() {
+    return 'invalidOneTimePasswordError';
   }
 }
 
 class InvalidUsernameOrPasswordDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.invalidUsernameOrPasswordError;
+  String getErrorKey() {
+    return 'invalidUsernameOrPasswordError';
   }
 }
 
 class PasswordMustBeChangedDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.passwordMustBeChangedError;
+  String getErrorKey() {
+    return 'passwordMustBeChangedError';
   }
 }
 
 class UserAlreadyExistingDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.userAlreadyExistingError;
+  String getErrorKey() {
+    return 'userAlreadyExistingError';
   }
 }
 
 class PasswordNotExpiredDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.passwordNotExpiredError;
+  String getErrorKey() {
+    return 'passwordNotExpiredError';
   }
 }
 
 class InvalidRefreshTokenDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.defaultError;
+  String getErrorKey() {
+    return 'defaultError';
   }
 }
 
 class RefreshTokenNotFoundDomainError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.defaultError;
+  String getErrorKey() {
+    return 'defaultError';
   }
 }
 
 class PasswordTooShortError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.passwordTooShortError;
+  String getErrorKey() {
+    return 'passwordTooShortError';
   }
 }
 
 class PasswordNotComplexEnoughError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.passwordNotComplexEnough;
+  String getErrorKey() {
+    return 'passwordNotComplexEnough';
   }
 }
 
 class UsernameWrongSizeError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.usernameNotRespectingRulesError;
+  String getErrorKey() {
+    return 'usernameNotRespectingRulesError';
   }
 }
 
 class UsernameNotRespectingRulesError extends DomainError {
-  String display(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return localizations.usernameWrongSizeError;
+  String getErrorKey() {
+    return 'usernameWrongSizeError';
   }
 }

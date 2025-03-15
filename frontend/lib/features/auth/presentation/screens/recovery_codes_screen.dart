@@ -8,6 +8,7 @@ import 'package:flutteractixapp/features/auth/presentation/bloc/auth_states.dart
 import 'package:flutteractixapp/features/auth/presentation/widgets/background.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/button.dart';
 import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -54,10 +55,10 @@ class RecoveryCodesScreen extends StatelessWidget {
                             _otpController.text = '';
 
                             if (state.error != null) {
+                              final errorMessage =
+                                  getProfileErrorMessage(context, state.error!);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content:
-                                          Text(state.error!.display(context))));
+                                  SnackBar(content: Text(errorMessage)));
                             }
                           }
                         },

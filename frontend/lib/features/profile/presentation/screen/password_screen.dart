@@ -8,6 +8,7 @@ import 'package:flutteractixapp/features/auth/presentation/widgets/custom_text_f
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_events.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile_states.dart';
+import 'package:flutteractixapp/features/profile/presentation/utils/error_mapper.dart';
 
 class PasswordScreen extends StatelessWidget {
   final TextEditingController _currentPasswordController =
@@ -25,8 +26,10 @@ class PasswordScreen extends StatelessWidget {
           child: BlocListener<ProfileBloc, ProfileState>(
               listener: (context, state) {
             if (state.error != null) {
+              final errorMessage =
+                  getProfileErrorMessage(context, state.error!);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.error!.display(context))),
+                SnackBar(content: Text(errorMessage)),
               );
             }
           }, child: BlocBuilder<ProfileBloc, ProfileState>(
@@ -55,7 +58,7 @@ class PasswordScreen extends StatelessWidget {
       (LoginCubit cubit) => cubit.state.password.displayError,
     );
     final displayPasswordErrorMessage = displayPasswordError is DomainError
-        ? displayPasswordError.display(context)
+        ? getProfileErrorMessage(context, displayPasswordError)
         : null;
 
     return SingleChildScrollView(
@@ -114,7 +117,7 @@ class PasswordScreen extends StatelessWidget {
       (LoginCubit cubit) => cubit.state.password.displayError,
     );
     final displayPasswordErrorMessage = displayPasswordError is DomainError
-        ? displayPasswordError.display(context)
+        ? getProfileErrorMessage(context, displayPasswordError)
         : null;
 
     return SingleChildScrollView(
