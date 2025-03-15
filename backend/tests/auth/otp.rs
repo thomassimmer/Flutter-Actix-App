@@ -14,7 +14,7 @@ use crate::auth::signup::user_signs_up;
 use crate::helpers::spawn_app;
 use crate::profile::profile::user_has_access_to_protected_route;
 
-async fn user_generates_otp(
+pub async fn user_generates_otp(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
     access_token: &str,
 ) -> String {
@@ -32,7 +32,7 @@ async fn user_generates_otp(
     response.otp_base32.to_owned()
 }
 
-async fn user_verifies_otp(
+pub async fn user_verifies_otp(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
     access_token: &str,
     otp_base32: &str,
