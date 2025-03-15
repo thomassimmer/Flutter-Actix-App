@@ -4,10 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/widgets/icon_with_warning.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_bloc.dart';
 import 'package:flutteractixapp/features/profile/presentation/bloc/profile/profile_states.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/language_selection_screen.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/password_screen.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/theme_selection_screen.dart';
-import 'package:flutteractixapp/features/profile/presentation/screen/two_factor_authentication_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
@@ -26,46 +23,30 @@ class ProfileScreen extends StatelessWidget {
               title: Text(AppLocalizations.of(context)!.language),
               trailing: Icon(Icons.chevron_right),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => LocaleSelectionScreen()),
-                );
+                context.go('/profile/language'); // Navigate using GoRouter
               },
             ),
             ListTile(
               title: Text(AppLocalizations.of(context)!.theme),
               trailing: Icon(Icons.chevron_right),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ThemeSelectionScreen()),
-                );
+                context.go('/profile/theme'); // Navigate using GoRouter
               },
             ),
             ListTile(
               title: Text(AppLocalizations.of(context)!.twoFA),
               trailing: Icon(Icons.chevron_right),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TwoFactorAuthenticationScreen()),
-                );
+                context.go('/profile/two-factor-authentication'); // Go to 2FA
               },
             ),
-            //here
             ListTile(
               title: Text(AppLocalizations.of(context)!.changePassword),
-              trailing: (IconWithWarning(
+              trailing: IconWithWarning(
                   iconData: Icons.chevron_right,
-                  shouldBeWarning: shouldBeWarning)),
+                  shouldBeWarning: shouldBeWarning),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PasswordScreen()),
-                );
+                context.go('/profile/password'); // Navigate to password change
               },
             ),
           ],

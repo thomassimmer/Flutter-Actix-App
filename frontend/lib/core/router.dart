@@ -10,7 +10,11 @@ import 'package:flutteractixapp/features/auth/presentation/screens/unauthenticat
 import 'package:flutteractixapp/features/challenges/presentation/challenges_screen.dart';
 import 'package:flutteractixapp/features/habits/presentation/habits_screen.dart';
 import 'package:flutteractixapp/features/messages/presentation/messages_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screen/language_selection_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screen/password_screen.dart';
 import 'package:flutteractixapp/features/profile/presentation/screen/profile_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screen/theme_selection_screen.dart';
+import 'package:flutteractixapp/features/profile/presentation/screen/two_factor_authentication_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
@@ -87,6 +91,24 @@ final router = GoRouter(
         GoRoute(
           path: '/profile',
           builder: (context, state) => ProfileScreen(),
+          routes: [
+            GoRoute(
+              path: 'language',
+              builder: (context, state) => LocaleSelectionScreen(),
+            ),
+            GoRoute(
+              path: 'theme',
+              builder: (context, state) => ThemeSelectionScreen(),
+            ),
+            GoRoute(
+              path: 'two-factor-authentication',
+              builder: (context, state) => TwoFactorAuthenticationScreen(),
+            ),
+            GoRoute(
+              path: 'password',
+              builder: (context, state) => PasswordScreen(),
+            ),
+          ],
         ),
       ],
       redirect: (context, state) {
