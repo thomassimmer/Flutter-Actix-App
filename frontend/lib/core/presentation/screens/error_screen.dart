@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutteractixapp/core/ui/extensions.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_bloc.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_events.dart';
-import 'package:flutteractixapp/features/auth/presentation/bloc/auth/auth_states.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_bloc.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_events.dart';
+import 'package:flutteractixapp/features/auth/presentation/blocs/auth/auth_states.dart';
 import 'package:go_router/go_router.dart';
 
 class ErrorScreen extends StatelessWidget {
