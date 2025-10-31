@@ -1,5 +1,5 @@
 # Use the official Rust image as the base image
-FROM rust:1.81
+FROM rust:latest
 
 # Create a new user and switch to that user
 RUN useradd -m rustuser
@@ -7,6 +7,7 @@ USER rustuser
 
 # Install cargo-watch
 RUN cargo install cargo-watch
+RUN cargo install sqlx-cli --no-default-features --features postgres
 
 # Set the working directory inside the container
 WORKDIR /app

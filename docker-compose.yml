@@ -7,17 +7,8 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./backend/.env.docker
-    command:
-      [
-        "cargo",
-        "watch",
-        "-q",
-        "-c",
-        "-w",
-        "src/",
-        "-x",
-        "run",
-      ]
+    command: bash -c "sqlx migrate run
+      && cargo watch -q -c -w src/ -x run"
     ports:
       - "8000:8000"
     volumes:

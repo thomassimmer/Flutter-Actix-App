@@ -63,10 +63,7 @@ You can click on it to watch, it's a youtube link.
 ## Installation and development
 
 ```bash
-# Start by running db container
-docker-compose up -d db
-# Then back
-docker-compose up -d backend
+docker-compose up -d
 ```
 
 ### Backend commands
