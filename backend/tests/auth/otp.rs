@@ -8,6 +8,7 @@ use flutteractixapp::features::auth::structs::responses::{
     DisableOtpResponse, GenerateOtpResponse, UserLoginResponse, UserLoginWhenOtpEnabledResponse,
     VerifyOtpResponse,
 };
+use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
 use uuid::Uuid;
 
@@ -68,18 +69,18 @@ pub async fn user_verifies_otp(
     assert_eq!(response.otp_verified, true);
 }
 
-#[tokio::test]
-async fn registered_user_can_generate_and_verify_otp() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn registered_user_can_generate_and_verify_otp(pool: PgPool) {
+    let app = spawn_app(pool).await;
 
     let (access_token, _, _) = user_signs_up(&app).await;
     let otp_base32 = user_generates_otp(&app, &access_token).await;
     user_verifies_otp(&app, &access_token, &otp_base32).await;
 }
 
-#[tokio::test]
-async fn registered_user_can_validate_otp() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn registered_user_can_validate_otp(pool: PgPool) {
+    let app = spawn_app(pool).await;
 
     let (access_token, _, _) = user_signs_up(&app).await;
     let otp_base32 = user_generates_otp(&app, &access_token).await;
@@ -133,9 +134,9 @@ async fn registered_user_can_validate_otp() {
     user_has_access_to_protected_route(&app, &response.access_token).await;
 }
 
-#[tokio::test]
-async fn registered_user_can_disable_otp() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn registered_user_can_disable_otp(pool: PgPool) {
+    let app = spawn_app(pool).await;
 
     let (access_token, _, _) = user_signs_up(&app).await;
     let otp_base32 = user_generates_otp(&app, &access_token).await;
@@ -156,9 +157,9 @@ async fn registered_user_can_disable_otp() {
     assert_eq!(response.two_fa_enabled, false);
 }
 
-#[tokio::test]
-async fn user_cannot_generate_otp_with_wrong_token() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_generate_otp_with_wrong_token(pool: PgPool) {
+    let app = spawn_app(pool).await;
 
     let req = test::TestRequest::get()
         .uri("/api/auth/otp/generate")
@@ -174,9 +175,9 @@ async fn user_cannot_generate_otp_with_wrong_token() {
     assert_eq!(response.code, "INVALID_ACCESS_TOKEN");
 }
 
-#[tokio::test]
-async fn user_cannot_validate_otp_for_a_wrong_user() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_validate_otp_for_a_wrong_user(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
     let req = test::TestRequest::post()

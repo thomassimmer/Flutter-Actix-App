@@ -5,6 +5,7 @@ use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
 use flutteractixapp::core::structs::responses::GenericResponse;
 use flutteractixapp::features::auth::structs::responses::UserLoginResponse;
+use sqlx::PgPool;
 
 use crate::auth::signup::user_signs_up;
 use crate::helpers::spawn_app;
@@ -35,16 +36,16 @@ pub async fn user_logs_in(
     (response.access_token, response.refresh_token)
 }
 
-#[tokio::test]
-async fn user_can_login() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_can_login(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
     user_logs_in(&app, "testusername", "password1_").await;
 }
 
-#[tokio::test]
-async fn user_cannot_login_with_wrong_password() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_login_with_wrong_password(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 
     let req = test::TestRequest::post()
@@ -65,9 +66,9 @@ async fn user_cannot_login_with_wrong_password() {
     assert_eq!(response.code, "INVALID_USERNAME_OR_PASSWORD");
 }
 
-#[tokio::test]
-async fn user_cannot_login_with_wrong_username() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_login_with_wrong_username(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 
     let req = test::TestRequest::post()
@@ -88,9 +89,9 @@ async fn user_cannot_login_with_wrong_username() {
     assert_eq!(response.code, "INVALID_USERNAME_OR_PASSWORD");
 }
 
-#[tokio::test]
-async fn logged_in_user_can_access_profile_information() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn logged_in_user_can_access_profile_information(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 
     let (access_token, _) = user_logs_in(&app, "testusername", "password1_").await;

@@ -9,6 +9,7 @@ use flutteractixapp::{
     core::structs::responses::GenericResponse,
     features::auth::structs::responses::UserSignupResponse,
 };
+use sqlx::PgPool;
 
 use crate::{helpers::spawn_app, profile::profile::user_has_access_to_protected_route};
 
@@ -41,24 +42,24 @@ pub async fn user_signs_up(
     )
 }
 
-#[tokio::test]
-async fn user_can_signup() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_can_signup(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 }
 
-#[tokio::test]
-async fn registered_user_can_access_profile_information() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn registered_user_can_access_profile_information(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
     // User can access a route protected by token authentication
     user_has_access_to_protected_route(&app, &access_token).await;
 }
 
-#[tokio::test]
-async fn user_with_invalid_token_cannot_access_profile_information() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_with_invalid_token_cannot_access_profile_information(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
     // A wrong token would not work
@@ -85,18 +86,18 @@ async fn user_with_invalid_token_cannot_access_profile_information() {
     assert_eq!(response.code, "INVALID_ACCESS_TOKEN");
 }
 
-#[tokio::test]
-async fn unauthenticated_user_cannot_access_profile_information() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn unauthenticated_user_cannot_access_profile_information(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let req = test::TestRequest::get().uri("/api/users/me").to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(401, response.status().as_u16());
 }
 
-#[tokio::test]
-async fn user_cannot_signup_with_existing_username() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_signup_with_existing_username(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 
     let req = test::TestRequest::post()
@@ -119,9 +120,9 @@ async fn user_cannot_signup_with_existing_username() {
     assert_eq!(response.code, "USER_ALREADY_EXISTS");
 }
 
-#[tokio::test]
-async fn user_cannot_signup_with_short_password() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_signup_with_short_password(pool: PgPool) {
+    let app = spawn_app(pool).await;
 
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")
@@ -143,9 +144,9 @@ async fn user_cannot_signup_with_short_password() {
     assert_eq!(response.code, "PASSWORD_TOO_SHORT");
 }
 
-#[tokio::test]
-async fn user_cannot_signup_with_short_username() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_signup_with_short_username(pool: PgPool) {
+    let app = spawn_app(pool).await;
 
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")
@@ -167,9 +168,9 @@ async fn user_cannot_signup_with_short_username() {
     assert_eq!(response.code, "USERNAME_WRONG_SIZE");
 }
 
-#[tokio::test]
-async fn user_cannot_signup_with_long_username() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_signup_with_long_username(pool: PgPool) {
+    let app = spawn_app(pool).await;
 
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")
@@ -191,9 +192,9 @@ async fn user_cannot_signup_with_long_username() {
     assert_eq!(response.code, "USERNAME_WRONG_SIZE");
 }
 
-#[tokio::test]
-async fn user_cannot_signup_with_username_not_respecting_rules() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_signup_with_username_not_respecting_rules(pool: PgPool) {
+    let app = spawn_app(pool).await;
 
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")

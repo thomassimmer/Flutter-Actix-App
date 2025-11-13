@@ -1,11 +1,12 @@
 use actix_web::test;
 use flutteractixapp::core::structs::responses::GenericResponse;
+use sqlx::PgPool;
 
 use crate::helpers::spawn_app;
 
-#[tokio::test]
-async fn health_check() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn health_check(pool: PgPool) {
+    let app = spawn_app(pool).await;
 
     let req = test::TestRequest::get()
         .uri("/api/health_check")

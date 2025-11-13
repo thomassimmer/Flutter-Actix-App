@@ -6,6 +6,7 @@ use actix_web::{
     test, Error,
 };
 use flutteractixapp::features::profile::structs::responses::{IsOtpEnabledResponse, UserResponse};
+use sqlx::PgPool;
 
 use crate::{
     auth::{
@@ -35,9 +36,9 @@ pub async fn user_has_access_to_protected_route(
     assert_eq!(response.user.locale, "en");
 }
 
-#[tokio::test]
-pub async fn user_can_update_profile() {
-    let app = spawn_app().await;
+#[sqlx::test]
+pub async fn user_can_update_profile(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
     user_has_access_to_protected_route(&app, &access_token).await;
@@ -65,9 +66,9 @@ pub async fn user_can_update_profile() {
     assert_eq!(response.user.theme, "light");
 }
 
-#[tokio::test]
-pub async fn is_otp_enabled_for_user_that_activated_it() {
-    let app = spawn_app().await;
+#[sqlx::test]
+pub async fn is_otp_enabled_for_user_that_activated_it(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
     let req = test::TestRequest::post()

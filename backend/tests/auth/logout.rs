@@ -4,6 +4,7 @@ use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::{self, ContentType};
 use actix_web::{test, Error};
 use flutteractixapp::core::structs::responses::GenericResponse;
+use sqlx::PgPool;
 
 use crate::auth::signup::user_signs_up;
 use crate::helpers::spawn_app;
@@ -27,17 +28,17 @@ pub async fn user_logs_out(
     assert_eq!(response.code, "LOGGED_OUT");
 }
 
-#[tokio::test]
-async fn user_can_logout() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_can_logout(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
     user_logs_out(&app, &access_token).await;
 }
 
-#[tokio::test]
-async fn user_cannot_use_access_token_or_refresh_token_after_logout() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_use_access_token_or_refresh_token_after_logout(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, refresh_token, _) = user_signs_up(&app).await;
 
     user_has_access_to_protected_route(&app, &access_token).await;

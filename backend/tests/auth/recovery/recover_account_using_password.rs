@@ -6,6 +6,7 @@ use actix_web::{test, Error};
 use flutteractixapp::core::structs::responses::GenericResponse;
 use flutteractixapp::features::auth::structs::responses::UserLoginResponse;
 use flutteractixapp::features::profile::structs::responses::IsOtpEnabledResponse;
+use sqlx::PgPool;
 
 use crate::auth::otp::{user_generates_otp, user_verifies_otp};
 use crate::auth::signup::user_signs_up;
@@ -38,9 +39,9 @@ pub async fn user_recovers_account_using_password(
     (response.access_token, response.refresh_token)
 }
 
-#[tokio::test]
-async fn user_can_recover_account_using_password() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_can_recover_account_using_password(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (mut access_token, _, recovery_codes) = user_signs_up(&app).await;
 
     for recovery_code in recovery_codes {
@@ -73,9 +74,9 @@ async fn user_can_recover_account_using_password() {
     assert_eq!(response.otp_enabled, false);
 }
 
-#[tokio::test]
-async fn user_cannot_recover_using_password_without_2fa() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_recover_using_password_without_2fa(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 
     // Without this
@@ -101,9 +102,9 @@ async fn user_cannot_recover_using_password_without_2fa() {
     assert_eq!(response.code, "TWO_FACTOR_AUTHENTICATION_NOT_ENABLED");
 }
 
-#[tokio::test]
-async fn user_cannot_recover_account_using_password_with_wrong_code() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_recover_account_using_password_with_wrong_code(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, _) = user_signs_up(&app).await;
     let otp_base32 = user_generates_otp(&app, &access_token).await;
 
@@ -131,9 +132,9 @@ async fn user_cannot_recover_account_using_password_with_wrong_code() {
     );
 }
 
-#[tokio::test]
-async fn user_cannot_recover_account_using_password_with_wrong_username() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_recover_account_using_password_with_wrong_username(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, recovery_codes) = user_signs_up(&app).await;
     let otp_base32 = user_generates_otp(&app, &access_token).await;
 
@@ -161,9 +162,9 @@ async fn user_cannot_recover_account_using_password_with_wrong_username() {
     );
 }
 
-#[tokio::test]
-async fn user_cannot_recover_account_using_password_with_wrong_password() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_recover_account_using_password_with_wrong_password(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, recovery_codes) = user_signs_up(&app).await;
     let otp_base32 = user_generates_otp(&app, &access_token).await;
 
@@ -191,9 +192,9 @@ async fn user_cannot_recover_account_using_password_with_wrong_password() {
     );
 }
 
-#[tokio::test]
-async fn user_cannot_recover_account_using_password_using_code_twice() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_recover_account_using_password_using_code_twice(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, recovery_codes) = user_signs_up(&app).await;
     let otp_base32 = user_generates_otp(&app, &access_token).await;
 

@@ -9,6 +9,7 @@ use chrono::Utc;
 use flutteractixapp::core::helpers::mock_now::override_now;
 use flutteractixapp::core::structs::responses::GenericResponse;
 use flutteractixapp::features::auth::structs::responses::RefreshTokenResponse;
+use sqlx::PgPool;
 
 use crate::auth::login::user_logs_in;
 use crate::auth::signup::user_signs_up;
@@ -39,9 +40,9 @@ pub async fn user_refreshes_token(
     (response.access_token, response.refresh_token)
 }
 
-#[tokio::test]
-async fn user_can_refresh_token() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_can_refresh_token(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
     let (_, refresh_token) = user_logs_in(&app, "testusername", "password1_").await;
     let (access_token, _) = user_refreshes_token(&app, &refresh_token).await;
@@ -49,9 +50,9 @@ async fn user_can_refresh_token() {
     user_has_access_to_protected_route(&app, &access_token).await;
 }
 
-#[tokio::test]
-async fn user_cannot_refresh_using_a_wrong_refresh_token() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_cannot_refresh_using_a_wrong_refresh_token(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 
     let req = test::TestRequest::post()
@@ -71,9 +72,9 @@ async fn user_cannot_refresh_using_a_wrong_refresh_token() {
     assert_eq!(response.code, "INVALID_REFRESH_TOKEN");
 }
 
-#[tokio::test]
-async fn access_token_becomes_expired_after_15_minutes() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn access_token_becomes_expired_after_15_minutes(pool: PgPool) {
+    let app = spawn_app(pool).await;
 
     let (access_token, _, _) = user_signs_up(&app).await;
 
@@ -105,9 +106,9 @@ async fn access_token_becomes_expired_after_15_minutes() {
     assert_eq!(profile_response.code, "ACCESS_TOKEN_EXPIRED");
 }
 
-#[tokio::test]
-async fn refresh_token_becomes_expired_after_7_days() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn refresh_token_becomes_expired_after_7_days(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
     let (_, refresh_token) = user_logs_in(&app, "testusername", "password1_").await;
 

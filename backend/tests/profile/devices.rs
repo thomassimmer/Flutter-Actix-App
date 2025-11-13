@@ -4,8 +4,9 @@ use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::{self};
 use actix_web::{test, Error};
 use flutteractixapp::features::profile::structs::responses::{
-    DeviceData, DeviceDeleteResponse, DevicesResponse
+    DeviceData, DeviceDeleteResponse, DevicesResponse,
 };
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::auth::login::user_logs_in;
@@ -50,9 +51,9 @@ pub async fn user_removes_a_device(
     assert_eq!(response.code, "DEVICE_DELETED");
 }
 
-#[tokio::test]
-async fn user_can_remove_session_on_another_device() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_can_remove_session_on_another_device(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (initial_access_token, _, _) = user_signs_up(&app).await;
 
     let devices = user_gets_list_of_devices(&app, &initial_access_token).await;

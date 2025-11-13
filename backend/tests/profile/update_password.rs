@@ -6,6 +6,7 @@ use actix_web::{
     test, Error,
 };
 use flutteractixapp::features::profile::structs::responses::UserResponse;
+use sqlx::PgPool;
 
 use crate::{
     auth::{
@@ -41,18 +42,18 @@ pub async fn user_updates_password(
     assert_eq!(response.code, "PASSWORD_CHANGED");
 }
 
-#[tokio::test]
-pub async fn user_can_update_password_even_when_not_expired() {
-    let app = spawn_app().await;
+#[sqlx::test]
+pub async fn user_can_update_password_even_when_not_expired(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
     user_updates_password(&app, &access_token, "password1_", "new_password1_").await;
     user_logs_in(&app, "testusername", "new_password1_").await;
 }
 
-#[tokio::test]
-pub async fn user_can_update_password_after_account_recovery() {
-    let app = spawn_app().await;
+#[sqlx::test]
+pub async fn user_can_update_password_after_account_recovery(pool: PgPool) {
+    let app = spawn_app(pool).await;
     let (_, _, recovery_codes) = user_signs_up(&app).await;
 
     let (access_token, _) =
