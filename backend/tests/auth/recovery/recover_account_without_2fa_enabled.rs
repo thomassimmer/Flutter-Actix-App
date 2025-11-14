@@ -4,7 +4,7 @@ use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
 use flutteractixapp::core::structs::responses::GenericResponse;
-use flutteractixapp::features::auth::structs::responses::UserLoginResponse;
+use flutteractixapp::features::auth::application::dto::{LoginRequest, LoginResponse, RecoverAccountWithout2FAEnabledRequest};
 use sqlx::PgPool;
 
 use crate::auth::signup::user_signs_up;
@@ -15,20 +15,21 @@ pub async fn user_recovers_account_without_2fa_enabled(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
     recovery_code: &str,
 ) -> (String, String) {
+    let recovery_request = RecoverAccountWithout2FAEnabledRequest {
+        username: "testusername".to_string(),
+        recovery_code: recovery_code.to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/recover")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "recovery_code": recovery_code,
-        }))
+        .set_json(&recovery_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
+    let response: LoginResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "USER_LOGGED_IN_AFTER_ACCOUNT_RECOVERY");
 
@@ -52,13 +53,14 @@ async fn user_can_recover_account_without_2fa_enabled(pool: PgPool) {
 async fn user_cannot_recover_account_without_2fa_enabled_with_wrong_code(pool: PgPool) {
     let app = spawn_app(pool).await;
     user_signs_up(&app).await;
+    let recovery_request = RecoverAccountWithout2FAEnabledRequest {
+        username: "testusername".to_string(),
+        recovery_code: "wrong_recovery_code".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/recover")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "recovery_code": "wrong_recovery_code",
-        }))
+        .set_json(&recovery_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -74,13 +76,14 @@ async fn user_cannot_recover_account_without_2fa_enabled_with_wrong_code(pool: P
 async fn user_cannot_recover_account_without_2fa_enabled_with_wrong_username(pool: PgPool) {
     let app = spawn_app(pool).await;
     let (_, _, recovery_codes) = user_signs_up(&app).await;
+    let recovery_request = RecoverAccountWithout2FAEnabledRequest {
+        username: "wrong_username".to_string(),
+        recovery_code: recovery_codes[0].clone(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/recover")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "wrong_username",
-            "recovery_code": recovery_codes[0],
-        }))
+        .set_json(&recovery_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -101,13 +104,14 @@ async fn user_cannot_recover_account_without_2fa_enabled_using_code_twice(pool: 
 
     user_has_access_to_protected_route(&app, &access_token).await;
 
+    let recovery_request = RecoverAccountWithout2FAEnabledRequest {
+        username: "testusername".to_string(),
+        recovery_code: recovery_codes[0].clone(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/recover")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "recovery_code": recovery_codes[0],
-        }))
+        .set_json(&recovery_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -128,13 +132,14 @@ async fn user_cannot_login_with_old_password_after_recovery(pool: PgPool) {
 
     user_has_access_to_protected_route(&app, &access_token).await;
 
+    let login_request = LoginRequest {
+        username: "testusername".to_string(),
+        password: "password1_".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/login")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "testusername",
-        "password": "password1_",
-        }))
+        .set_json(&login_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 

@@ -6,7 +6,8 @@ use actix_web::{
     test, Error,
 };
 use flutteractixapp::{
-    core::structs::responses::GenericResponse, features::profile::structs::responses::UserResponse,
+    core::structs::responses::GenericResponse,
+    features::profile::application::dto::{ProfileResponse, SetPasswordRequest},
 };
 use sqlx::PgPool;
 
@@ -24,20 +25,21 @@ pub async fn user_sets_password(
     access_token: &str,
     new_password: &str,
 ) {
+    let set_password_request = SetPasswordRequest {
+        new_password: new_password.to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/users/set-password")
         .insert_header((header::AUTHORIZATION, format!("Bearer {}", access_token)))
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "new_password": new_password,
-        }))
+        .set_json(&set_password_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserResponse = serde_json::from_slice(&body).unwrap();
+    let response: ProfileResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "PASSWORD_CHANGED");
 }
@@ -59,13 +61,14 @@ pub async fn user_cannot_set_password_if_its_not_expired(pool: PgPool) {
     let app = spawn_app(pool).await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
+    let set_password_request = SetPasswordRequest {
+        new_password: "new_password1_".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/users/set-password")
         .insert_header((header::AUTHORIZATION, format!("Bearer {}", access_token)))
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "new_password": "new_password1_",
-        }))
+        .set_json(&set_password_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 

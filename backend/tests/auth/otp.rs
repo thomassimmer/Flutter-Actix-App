@@ -4,10 +4,7 @@ use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
 use flutteractixapp::core::structs::responses::GenericResponse;
-use flutteractixapp::features::auth::structs::responses::{
-    DisableOtpResponse, GenerateOtpResponse, UserLoginResponse, UserLoginWhenOtpEnabledResponse,
-    VerifyOtpResponse,
-};
+use flutteractixapp::features::auth::application::dto::{DisableOtpResponse, GenerateOtpResponse, LoginRequest, LoginResponse, LoginWhenOtpEnabledResponse, ValidateOtpRequest, VerifyOtpRequest, VerifyOtpResponse};
 use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
 use uuid::Uuid;
@@ -52,11 +49,14 @@ pub async fn user_verifies_otp(
 
     let code = totp.generate_current().unwrap();
 
+    let verify_request = VerifyOtpRequest {
+        code: code,
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/otp/verify")
         .insert_header(ContentType::json())
         .insert_header((header::AUTHORIZATION, format!("Bearer {}", access_token)))
-        .set_json(&serde_json::json!({"code": code}))
+        .set_json(&verify_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -87,20 +87,21 @@ async fn registered_user_can_validate_otp(pool: PgPool) {
     user_verifies_otp(&app, &access_token, &otp_base32).await;
 
     // User logs in. Otp is required.
+    let login_request = LoginRequest {
+        username: "testusername".to_string(),
+        password: "password1_".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/login")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "testusername",
-        "password": "password1_",
-        }))
+        .set_json(&login_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserLoginWhenOtpEnabledResponse = serde_json::from_slice(&body).unwrap();
+    let response: LoginWhenOtpEnabledResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "USER_LOGS_IN_WITH_OTP_ENABLED");
 
@@ -115,19 +116,24 @@ async fn registered_user_can_validate_otp(pool: PgPool) {
     .unwrap();
 
     let code = totp.generate_current().unwrap();
+    let user_id: Uuid = response.user_id.parse().unwrap();
 
+    let validate_request = ValidateOtpRequest {
+        code: code,
+        user_id: user_id,
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/otp/validate")
         .insert_header(ContentType::json())
         .insert_header((header::AUTHORIZATION, format!("Bearer {}", access_token)))
-        .set_json(&serde_json::json!({"code": code, "user_id": response.user_id}))
+        .set_json(&validate_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
+    let response: LoginResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "USER_LOGGED_IN_AFTER_OTP_VALIDATION");
 
@@ -180,11 +186,15 @@ async fn user_cannot_validate_otp_for_a_wrong_user(pool: PgPool) {
     let app = spawn_app(pool).await;
     let (access_token, _, _) = user_signs_up(&app).await;
 
+    let validate_request = ValidateOtpRequest {
+        code: "000000".to_string(),
+        user_id: Uuid::new_v4(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/otp/validate")
         .insert_header(ContentType::json())
         .insert_header((header::AUTHORIZATION, format!("Bearer {}", access_token)))
-        .set_json(&serde_json::json!({"code": "000000", "user_id": Uuid::new_v4()}))
+        .set_json(&validate_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 

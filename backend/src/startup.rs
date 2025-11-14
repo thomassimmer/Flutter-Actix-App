@@ -5,27 +5,32 @@ use std::net::TcpListener;
 use crate::configuration::{DatabaseSettings, Settings};
 use crate::core::middlewares::token_validator::TokenValidator;
 use crate::core::routes::health_check::health_check;
-use crate::features::auth::routes::disable_otp::disable;
-use crate::features::auth::routes::generate_otp::generate;
-use crate::features::auth::routes::log_user_in::log_user_in;
-use crate::features::auth::routes::log_user_out::log_user_out;
-use crate::features::auth::routes::recover_account_using_2fa::recover_account_using_2fa;
-use crate::features::auth::routes::recover_account_using_password::recover_account_using_password;
-use crate::features::auth::routes::recover_account_without_2fa_enabled::recover_account_without_2fa_enabled;
-use crate::features::auth::routes::validate_otp::validate;
-use crate::features::auth::routes::verify_otp::verify;
-
-use crate::features::auth::routes::refresh_token::refresh_token;
-use crate::features::auth::routes::signup::register_user;
+use crate::features::auth::application::usecases::{
+    DisableOtpUseCase, GenerateOtpUseCase, LoginUseCase, LogoutUseCase,
+    RecoverAccountUsing2FAUseCase, RecoverAccountUsingPasswordUseCase,
+    RecoverAccountWithout2FAEnabledUseCase, RefreshTokenUseCase, SignupUseCase,
+    ValidateOtpUseCase, VerifyOtpUseCase,
+};
+use crate::features::auth::infrastructure::repositories::{
+    TokenRepositoryImpl, TokenServiceImpl, UserRepositoryImpl,
+};
+use crate::features::auth::presentation::controllers::{
+    disable_otp, generate_otp, login, logout, recover_account_using_2fa,
+    recover_account_using_password, recover_account_without_2fa_enabled, refresh_token, signup,
+    validate_otp, verify_otp,
+};
 use crate::features::auth::structs::models::TokenCache;
-use crate::features::profile::routes::delete_device::delete_device;
-use crate::features::profile::routes::get_devices::get_devices;
-use crate::features::profile::routes::get_profile_information::get_profile_information;
-use crate::features::profile::routes::is_otp_enabled::is_otp_enabled;
-use crate::features::profile::routes::post_profile_information::post_profile_information;
-
-use crate::features::profile::routes::set_password::set_password;
-use crate::features::profile::routes::update_password::update_password;
+use crate::features::profile::application::usecases::{
+    DeleteDeviceUseCase, GetDevicesUseCase, GetProfileUseCase, IsOtpEnabledUseCase,
+    SetPasswordUseCase, UpdatePasswordUseCase, UpdateProfileUseCase,
+};
+use crate::features::profile::infrastructure::repositories::{
+    DeviceRepositoryImpl, UserRepositoryImpl as ProfileUserRepositoryImpl,
+};
+use crate::features::profile::presentation::controllers::{
+    delete_device, get_devices, get_profile, is_otp_enabled, set_password, update_password,
+    update_profile,
+};
 use actix_cors::Cors;
 use actix_http::header::HeaderName;
 use actix_web::body::MessageBody;
@@ -75,14 +80,78 @@ pub fn create_app(
         ])
         .supports_credentials();
 
+    // Initialize repositories
+    let user_repo_impl = UserRepositoryImpl::new(connection_pool.clone());
+    let token_repo_impl = TokenRepositoryImpl::new(connection_pool.clone());
+    let token_service_impl = TokenServiceImpl::new(secret.as_bytes().to_vec());
+
+    // Initialize use cases
+    let signup_use_case = SignupUseCase::new(
+        Box::new(user_repo_impl.clone()),
+        Box::new(token_repo_impl.clone()),
+        Box::new(token_service_impl.clone()),
+        secret.as_bytes().to_vec(),
+    );
+    let login_use_case = LoginUseCase::new(
+        Box::new(user_repo_impl.clone()),
+        Box::new(token_repo_impl.clone()),
+        Box::new(token_service_impl.clone()),
+    );
+    let refresh_token_use_case = RefreshTokenUseCase::new(
+        Box::new(token_repo_impl.clone()),
+        Box::new(token_service_impl.clone()),
+    );
+    let generate_otp_use_case = GenerateOtpUseCase::new(Box::new(user_repo_impl.clone()));
+    let verify_otp_use_case = VerifyOtpUseCase::new(Box::new(user_repo_impl.clone()));
+    let validate_otp_use_case = ValidateOtpUseCase::new(
+        Box::new(user_repo_impl.clone()),
+        Box::new(token_repo_impl.clone()),
+        Box::new(token_service_impl.clone()),
+    );
+    let disable_otp_use_case = DisableOtpUseCase::new(Box::new(user_repo_impl.clone()));
+    let logout_use_case = LogoutUseCase::new(Box::new(token_repo_impl.clone()), token_cache.clone());
+    let recover_account_without_2fa_enabled_use_case = RecoverAccountWithout2FAEnabledUseCase::new(
+        Box::new(user_repo_impl.clone()),
+        Box::new(token_repo_impl.clone()),
+        Box::new(token_service_impl.clone()),
+    );
+    let recover_account_using_password_use_case = RecoverAccountUsingPasswordUseCase::new(
+        Box::new(user_repo_impl.clone()),
+        Box::new(token_repo_impl.clone()),
+        Box::new(token_service_impl.clone()),
+    );
+    let recover_account_using_2fa_use_case = RecoverAccountUsing2FAUseCase::new(
+        Box::new(user_repo_impl.clone()),
+        Box::new(token_repo_impl.clone()),
+        Box::new(token_service_impl.clone()),
+    );
+
+    // Initialize profile repositories
+    let profile_user_repo_impl = ProfileUserRepositoryImpl::new(connection_pool.clone());
+    let device_repo_impl = DeviceRepositoryImpl::new(connection_pool.clone());
+
+    // Initialize profile use cases
+    let get_profile_use_case = GetProfileUseCase::new(Box::new(profile_user_repo_impl.clone()));
+    let update_profile_use_case =
+        UpdateProfileUseCase::new(Box::new(profile_user_repo_impl.clone()));
+    let set_password_use_case = SetPasswordUseCase::new(Box::new(profile_user_repo_impl.clone()));
+    let update_password_use_case =
+        UpdatePasswordUseCase::new(Box::new(profile_user_repo_impl.clone()));
+    let get_devices_use_case = GetDevicesUseCase::new(
+        Box::new(device_repo_impl.clone()),
+        token_cache.clone(),
+    );
+    let delete_device_use_case = DeleteDeviceUseCase::new(Box::new(device_repo_impl));
+    let is_otp_enabled_use_case = IsOtpEnabledUseCase::new(Box::new(profile_user_repo_impl.clone()));
+
     App::new()
         .service(
             web::scope("/api")
                 .service(health_check)
                 .service(
                     web::scope("/auth")
-                        .service(register_user)
-                        .service(log_user_in)
+                        .service(signup)
+                        .service(login)
                         .service(recover_account_without_2fa_enabled)
                         .service(recover_account_using_password)
                         .service(recover_account_using_2fa)
@@ -90,19 +159,19 @@ pub fn create_app(
                         .service(
                             web::scope("/logout")
                                 .wrap(TokenValidator {})
-                                .service(log_user_out),
+                                .service(logout),
                         )
                         .service(
                             web::scope("/otp")
                                 // Scope without middleware applied to routes that don't need it
-                                .service(validate)
+                                .service(validate_otp)
                                 // Nested scope with middleware for protected routes
                                 .service(
                                     web::scope("")
                                         .wrap(TokenValidator {})
-                                        .service(generate)
-                                        .service(verify)
-                                        .service(disable),
+                                        .service(generate_otp)
+                                        .service(verify_otp)
+                                        .service(disable_otp),
                                 ),
                         ),
                 )
@@ -114,8 +183,8 @@ pub fn create_app(
                         .service(
                             web::scope("")
                                 .wrap(TokenValidator {})
-                                .service(get_profile_information)
-                                .service(post_profile_information)
+                                .service(get_profile)
+                                .service(update_profile)
                                 .service(set_password)
                                 .service(update_password),
                         ),
@@ -132,6 +201,24 @@ pub fn create_app(
         .app_data(web::Data::new(connection_pool))
         .app_data(web::Data::new(secret))
         .app_data(web::Data::new(token_cache))
+        .app_data(web::Data::new(signup_use_case))
+        .app_data(web::Data::new(login_use_case))
+        .app_data(web::Data::new(refresh_token_use_case))
+        .app_data(web::Data::new(generate_otp_use_case))
+        .app_data(web::Data::new(verify_otp_use_case))
+        .app_data(web::Data::new(validate_otp_use_case))
+        .app_data(web::Data::new(disable_otp_use_case))
+        .app_data(web::Data::new(logout_use_case))
+        .app_data(web::Data::new(recover_account_without_2fa_enabled_use_case))
+        .app_data(web::Data::new(recover_account_using_password_use_case))
+        .app_data(web::Data::new(recover_account_using_2fa_use_case))
+        .app_data(web::Data::new(get_profile_use_case))
+        .app_data(web::Data::new(update_profile_use_case))
+        .app_data(web::Data::new(set_password_use_case))
+        .app_data(web::Data::new(update_password_use_case))
+        .app_data(web::Data::new(is_otp_enabled_use_case))
+        .app_data(web::Data::new(get_devices_use_case))
+        .app_data(web::Data::new(delete_device_use_case))
 }
 
 pub struct Application {

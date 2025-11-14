@@ -5,7 +5,9 @@ use actix_web::{
     http::header::ContentType,
     test, Error,
 };
-use flutteractixapp::features::profile::structs::responses::UserResponse;
+use flutteractixapp::features::profile::application::dto::{
+    ProfileResponse, UpdatePasswordRequest,
+};
 use sqlx::PgPool;
 
 use crate::{
@@ -23,21 +25,22 @@ pub async fn user_updates_password(
     password: &str,
     new_password: &str,
 ) {
+    let update_password_request = UpdatePasswordRequest {
+        current_password: password.to_string(),
+        new_password: new_password.to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/users/update-password")
         .insert_header((header::AUTHORIZATION, format!("Bearer {}", access_token)))
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "current_password": password,
-            "new_password": new_password,
-        }))
+        .set_json(&update_password_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserResponse = serde_json::from_slice(&body).unwrap();
+    let response: ProfileResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "PASSWORD_CHANGED");
 }

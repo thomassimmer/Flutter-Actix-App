@@ -3,9 +3,7 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::{self};
 use actix_web::{test, Error};
-use flutteractixapp::features::profile::structs::responses::{
-    DeviceData, DeviceDeleteResponse, DevicesResponse,
-};
+use flutteractixapp::features::profile::application::dto::{DeviceData, DeviceDeleteResponse, DevicesResponse};
 use sqlx::PgPool;
 use uuid::Uuid;
 

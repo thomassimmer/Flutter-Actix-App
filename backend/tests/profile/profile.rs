@@ -5,7 +5,7 @@ use actix_web::{
     http::header::ContentType,
     test, Error,
 };
-use flutteractixapp::features::profile::structs::responses::{IsOtpEnabledResponse, UserResponse};
+use flutteractixapp::features::profile::application::dto::{IsOtpEnabledRequest, IsOtpEnabledResponse, ProfileResponse, UpdateProfileRequest};
 use sqlx::PgPool;
 
 use crate::{
@@ -29,7 +29,7 @@ pub async fn user_has_access_to_protected_route(
     assert_eq!(200, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserResponse = serde_json::from_slice(&body).unwrap();
+    let response: ProfileResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "PROFILE_FETCHED");
     assert_eq!(response.user.username, "testusername");
@@ -43,22 +43,23 @@ pub async fn user_can_update_profile(pool: PgPool) {
 
     user_has_access_to_protected_route(&app, &access_token).await;
 
+    let update_request = UpdateProfileRequest {
+        username: "testusername".to_string(),
+        locale: "fr".to_string(),
+        theme: "light".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/users/me")
         .insert_header((header::AUTHORIZATION, format!("Bearer {}", access_token)))
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "locale": "fr",
-            "theme": "light",
-        }))
+        .set_json(&update_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserResponse = serde_json::from_slice(&body).unwrap();
+    let response: ProfileResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "PROFILE_UPDATED");
     assert_eq!(response.user.username, "testusername");
@@ -74,9 +75,9 @@ pub async fn is_otp_enabled_for_user_that_activated_it(pool: PgPool) {
     let req = test::TestRequest::post()
         .uri("/api/users/is-otp-enabled")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-        }))
+        .set_json(&IsOtpEnabledRequest {
+            username: "testusername".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -94,9 +95,9 @@ pub async fn is_otp_enabled_for_user_that_activated_it(pool: PgPool) {
     let req = test::TestRequest::post()
         .uri("/api/users/is-otp-enabled")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-        }))
+        .set_json(&IsOtpEnabledRequest {
+            username: "testusername".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -115,9 +116,9 @@ pub async fn is_otp_enabled_for_user_that_activated_it(pool: PgPool) {
     let req = test::TestRequest::post()
         .uri("/api/users/is-otp-enabled")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-        }))
+        .set_json(&IsOtpEnabledRequest {
+            username: "testusername".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 

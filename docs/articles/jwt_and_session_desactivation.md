@@ -108,20 +108,9 @@ where
                             }
                         }
                         None => {
-                            let mut transaction = match pool.begin().await {
-                                Ok(t) => t,
-                                Err(_) => {
-                                    return Ok(req.into_response(
-                                        HttpResponse::InternalServerError()
-                                            .json(AppError::DatabaseConnection.to_response())
-                                            .map_into_right_body(),
-                                    ));
-                                }
-                            };
-
                             // Check if token still exists (it could have been revoked)
                             let existing_token =
-                                get_user_token(claims.user_id, claims.jti, &mut transaction).await;
+                                get_user_token(&**pool, claims.user_id, claims.jti).await;
 
                             match existing_token {
                                 Ok(r) => {
@@ -133,7 +122,8 @@ where
                                         ));
                                     }
                                 }
-                                Err(_) => {
+                                Err(e) => {
+                                    error!("Error: {}", e);
                                     return Ok(req.into_response(
                                         HttpResponse::InternalServerError()
                                             .json(AppError::DatabaseQuery.to_response())
@@ -146,7 +136,7 @@ where
                         }
                     }
 
-                    // Store claims in request extensions
+                    // Store claims in request extensions for ReqData extractor
                     req.extensions_mut().insert(claims);
                     let res = service.call(req).await?;
                     Ok(res.map_into_left_body())
@@ -170,7 +160,7 @@ Here’s the implementation of the cached_tokens:
 
 ```rust
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct TokenCache {
     data: Arc<RwLock<HashMap<Uuid, DateTime<Utc>>>>,
 }

@@ -4,7 +4,7 @@ use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
 use flutteractixapp::core::structs::responses::GenericResponse;
-use flutteractixapp::features::auth::structs::responses::UserLoginResponse;
+use flutteractixapp::features::auth::application::dto::{LoginRequest, LoginResponse};
 use sqlx::PgPool;
 
 use crate::auth::signup::user_signs_up;
@@ -16,20 +16,21 @@ pub async fn user_logs_in(
     username: &str,
     password: &str,
 ) -> (String, String) {
+    let login_request = LoginRequest {
+        username: username.to_string(),
+        password: password.to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/login")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": username,
-        "password": password,
-        }))
+        .set_json(&login_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
+    let response: LoginResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "USER_LOGGED_IN_WITHOUT_OTP");
 
@@ -48,13 +49,14 @@ async fn user_cannot_login_with_wrong_password(pool: PgPool) {
     let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 
+    let login_request = LoginRequest {
+        username: "testusername".to_string(),
+        password: "wrong_password".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/login")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "testusername",
-        "password": "wrong_password",
-        }))
+        .set_json(&login_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -71,13 +73,14 @@ async fn user_cannot_login_with_wrong_username(pool: PgPool) {
     let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 
+    let login_request = LoginRequest {
+        username: "wrong_username".to_string(),
+        password: "password1_".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/login")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "wrong_username",
-        "password": "password1_",
-        }))
+        .set_json(&login_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 

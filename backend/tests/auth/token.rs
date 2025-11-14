@@ -8,7 +8,8 @@ use actix_web::{test, Error};
 use chrono::Utc;
 use flutteractixapp::core::helpers::mock_now::override_now;
 use flutteractixapp::core::structs::responses::GenericResponse;
-use flutteractixapp::features::auth::structs::responses::RefreshTokenResponse;
+use flutteractixapp::features::auth::application::dto::RefreshTokenRequest;
+use flutteractixapp::features::auth::application::dto::refresh_token_response::RefreshTokenResponse;
 use sqlx::PgPool;
 
 use crate::auth::login::user_logs_in;
@@ -20,12 +21,13 @@ pub async fn user_refreshes_token(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
     refresh_token: &str,
 ) -> (String, String) {
+    let refresh_request = RefreshTokenRequest {
+        refresh_token: refresh_token.to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/refresh-token")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "refresh_token": refresh_token,
-        }))
+        .set_json(&refresh_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -55,12 +57,13 @@ async fn user_cannot_refresh_using_a_wrong_refresh_token(pool: PgPool) {
     let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 
+    let refresh_request = RefreshTokenRequest {
+        refresh_token: "wrong token".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/refresh-token")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "refresh_token": "wrong token",
-        }))
+        .set_json(&refresh_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -128,12 +131,13 @@ async fn refresh_token_becomes_expired_after_7_days(pool: PgPool) {
         (Utc::now() + Duration::new(60 * 60 * 24 * (6 + 7), 1)).fixed_offset(),
     ));
 
+    let refresh_request = RefreshTokenRequest {
+        refresh_token: refresh_token.to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/refresh-token")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "refresh_token": refresh_token,
-        }))
+        .set_json(&refresh_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 

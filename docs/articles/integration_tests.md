@@ -111,62 +111,80 @@ mod tests {
 }
 ```
 
-The good news is that I didn’t need to rewrite my entire app with all the routes and web::Data variables for each test. Instead, I created a function in src/startup.rs that sets everything up:
+The good news is that I didn't need to rewrite my entire app with all the routes and web::Data variables for each test. Instead, I created a function in src/startup.rs that sets everything up using clean architecture:
 
 ```rust
 pub fn create_app(
-    configuration: &Settings,
-) -> App<
-    impl ServiceFactory<
-        ServiceRequest,
-        Config = (),
-        Response = ServiceResponse<impl MessageBody>,
-        Error = Error,
-        InitError = (),
-    >,
-> {
-    let connection_pool = get_connection_pool(&configuration.database);
-    let secret = &configuration.application.secret;
+    connection_pool: Pool<Postgres>,
+    secret: String,
+    token_cache: TokenCache,
+) -> App<...> {
+    // Initialize repositories (Infrastructure Layer)
+    let user_repo_impl = UserRepositoryImpl::new(connection_pool.clone());
+    let token_repo_impl = TokenRepositoryImpl::new(connection_pool.clone());
+    let token_service_impl = TokenServiceImpl::new(secret.as_bytes().to_vec());
+
+    // Initialize use cases (Application Layer)
+    let signup_use_case = SignupUseCase::new(
+        Box::new(user_repo_impl.clone()),
+        Box::new(token_repo_impl.clone()),
+        Box::new(token_service_impl.clone()),
+        secret.as_bytes().to_vec(),
+    );
+    // ... more use cases
 
     App::new()
         .service(
             web::scope("/api")
                 .service(health_check)
-                ... // The rest is not important here
+                .service(
+                    web::scope("/auth")
+                        .service(signup)  // Controller from Presentation Layer
+                        .service(login)
+                        // ... more routes
+                )
+        )
+        // Inject use cases via web::Data
+        .app_data(web::Data::new(signup_use_case))
+        .app_data(web::Data::new(login_use_case))
+        // ...
 ```
 
-Here’s a basic test, like signing up a user:
+Here's a basic test, like signing up a user:
 
 ```rust
 pub async fn user_signs_up(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
-) -> (String, String) {
+) -> (String, String, Vec<String>) {
+    let signup_request = SignupRequest {
+        username: "testusername".to_string(),
+        password: "password1_".to_string(),
+        locale: "en".to_string(),
+        theme: "dark".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "testusername",
-        "password": "password1_",
-        "locale": "en",
-        "theme": "dark",
-        }))
+        .set_json(&signup_request)  // Using DTO instead of raw JSON
         .to_request();
     let response = test::call_service(&app, req).await;
 
-    assert_eq!(200, response.status().as_u16());
+    assert_eq!(201, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserSignupResponse = serde_json::from_slice(&body).unwrap();
+    let response: SignupResponse = serde_json::from_slice(&body).unwrap();
 
-    (response.access_token, response.refresh_token)
+    (response.access_token, response.refresh_token, response.recovery_codes)
 }
 
-#[tokio::test]
-async fn user_can_signup() {
-    let app = spawn_app().await;
+#[sqlx::test]
+async fn user_can_signup(pool: PgPool) {
+    let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 }
 ```
+
+Note that we now use the `SignupRequest` DTO from the Application Layer and `#[sqlx::test]` macro for automatic database management.
 
 Now, if I want to test the expiration of an access token, I can control time using the previously mentioned override_now method:
 

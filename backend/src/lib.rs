@@ -26,6 +26,17 @@ pub mod core {
 
 pub mod features {
     pub mod auth {
+        pub mod application {
+            pub mod dto;
+            pub mod usecases;
+        }
+
+        pub mod domain {
+            pub mod entities;
+            pub mod errors;
+            pub mod repositories;
+        }
+
         pub mod helpers {
             pub mod errors;
             pub mod password;
@@ -33,47 +44,47 @@ pub mod features {
             pub mod username;
         }
 
-        pub mod routes {
-            pub mod disable_otp;
-            pub mod generate_otp;
-            pub mod log_user_in;
-            pub mod log_user_out;
-            pub mod recover_account_using_2fa;
-            pub mod recover_account_using_password;
-            pub mod recover_account_without_2fa_enabled;
-            pub mod refresh_token;
-            pub mod signup;
-            pub mod validate_otp;
-            pub mod verify_otp;
+        pub mod infrastructure {
+            pub mod models;
+            pub mod repositories;
+        }
+
+        pub mod presentation {
+            pub mod controllers;
         }
 
         pub mod structs {
             pub mod models;
-            pub mod requests;
-            pub mod responses;
         }
     }
 
     pub mod profile {
-        pub mod routes {
-            pub mod delete_device;
-            pub mod get_devices;
-            pub mod get_profile_information;
-            pub mod is_otp_enabled;
-            pub mod post_profile_information;
-            pub mod set_password;
-            pub mod update_password;
+        pub mod application {
+            pub mod dto;
+            pub mod usecases;
+        }
+
+        pub mod domain {
+            pub mod entities;
+            pub mod errors;
+            pub mod repositories;
         }
 
         pub mod helpers {
             pub mod device_info;
-            pub mod profile;
+        }
+
+        pub mod infrastructure {
+            pub mod models;
+            pub mod repositories;
+        }
+
+        pub mod presentation {
+            pub mod controllers;
         }
 
         pub mod structs {
             pub mod models;
-            pub mod requests;
-            pub mod responses;
         }
     }
 }

@@ -4,8 +4,8 @@ use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
 use flutteractixapp::core::structs::responses::GenericResponse;
-use flutteractixapp::features::auth::structs::responses::UserLoginResponse;
-use flutteractixapp::features::profile::structs::responses::IsOtpEnabledResponse;
+use flutteractixapp::features::auth::application::dto::{LoginResponse, RecoverAccountUsingPasswordRequest};
+use flutteractixapp::features::profile::application::dto::{IsOtpEnabledRequest, IsOtpEnabledResponse};
 use sqlx::PgPool;
 
 use crate::auth::otp::{user_generates_otp, user_verifies_otp};
@@ -18,21 +18,22 @@ pub async fn user_recovers_account_using_password(
     recovery_code: &str,
     password: &str,
 ) -> (String, String) {
+    let recovery_request = RecoverAccountUsingPasswordRequest {
+        username: "testusername".to_string(),
+        password: password.to_string(),
+        recovery_code: recovery_code.to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-password")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "password": password,
-            "recovery_code": recovery_code,
-        }))
+        .set_json(&recovery_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
+    let response: LoginResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "USER_LOGGED_IN_AFTER_ACCOUNT_RECOVERY");
 
@@ -60,9 +61,9 @@ async fn user_can_recover_account_using_password(pool: PgPool) {
     let req = test::TestRequest::post()
         .uri("/api/users/is-otp-enabled")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-        }))
+        .set_json(&IsOtpEnabledRequest {
+            username: "testusername".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -86,11 +87,11 @@ async fn user_cannot_recover_using_password_without_2fa(pool: PgPool) {
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-password")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "recovery_code": "wrong_recovery_code",
-            "password": "password1_".to_string(),
-        }))
+        .set_json(&RecoverAccountUsingPasswordRequest {
+            username: "testusername".to_string(),
+            recovery_code: "wrong_recovery_code".to_string(),
+            password: "password1_".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -113,11 +114,11 @@ async fn user_cannot_recover_account_using_password_with_wrong_code(pool: PgPool
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-password")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "recovery_code": "wrong_recovery_code",
-            "password": "password1_".to_string(),
-        }))
+        .set_json(&RecoverAccountUsingPasswordRequest {
+            username: "testusername".to_string(),
+            recovery_code: "wrong_recovery_code".to_string(),
+            password: "password1_".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -143,11 +144,11 @@ async fn user_cannot_recover_account_using_password_with_wrong_username(pool: Pg
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-password")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "wrong_username",
-            "recovery_code": recovery_codes[0],
-            "password": "password1_".to_string(),
-        }))
+        .set_json(&RecoverAccountUsingPasswordRequest {
+            username: "wrong_username".to_string(),
+            recovery_code: recovery_codes[0].clone(),
+            password: "password1_".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -173,11 +174,11 @@ async fn user_cannot_recover_account_using_password_with_wrong_password(pool: Pg
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-password")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "recovery_code": recovery_codes[0],
-            "password": "wrong_password".to_string(),
-        }))
+        .set_json(&RecoverAccountUsingPasswordRequest {
+            username: "testusername".to_string(),
+            recovery_code: recovery_codes[0].clone(),
+            password: "wrong_password".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -212,11 +213,11 @@ async fn user_cannot_recover_account_using_password_using_code_twice(pool: PgPoo
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-password")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "recovery_code": recovery_codes[0],
-            "password": "password1_".to_string(),
-        }))
+        .set_json(&RecoverAccountUsingPasswordRequest {
+            username: "testusername".to_string(),
+            recovery_code: recovery_codes[0].clone(),
+            password: "password1_".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 

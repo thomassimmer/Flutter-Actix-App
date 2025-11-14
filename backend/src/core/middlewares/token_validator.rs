@@ -111,7 +111,7 @@ where
                         }
                     }
 
-                    // Store claims in request extensions
+                    // Store claims in request extensions for ReqData extractor
                     req.extensions_mut().insert(claims);
                     let res = service.call(req).await?;
                     Ok(res.map_into_left_body())

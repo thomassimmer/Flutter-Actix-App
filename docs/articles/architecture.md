@@ -123,115 +123,171 @@ For the backend, I focused on two core features, each encapsulating key areas of
 - **auth**: Handles all authentication-related processes, including signup, login, token management, account recovery, and 2FA (two-factor authentication).
 - **profile**: Manages user profile settings, such as theme selection, language preferences, and password updates.
 
-The Actix backend architecture is structured as follows:
+The Actix backend architecture follows **Clean Architecture** principles, with clear separation of concerns across four layers: **Domain**, **Application**, **Infrastructure**, and **Presentation**. It is structured as follows:
 
 ```
 ├── backend
-│   ├── .env
-│   ├── .env.docker
-│   ├── Cargo.lock
-│   ├── Cargo.toml
-│   ├── Dockerfile
-│   ├── configuration
-│   │   ├── base.yaml
-│   │   ├── docker.yaml
-│   │   ├── local.yaml
-│   │   └── production.yaml
-│   ├── migrations
-│   ├── src
-│   │   ├── configuration.rs
-│   │   ├── core
-│   │   │   ├── constants
-│   │   │   │   └── errors.rs
-│   │   │   ├── helpers
-│   │   │   │   └── mock_now.rs
-│   │   │   ├── middlewares
-│   │   │   │   └── token_validator.rs
-│   │   │   ├── routes
-│   │   │   │   └── health_check.rs
-│   │   │   └── structs
-│   │   │       └── responses.rs
-│   │   ├── features
-│   │   │   ├── auth
-│   │   │   │   ├── helpers
-│   │   │   │   │   ├── errors.rs
-│   │   │   │   │   ├── password.rs
-│   │   │   │   │   ├── token.rs
-│   │   │   │   │   └── username.rs
-│   │   │   │   ├── routes
-│   │   │   │   │   ├── disable_otp.rs
-│   │   │   │   │   ├── generate_otp.rs
-│   │   │   │   │   ├── log_user_in.rs
-│   │   │   │   │   ├── recover_account_using_2fa.rs
-│   │   │   │   │   ├── recover_account_using_password.rs
-│   │   │   │   │   ├── recover_account_without_2fa_enabled.rs
-│   │   │   │   │   ├── signup.rs
-│   │   │   │   │   ├── token.rs
-│   │   │   │   │   ├── validate_otp.rs
-│   │   │   │   │   └── verify_otp.rs
-│   │   │   │   └── structs
-│   │   │   │       ├── models.rs
-│   │   │   │       ├── requests.rs
-│   │   │   │       └── responses.rs
-│   │   │   └── profile
-│   │   │       ├── helpers
-│   │   │       ├── routes
-│   │   │       │   ├── get_profile_information.rs
-│   │   │       │   ├── is_otp_enabled.rs
-│   │   │       │   ├── post_profile_information.rs
-│   │   │       │   ├── set_password.rs
-│   │   │       │   └── update_password.rs
-│   │   │       └── structs
-│   │   │           ├── models.rs
-│   │   │           ├── requests.rs
-│   │   │           └── responses.rs
-│   │   ├── lib.rs
-│   │   ├── main.rs
-│   │   └── startup.rs
-│   └── tests
-│       ├── auth
-│       │   ├── login.rs
-│       │   ├── otp.rs
-│       │   ├── recovery
-│       │   │   ├── recover_account_using_2fa.rs
-│       │   │   ├── recover_account_using_password.rs
-│       │   │   └── recover_account_without_2fa_enabled.rs
-│       │   ├── signup.rs
-│       │   └── token.rs
-│       ├── core
-│       │   └── health_check.rs
-│       ├── helpers.rs
-│       ├── mod.rs
-│       └── profile
-│           ├── profile.rs
-│           ├── set_password.rs
-│           └── update_password.rs
+│   ├── .env
+│   ├── .env.docker
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   ├── Dockerfile
+│   ├── configuration
+│   │   ├── base.yaml
+│   │   ├── docker.yaml
+│   │   ├── local.yaml
+│   │   └── production.yaml
+│   ├── migrations
+│   ├── src
+│   │   ├── configuration.rs
+│   │   ├── core
+│   │   │   ├── constants
+│   │   │   │   └── errors.rs
+│   │   │   ├── helpers
+│   │   │   │   └── mock_now.rs
+│   │   │   ├── middlewares
+│   │   │   │   └── token_validator.rs
+│   │   │   ├── routes
+│   │   │   │   └── health_check.rs
+│   │   │   └── structs
+│   │   │       └── responses.rs
+│   │   ├── features
+│   │   │   ├── auth
+│   │   │   │   ├── domain
+│   │   │   │   │   ├── entities
+│   │   │   │   │   │   ├── user.rs
+│   │   │   │   │   │   ├── user_token.rs
+│   │   │   │   │   │   └── device_info.rs
+│   │   │   │   │   ├── errors.rs
+│   │   │   │   │   └── repositories
+│   │   │   │   │       ├── user_repository.rs
+│   │   │   │   │       └── token_repository.rs
+│   │   │   │   ├── application
+│   │   │   │   │   ├── dto
+│   │   │   │   │   │   ├── signup_request.rs
+│   │   │   │   │   │   ├── login_request.rs
+│   │   │   │   │   │   └── ...
+│   │   │   │   │   └── usecases
+│   │   │   │   │       ├── signup_use_case.rs
+│   │   │   │   │       ├── login_use_case.rs
+│   │   │   │   │       └── ...
+│   │   │   │   ├── infrastructure
+│   │   │   │   │   ├── models
+│   │   │   │   │   │   ├── user.rs
+│   │   │   │   │   │   └── user_token.rs
+│   │   │   │   │   └── repositories
+│   │   │   │   │       ├── user_repository_impl.rs
+│   │   │   │   │       └── token_repository_impl.rs
+│   │   │   │   ├── presentation
+│   │   │   │   │   └── controllers
+│   │   │   │   │       ├── signup_controller.rs
+│   │   │   │   │       ├── login_controller.rs
+│   │   │   │   │       └── ...
+│   │   │   │   ├── helpers
+│   │   │   │   │   ├── errors.rs
+│   │   │   │   │   ├── password.rs
+│   │   │   │   │   ├── token.rs
+│   │   │   │   │   └── username.rs
+│   │   │   │   └── structs
+│   │   │   │       └── models.rs  (TokenCache)
+│   │   │   └── profile
+│   │   │       ├── domain
+│   │   │       │   ├── entities
+│   │   │       │   ├── errors.rs
+│   │   │       │   └── repositories
+│   │   │       ├── application
+│   │   │       │   ├── dto
+│   │   │       │   └── usecases
+│   │   │       ├── infrastructure
+│   │   │       │   ├── models
+│   │   │       │   └── repositories
+│   │   │       ├── presentation
+│   │   │       │   └── controllers
+│   │   │       └── helpers
+│   │   ├── lib.rs
+│   │   ├── main.rs
+│   │   └── startup.rs
+│   └── tests
+│       ├── auth
+│       │   ├── login.rs
+│       │   ├── otp.rs
+│       │   ├── recovery
+│       │   │   ├── recover_account_using_2fa.rs
+│       │   │   ├── recover_account_using_password.rs
+│       │   │   └── recover_account_without_2fa_enabled.rs
+│       │   ├── signup.rs
+│       │   └── token.rs
+│       ├── core
+│       │   └── health_check.rs
+│       ├── helpers.rs
+│       ├── mod.rs
+│       └── profile
+│           ├── profile.rs
+│           ├── set_password.rs
+│           └── update_password.rs
 ```
 
-While this architecture may not be the absolute best, I found it straightforward to develop with, allowing for easy separation of concerns into small, purpose-driven files. This modular approach aids in maintaining readability and organization.
+This architecture follows **Clean Architecture** principles, providing clear separation of concerns and making the codebase more maintainable and testable.
+
+### Clean Architecture Layers
+
+Each feature (auth and profile) is organized into four distinct layers:
+
+1. **Domain Layer** (`domain/`):
+
+   - **Entities**: Core business objects (e.g., `User`, `UserToken`)
+   - **Repositories**: Abstract traits defining data access interfaces
+   - **Errors**: Domain-specific error types
+
+2. **Application Layer** (`application/`):
+
+   - **DTOs**: Data Transfer Objects for requests and responses
+   - **Use Cases**: Business logic that orchestrates domain entities and repositories
+
+3. **Infrastructure Layer** (`infrastructure/`):
+
+   - **Models**: Database-specific models with SQLx annotations
+   - **Repositories**: Concrete implementations of domain repository traits
+
+4. **Presentation Layer** (`presentation/`):
+   - **Controllers**: HTTP request handlers that call use cases and map domain errors to HTTP responses
 
 ### Project Structure Overview
 
-The **core** folder contains functionality that is not specific to any particular feature. While it’s currently minimal, I anticipate that it will become increasingly valuable as the project expands.
+The **core** folder contains functionality that is not specific to any particular feature, such as shared middlewares, utilities, and common error types.
 
-The **features/auth** folder is the largest at this stage, reflecting the complexity of the authentication process. For example, my signup route is organized as follows:
+Each feature follows the same clean architecture pattern. For example, the signup process is organized as follows:
 
-- The route itself is located in **features/auth/routes/signup.rs**.
-- It uses a request body schema defined in **features/auth/structs/requests.rs**.
-- The corresponding response body is defined in **features/auth/structs/responses.rs**.
+- The HTTP controller is located in **features/auth/presentation/controllers/signup_controller.rs**.
+- It uses a request DTO defined in **features/auth/application/dto/signup_request.rs**.
+- The business logic is in **features/auth/application/usecases/signup_use_case.rs**.
+- The domain entity is defined in **features/auth/domain/entities/user.rs**.
+- The repository interface is in **features/auth/domain/repositories/user_repository.rs**.
+- The concrete implementation is in **features/auth/infrastructure/repositories/user_repository_impl.rs**.
 - Helper functions for token generation are found in **features/auth/helpers/token.rs**.
 
 ### Application Startup Process
 
-One interesting aspect of my implementation is the startup process. I primarily adapted methods from [zero2prod](https://www.lpalmieri.com/posts/2020-08-31-zero-to-production-3-5-html-forms-databases-integration-tests/#3-2-choosing-a-database-crate) with slight adjustments, allowing me to define and reuse an Actix app in both my tests and main.rs. This way, I can leverage Actix’s testing facilities without duplicating my route definitions. Here’s how I structured it:
+One interesting aspect of my implementation is the startup process. I primarily adapted methods from [zero2prod](https://www.lpalmieri.com/posts/2020-08-31-zero-to-production-3-5-html-forms-databases-integration-tests/#3-2-choosing-a-database-crate) with slight adjustments, allowing me to define and reuse an Actix app in both my tests and main.rs. This way, I can leverage Actix's testing facilities without duplicating my route definitions. Here's how I structured it:
 
 - **src/startup.rs**:
-  - **create_app**: This function returns an Actix App that includes my routes, CORS configuration, and other state variables. It’s utilized in my tests, eliminating the need to run a server for each one.
+  - **create_app**: This function initializes repositories, use cases, and controllers, then returns an Actix App that includes all routes, CORS configuration, and dependency injection via `web::Data`. It's utilized in my tests, eliminating the need to run a server for each one.
   - **run**: This function initializes an HTTP server running my app.
   - **Application** struct: This struct invokes run with a listener set to the address specified in my configuration.
 - **src/main.rs**: This file retrieves the application configuration, creates an instance of **Application**, and runs it indefinitely.
 - **src/configuration.rs**: Here, I define functions to read my application and database configurations.
 - **configuration/base.yml**: This file contains my configuration settings. The base.yml file serves as the default when a variable is not specified in local.yml, docker.yml, or production.yml.
+
+### Dependency Injection
+
+The clean architecture is wired together through dependency injection in `startup.rs`. The flow is:
+
+1. **Infrastructure Layer**: Concrete repository implementations are created (e.g., `UserRepositoryImpl`, `TokenRepositoryImpl`)
+2. **Application Layer**: Use cases are instantiated with repository dependencies via trait objects (e.g., `Box<dyn UserRepository>`)
+3. **Presentation Layer**: Controllers access use cases via `web::Data` in Actix Web
+4. **Domain Layer**: Defines the contracts (traits) that repositories must implement
+
+This dependency inversion ensures that business logic depends on abstractions (traits) rather than concrete implementations, making the code more testable and maintainable.
 
 To utilize these configurations, I maintain a .env file in the backend/ directory:
 

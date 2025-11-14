@@ -332,19 +332,18 @@ The entry point of the API is the **src/main.rs** file, where an instance of **A
 
 ```rust
 pub fn create_app(
-    configuration: &Settings,
-) -> App<
-    impl ServiceFactory<
-        ServiceRequest,
-        Config = (),
-        Response = ServiceResponse<impl MessageBody>,
-        Error = Error,
-        InitError = (),
-    >,
-> {
-    let connection_pool = get_connection_pool(&configuration.database);
-    let secret = &configuration.application.secret;
-    ...
+    connection_pool: Pool<Postgres>,
+    secret: String,
+    token_cache: TokenCache,
+) -> App<...> {
+    // Initialize repositories (Infrastructure Layer)
+    let profile_user_repo_impl = ProfileUserRepositoryImpl::new(connection_pool.clone());
+
+    // Initialize use cases (Application Layer)
+    let update_profile_use_case = UpdateProfileUseCase::new(
+        Box::new(profile_user_repo_impl.clone()),
+    );
+
     App::new()
         .service(
             web::scope("/api")
@@ -356,109 +355,85 @@ pub fn create_app(
                         // Nested scope with middleware for protected routes
                         .service(
                             web::scope("")
-                                .wrap(TokenValidator::new(
-                                    secret.to_string(),
-                                    connection_pool.clone(),
-                                ))
-                                .service(get_profile_information)
-                                .service(post_profile_information)
+                                .wrap(TokenValidator {})  // Middleware validates tokens
+                                .service(update_profile)  // Controller from Presentation Layer
                                 ...
                         ),
                 ),
         )
         ...
-        .app_data(web::Data::new(connection_pool.clone()))
-        .app_data(web::Data::new(secret.clone()))
+        .app_data(web::Data::new(connection_pool))
+        .app_data(web::Data::new(secret))
+        .app_data(web::Data::new(token_cache))
+        // Inject use cases via web::Data
+        .app_data(web::Data::new(update_profile_use_case))
 }
 ```
 
-This function sets up the routes and state variables for the API. The **post_profile_information** service is located in **features/profile/routes/post_profile_information.rs** and handles updating user profile data:
+This function sets up the routes, dependency injection, and state variables for the API. The **update_profile** controller is located in **features/profile/presentation/controllers/profile_controller.rs** and handles updating user profile data:
 
 ```rust
 #[post("/me")]
-pub async fn post_profile_information(
-    body: web::Json<UserUpdateRequest>,
-    pool: web::Data<PgPool>,
-    mut request_user: User,
+pub async fn update_profile(
+    request_claims: ReqData<Claims>,  // Claims extracted by middleware
+    body: web::Json<UpdateProfileRequest>,
+    use_case: web::Data<UpdateProfileUseCase>,
 ) -> impl Responder {
-    let mut transaction = match pool.begin().await {
-        Ok(t) => t,
-        Err(_) => {
-            return HttpResponse::InternalServerError()
-                .json(AppError::DatabaseConnection.to_response())
+    match use_case.execute(request_claims.user_id, body.into_inner()).await {
+        Ok(response) => HttpResponse::Ok().json(response),
+        Err(e) => {
+            error!("Update profile error: {}", e);
+            let error_response = match e {
+                ProfileDomainError::UserNotFound => GenericResponse {
+                    code: "USER_NOT_FOUND".to_string(),
+                    message: "User not found".to_string(),
+                },
+                _ => GenericResponse {
+                    code: "PROFILE_UPDATE_ERROR".to_string(),
+                    message: "Failed to update profile".to_string(),
+                },
+            };
+            HttpResponse::InternalServerError().json(error_response)
         }
-    };
-
-    request_user.username = body.username.clone();
-    request_user.locale = body.locale.clone();
-    request_user.theme = body.theme.clone();
-
-    let updated_user_result = sqlx::query!(
-        r#"
-        UPDATE users
-        SET username = $1, locale = $2, theme = $3
-        WHERE id = $4
-        "#,
-        request_user.username,
-        request_user.locale,
-        request_user.theme,
-        request_user.id
-    )
-    .fetch_optional(&mut *transaction)
-    .await;
-
-    if (transaction.commit().await).is_err() {
-        return HttpResponse::InternalServerError()
-            .json(AppError::DatabaseTransaction.to_response());
-    }
-
-    match updated_user_result {
-        Ok(_) => HttpResponse::Ok().json(UserResponse {
-            code: "PROFILE_UPDATED".to_string(),
-            user: request_user.to_user_data(),
-        }),
-        Err(_) => HttpResponse::InternalServerError().json(AppError::UserUpdate.to_response()),
     }
 }
 ```
 
-The process here is fairly straightforward. First, I obtain a connection from the pool of available connections. Then, I construct a query to update the relevant user in the database. Based on the query’s outcome, I return either a success response or an error with a meaningful status code.
+The process here follows clean architecture principles:
 
-You might be wondering how this parameter made its way into my function:
+1. **Presentation Layer**: The controller receives `Claims` from the middleware via `ReqData<Claims>` and extracts the `user_id`
+2. **Application Layer**: The controller calls the use case with the `user_id` and request DTO
+3. **Use Case**: The `UpdateProfileUseCase` orchestrates domain entities and repositories
+4. **Infrastructure Layer**: The repository implementation handles database operations
+5. **Error Mapping**: Domain errors are mapped to HTTP responses in the controller
+
+You might be wondering how the `Claims` parameter made its way into my function:
 
 ```rust
-mut request_user: User
+request_claims: ReqData<Claims>
 ```
 
-This is made possible by the **TokenValidatorMiddleware**, which extracts the access token from the request, retrieves the associated user, or rejects the request with an error if necessary. The middleware is defined in **core/middlewares/token_validator.rs**. Here’s the essential part of it:
+This is made possible by the **TokenValidator** middleware, which extracts the access token from the request, validates it, and stores the `Claims` in request extensions. The middleware is defined in **core/middlewares/token_validator.rs**. Here's the essential part of it:
 
 ```rust
-pub struct TokenValidatorMiddleware<S> {
-    service: Rc<S>,
-    secret: Rc<String>,
-    pool: Rc<PgPool>,
-}
-
 impl<S, B> Service<ServiceRequest> for TokenValidatorMiddleware<S>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
 {
-    type Response = ServiceResponse<EitherBody<B>>;
-    type Error = Error;
-    type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
-
-    forward_ready!(service);
+    // ... implementation details ...
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
         let service = Rc::clone(&self.service);
-        let secret = Rc::clone(&self.secret);
-        let pool = Rc::clone(&self.pool);
+        let secret = req.app_data::<Data<String>>().unwrap().to_string();
+        let pool = req.app_data::<Data<PgPool>>().unwrap().clone();
+        let cached_tokens = req.app_data::<Data<TokenCache>>().unwrap().clone();
 
         Box::pin(async move {
-            match retrieve_claims_for_token(req.request().clone(), secret.to_string()) {
+            match retrieve_claims_for_token(req.request().clone(), secret) {
                 Ok(claims) => {
+                    // Validate token expiration
                     if now() > DateTime::<Utc>::from_timestamp(claims.exp, 0).unwrap() {
                         return Ok(req.into_response(
                             HttpResponse::Unauthorized()
@@ -467,54 +442,34 @@ where
                         ));
                     }
 
-                    let mut transaction = match pool.begin().await {
-                        Ok(t) => t,
-                        Err(_) => {
-                            return Ok(req.into_response(
-                                HttpResponse::InternalServerError()
-                                    .json(AppError::DatabaseConnection.to_response())
-                                    .map_into_right_body(),
-                            ));
-                        }
-                    };
-
-
-                    let existing_user = sqlx::query_as!(
-                        User,
-                        r#"
-                        SELECT u.*
-                        FROM users u
-                        JOIN user_tokens ut ON u.id = ut.user_id
-                        WHERE ut.token_id = $1
-                        "#,
-                        claims.jti,
-                    )
-                    .fetch_optional(&mut *transaction)
-                    .await;
-
-                    let user = match existing_user {
-                        Ok(existing_user) => {
-                            if let Some(user) = existing_user {
-                                user
-                            } else {
+                    // Check cache, then database if needed
+                    let last_activity = cached_tokens.get_value_for_key(claims.jti).await;
+                    if last_activity.is_none() {
+                        // Verify token exists in database (could have been revoked)
+                        let existing_token = get_user_token(&**pool, claims.user_id, claims.jti).await;
+                        match existing_token {
+                            Ok(Some(_)) => {
+                                cached_tokens.update_or_insert_key(claims.jti, now()).await;
+                            }
+                            Ok(None) => {
                                 return Ok(req.into_response(
                                     HttpResponse::Unauthorized()
                                         .json(AppError::InvalidAccessToken.to_response())
                                         .map_into_right_body(),
                                 ));
                             }
+                            Err(_) => {
+                                return Ok(req.into_response(
+                                    HttpResponse::InternalServerError()
+                                        .json(AppError::DatabaseQuery.to_response())
+                                        .map_into_right_body(),
+                                ));
+                            }
                         }
-                        Err(_) => {
-                            return Ok(req.into_response(
-                                HttpResponse::InternalServerError()
-                                    .json(AppError::DatabaseQuery.to_response())
-                                    .map_into_right_body(),
-                            ));
-                        }
-                    };
+                    }
 
-                    // Store user in request extensions
-                    req.extensions_mut().insert(user);
+                    // Store Claims in request extensions for ReqData extractor
+                    req.extensions_mut().insert(claims);
                     let res = service.call(req).await?;
                     Ok(res.map_into_left_body())
                 }
@@ -529,7 +484,7 @@ where
 }
 ```
 
-In essence, the middleware validates the token, retrieves the user, and attaches it to the request. If the token is invalid, expired, or any other error occurs, a descriptive error response like **InvalidAccessToken** or **AccessTokenExpired** is returned.
+In essence, the middleware validates the token, checks the cache and database if needed, and stores the `Claims` (containing `user_id`, `is_admin`, etc.) in request extensions. Controllers then extract `Claims` using `ReqData<Claims>` instead of the full `User` object. This optimization reduces database queries and follows clean architecture principles by keeping the presentation layer focused on HTTP concerns while business logic resides in the use cases.
 
 ## 4. Where and how do I write my translations in Flutter?
 

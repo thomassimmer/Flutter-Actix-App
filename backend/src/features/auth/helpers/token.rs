@@ -6,11 +6,10 @@ use sqlx::postgres::PgQueryResult;
 use sqlx::{Error, Executor, Postgres};
 use uuid::Uuid;
 
+use crate::core::helpers::mock_now::now;
+use crate::features::auth::domain::entities::Claims;
+use crate::features::auth::infrastructure::models::UserTokenModel;
 use crate::features::profile::structs::models::ParsedDeviceInfo;
-use crate::{
-    core::helpers::mock_now::now,
-    features::auth::structs::models::{Claims, UserToken},
-};
 
 use super::errors::AuthError;
 
@@ -113,7 +112,7 @@ pub async fn save_tokens<'a, E>(
 where
     E: Executor<'a, Database = Postgres>,
 {
-    let new_token = UserToken {
+    let new_token = UserTokenModel {
         id: Uuid::new_v4(),
         user_id,
         token_id: jti,
@@ -204,12 +203,12 @@ pub async fn get_user_token<'a, E>(
     executor: E,
     user_id: Uuid,
     token_id: Uuid,
-) -> Result<Option<UserToken>, Error>
+) -> Result<Option<UserTokenModel>, Error>
 where
     E: Executor<'a, Database = Postgres>,
 {
     sqlx::query_as!(
-        UserToken,
+        UserTokenModel,
         r#"
         SELECT *
         FROM user_tokens
@@ -222,12 +221,15 @@ where
     .await
 }
 
-pub async fn get_user_tokens<'a, E>(executor: E, user_id: Uuid) -> Result<Vec<UserToken>, Error>
+pub async fn get_user_tokens<'a, E>(
+    executor: E,
+    user_id: Uuid,
+) -> Result<Vec<UserTokenModel>, Error>
 where
     E: Executor<'a, Database = Postgres>,
 {
     sqlx::query_as!(
-        UserToken,
+        UserTokenModel,
         r#"
         SELECT *
         FROM user_tokens

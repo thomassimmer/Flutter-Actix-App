@@ -4,7 +4,7 @@ use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::ContentType;
 use actix_web::{test, Error};
 use flutteractixapp::core::structs::responses::GenericResponse;
-use flutteractixapp::features::auth::structs::responses::UserLoginResponse;
+use flutteractixapp::features::auth::application::dto::{LoginResponse, RecoverAccountUsing2FARequest};
 use sqlx::PgPool;
 use totp_rs::{Algorithm, Secret, TOTP};
 
@@ -18,21 +18,22 @@ pub async fn user_recovers_account_using_2fa(
     recovery_code: &str,
     code: &str,
 ) -> (String, String) {
+    let recovery_request = RecoverAccountUsing2FARequest {
+        username: "testusername".to_string(),
+        code: code.to_string(),
+        recovery_code: recovery_code.to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-2fa")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "code": code,
-            "recovery_code": recovery_code,
-        }))
+        .set_json(&recovery_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(200, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserLoginResponse = serde_json::from_slice(&body).unwrap();
+    let response: LoginResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "USER_LOGGED_IN_AFTER_ACCOUNT_RECOVERY");
 
@@ -76,11 +77,11 @@ async fn user_cannot_recover_account_using_2fa_without_2fa_enabled(pool: PgPool)
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-2fa")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "code": "000000",
-            "recovery_code": "wrong_recovery_code",
-        }))
+        .set_json(&RecoverAccountUsing2FARequest {
+            username: "testusername".to_string(),
+            code: "000000".to_string(),
+            recovery_code: "wrong_recovery_code".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -103,11 +104,11 @@ async fn user_cannot_recover_account_using_2fa_with_wrong_code(pool: PgPool) {
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-2fa")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "code": "000000",
-            "recovery_code": "wrong_recovery_code",
-        }))
+        .set_json(&RecoverAccountUsing2FARequest {
+            username: "testusername".to_string(),
+            code: "000000".to_string(),
+            recovery_code: "wrong_recovery_code".to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -139,11 +140,11 @@ async fn user_cannot_recover_account_using_2fa_with_wrong_username(pool: PgPool)
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-2fa")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "wrong_username",
-            "code": code,
-            "recovery_code": recovery_codes[0],
-        }))
+        .set_json(&RecoverAccountUsing2FARequest {
+            username: "wrong_username".to_string(),
+            code: code.to_string(),
+            recovery_code: recovery_codes[0].clone(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -179,11 +180,11 @@ async fn user_cannot_recover_account_using_2fa_using_code_twice(pool: PgPool) {
     let req = test::TestRequest::post()
         .uri("/api/auth/recover-using-2fa")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "username": "testusername",
-            "recovery_code": recovery_codes[0],
-            "code": code
-        }))
+        .set_json(&RecoverAccountUsing2FARequest {
+            username: "testusername".to_string(),
+            recovery_code: recovery_codes[0].clone(),
+            code: code.to_string(),
+        })
         .to_request();
     let response = test::call_service(&app, req).await;
 

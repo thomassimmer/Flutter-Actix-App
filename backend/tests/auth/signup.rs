@@ -7,7 +7,7 @@ use actix_web::{
 };
 use flutteractixapp::{
     core::structs::responses::GenericResponse,
-    features::auth::structs::responses::UserSignupResponse,
+    features::auth::application::dto::{SignupRequest, SignupResponse},
 };
 use sqlx::PgPool;
 
@@ -16,22 +16,23 @@ use crate::{helpers::spawn_app, profile::profile::user_has_access_to_protected_r
 pub async fn user_signs_up(
     app: impl Service<Request, Response = ServiceResponse<impl MessageBody>, Error = Error>,
 ) -> (String, String, Vec<String>) {
+    let signup_request = SignupRequest {
+        username: "testusername".to_string(),
+        password: "password1_".to_string(),
+        locale: "en".to_string(),
+        theme: "dark".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "testusername",
-        "password": "password1_",
-        "locale": "en",
-        "theme": "dark",
-        }))
+        .set_json(&signup_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
     assert_eq!(201, response.status().as_u16());
 
     let body = test::read_body(response).await;
-    let response: UserSignupResponse = serde_json::from_slice(&body).unwrap();
+    let response: SignupResponse = serde_json::from_slice(&body).unwrap();
 
     assert_eq!(response.code, "USER_SIGNED_UP");
 
@@ -100,15 +101,16 @@ async fn user_cannot_signup_with_existing_username(pool: PgPool) {
     let app = spawn_app(pool).await;
     user_signs_up(&app).await;
 
+    let signup_request = SignupRequest {
+        username: "testusername".to_string(),
+        password: "password1_".to_string(),
+        locale: "en".to_string(),
+        theme: "dark".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "testusername",
-        "password": "password1_",
-        "locale": "en",
-        "theme": "dark",
-        }))
+        .set_json(&signup_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -124,15 +126,16 @@ async fn user_cannot_signup_with_existing_username(pool: PgPool) {
 async fn user_cannot_signup_with_short_password(pool: PgPool) {
     let app = spawn_app(pool).await;
 
+    let signup_request = SignupRequest {
+        username: "testusername".to_string(),
+        password: "passwor".to_string(),
+        locale: "en".to_string(),
+        theme: "dark".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "testusername",
-        "password": "passwor",
-        "locale": "en",
-        "theme": "dark",
-        }))
+        .set_json(&signup_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -148,15 +151,16 @@ async fn user_cannot_signup_with_short_password(pool: PgPool) {
 async fn user_cannot_signup_with_short_username(pool: PgPool) {
     let app = spawn_app(pool).await;
 
+    let signup_request = SignupRequest {
+        username: "te".to_string(),
+        password: "password1_".to_string(),
+        locale: "en".to_string(),
+        theme: "dark".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "te",
-        "password": "password1_",
-        "locale": "en",
-        "theme": "dark",
-        }))
+        .set_json(&signup_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -172,15 +176,16 @@ async fn user_cannot_signup_with_short_username(pool: PgPool) {
 async fn user_cannot_signup_with_long_username(pool: PgPool) {
     let app = spawn_app(pool).await;
 
+    let signup_request = SignupRequest {
+        username: "testusernametestusernametestusername".to_string(),
+        password: "password1_".to_string(),
+        locale: "en".to_string(),
+        theme: "dark".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "testusernametestusernametestusername",
-        "password": "password1_",
-        "locale": "en",
-        "theme": "dark",
-        }))
+        .set_json(&signup_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
@@ -196,15 +201,16 @@ async fn user_cannot_signup_with_long_username(pool: PgPool) {
 async fn user_cannot_signup_with_username_not_respecting_rules(pool: PgPool) {
     let app = spawn_app(pool).await;
 
+    let signup_request = SignupRequest {
+        username: "__x__".to_string(),
+        password: "password1_".to_string(),
+        locale: "en".to_string(),
+        theme: "dark".to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/signup")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-        "username": "__x__",
-        "password": "password1_",
-        "locale": "en",
-        "theme": "dark",
-        }))
+        .set_json(&signup_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 

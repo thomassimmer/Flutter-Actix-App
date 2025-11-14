@@ -18,14 +18,19 @@
 | 201         | USER_SIGNED_UP                                |                                              |                                                    |
 | 401         | ACCESS_TOKEN_EXPIRED                          |                                              |                                                    |
 | 401         | INVALID_ACCESS_TOKEN                          |                                              |                                                    |
+| 401         | INVALID_ONE_TIME_PASSWORD                     |                                              |                                                    |
 | 401         | INVALID_REFRESH_TOKEN                         | InvalidRefreshTokenError                     | InvalidRefreshTokenDomainError                     |
 | 401         | INVALID_USERNAME_OR_CODE_OR_RECOVERY_CODE     | InvalidUsernameOrCodeOrRecoveryCodeError     | InvalidUsernameOrCodeOrRecoveryCodeDomainError     |
 | 401         | INVALID_USERNAME_OR_PASSWORD                  | InvalidUsernameOrPasswordError               | InvalidUsernameOrPasswordDomainError               |
 | 401         | INVALID_USERNAME_OR_PASSWORD_OR_RECOVERY_CODE | InvalidUsernameOrPasswordOrRecoveryCodeError | InvalidUsernameOrPasswordOrRecoveryCodeDomainError |
 | 401         | INVALID_USERNAME_OR_RECOVERY_CODE             | InvalidUsernameOrRecoveryCodeError           | InvalidUsernameOrRecoveryCodeDomainError           |
-| 401         | REFRESH_TOKEN_EXPIRED                         | RefreshTokenExpiredError                     | RefreshTokenExpiredDomainError                     |
+| 401         | LOGIN_ERROR                                   |                                              |                                                    |
+| 401         | OTP_VALIDATION_ERROR                          |                                              |                                                    |
+| 401         | OTP_VERIFICATION_ERROR                        |                                              |                                                    |
 | 401         | PASSWORD_TOO_SHORT                            | PasswordTooShortError                        | PasswordTooShortError                              |
 | 401         | PASSWORD_TOO_WEAK                             | PasswordNotComplexEnoughError                | PasswordNotComplexEnoughError                      |
+| 401         | RECOVERY_ERROR                                |                                              |                                                    |
+| 401         | REFRESH_TOKEN_EXPIRED                         | RefreshTokenExpiredError                     | RefreshTokenExpiredDomainError                     |
 | 401         | USERNAME_NOT_RESPECTING_RULES                 | UsernameNotRespectingRulesError              | UsernameNotRespectingRulesError                    |
 | 401         | USERNAME_WRONG_SIZE                           | UsernameWrongSizeError                       | UsernameWrongSizeError                             |
 | 403         | PASSWORD_MUST_BE_CHANGED                      | PasswordMustBeChangedError                   | PasswordMustBeChangedDomainError                   |
@@ -36,8 +41,12 @@
 | 500         | DATABASE_CONNECTION                           | InternalServerError                          | InternalServerDomainError                          |
 | 500         | DATABASE_QUERY                                | InternalServerError                          | InternalServerDomainError                          |
 | 500         | DATABASE_TRANSACTION                          | InternalServerError                          | InternalServerDomainError                          |
+| 500         | OTP_DISABLE_ERROR                             |                                              |                                                    |
+| 500         | OTP_GENERATION_ERROR                          |                                              |                                                    |
+| 500         | OTP_STATUS_ERROR                              |                                              |                                                    |
 | 500         | PASSWORD_HASH                                 | InternalServerError                          | InternalServerDomainError                          |
 | 500         | RECOVERY_CODE_HASH                            | InternalServerError                          | InternalServerDomainError                          |
+| 500         | SIGNUP_ERROR                                  |                                              |                                                    |
 | 500         | TOKEN_GENERATION                              | InternalServerError                          | InternalServerDomainError                          |
 | 500         | USER_INSERT                                   | InternalServerError                          | InternalServerDomainError                          |
 | 500         | USER_TOKEN_DELETION                           | InternalServerError                          | InternalServerDomainError                          |

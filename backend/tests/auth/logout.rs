@@ -4,6 +4,7 @@ use actix_web::dev::{Service, ServiceResponse};
 use actix_web::http::header::{self, ContentType};
 use actix_web::{test, Error};
 use flutteractixapp::core::structs::responses::GenericResponse;
+use flutteractixapp::features::auth::application::dto::RefreshTokenRequest;
 use sqlx::PgPool;
 
 use crate::auth::signup::user_signs_up;
@@ -58,12 +59,13 @@ async fn user_cannot_use_access_token_or_refresh_token_after_logout(pool: PgPool
 
     assert_eq!(profile_response.code, "INVALID_ACCESS_TOKEN");
 
+    let refresh_request = RefreshTokenRequest {
+        refresh_token: refresh_token.to_string(),
+    };
     let req = test::TestRequest::post()
         .uri("/api/auth/refresh-token")
         .insert_header(ContentType::json())
-        .set_json(&serde_json::json!({
-            "refresh_token": refresh_token,
-        }))
+        .set_json(&refresh_request)
         .to_request();
     let response = test::call_service(&app, req).await;
 
